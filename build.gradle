@@ -1,0 +1,99 @@
+buildscript {
+	repositories {
+        mavenCentral()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'net.minecraftforge.gradle.patcher'
+
+group = 'fewizz.svarka'
+version = '0.0.1'
+outputJar.archiveName = 'svarka'
+
+afterEvaluate {
+	patchSvarkaJar.addInject file('bukkit/src/main/java/')
+}
+
+tasks.whenTaskAdded	{ task ->
+	if(task.name.equals("genSvarkaPatches")) {
+		task.addOriginalSource file('bukkit/src/main/java/')
+	}
+}
+
+minecraft {
+    version = "1.9.4"
+    mappings = 'snapshot_nodoc_20160518'
+    workspaceDir = "projects"
+    versionJson = "forge/jsons/1.9.4-dev.json"
+    buildUserdev = false
+    buildInstaller = false
+
+    def common = {
+        patchPrefixOriginal "../src-base/minecraft"
+        patchPrefixChanged "../src-work/minecraft"
+        mainClassClient "net.minecraft.launchwrapper.Launch"
+        tweakClassClient "net.minecraftforge.fml.common.launcher.FMLTweaker"
+        mainClassServer "net.minecraft.launchwrapper.Launch"
+        tweakClassServer "net.minecraftforge.fml.common.launcher.FMLServerTweaker"
+    }
+
+    projects {
+        forge {
+            rootDir "forge/"
+            patchDir "forge/patches/minecraft/"
+            patchAfter "clean"
+            genPatchesFrom "clean"
+            genMcpPatches = false
+            applyMcpPatches = false
+            s2sKeepImports = true
+            with common
+        }
+		
+		svarka {
+			rootDir "."
+			patchDir "patches/minecraft/"
+            patchAfter "forge"
+            genPatchesFrom "forge"
+            genMcpPatches = false
+            applyMcpPatches = false
+            s2sKeepImports = true
+            with common
+		}
+    }
+}
+
+processJson {
+    releaseJson = "forge/jsons/1.9.4-rel.json"
+    addReplacements([
+        "@minecraft_version@": project.minecraft.version,
+        "@version@": project.version,
+        "@project@": "svarka",
+        "@artifact@": "fewizz:svarka:${project.version}",
+        "@universal_jar@": { outputJar.archiveName },
+        "@timestamp@": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+    ])
+}
+
+extractForgeSources { 
+	exclude "**/SideOnly.java", "**/Side.java" 
+}
+
+genGradleProjects {
+	addCompileDep "junit:junit:4.12"
+	addCompileDep "commons-lang:commons-lang:2.6"
+	addCompileDep "org.avaje:ebean:2.7.3"
+	addCompileDep "com.googlecode.json-simple:json-simple:1.1"
+	addCompileDep "org.yaml:snakeyaml:1.9"
+}

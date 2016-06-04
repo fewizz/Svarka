@@ -1,0 +1,15 @@
+# various other potential build files
+/build
+
+/projects
+/plugin
+/eclipse
+
+# Mac filesystem dust
+.DS_Store
+
+# intellij
+*.iml
+*.ipr
+*.iws
+.idea/
