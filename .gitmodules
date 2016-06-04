@@ -1,0 +1,6 @@
+[submodule "forge"]
+	path = forge
+	url = https://github.com/MinecraftForge/MinecraftForge.git
+[submodule "bukkit"]
+	path = bukkit
+	url = https://hub.spigotmc.org/stash/scm/spigot/bukkit.git
