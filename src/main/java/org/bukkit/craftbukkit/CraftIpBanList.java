@@ -5,9 +5,10 @@ import java.net.InetSocketAddress;
 import java.util.Date;
 import java.util.Set;
 
-import net.minecraft.server.IpBanEntry;
-import net.minecraft.server.IpBanList;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.UserListIPBans;
+import net.minecraft.server.management.UserListIPBansEntry;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
@@ -16,9 +17,9 @@ import java.util.logging.Level;
 import org.bukkit.Bukkit;
 
 public class CraftIpBanList implements org.bukkit.BanList {
-    private final IpBanList list;
+    private final UserListIPBans list;
 
-    public CraftIpBanList(IpBanList list) {
+    public CraftIpBanList(UserListIPBans list) {
         this.list = list;
     }
 
@@ -26,7 +27,7 @@ public class CraftIpBanList implements org.bukkit.BanList {
     public org.bukkit.BanEntry getBanEntry(String target) {
         Validate.notNull(target, "Target cannot be null");
 
-        IpBanEntry entry = (IpBanEntry) list.get(target);
+        UserListIPBansEntry entry = (UserListIPBansEntry) list.get(target);
         if (entry == null) {
             return null;
         }
@@ -38,7 +39,7 @@ public class CraftIpBanList implements org.bukkit.BanList {
     public org.bukkit.BanEntry addBan(String target, String reason, Date expires, String source) {
         Validate.notNull(target, "Ban target cannot be null");
 
-        IpBanEntry entry = new IpBanEntry(target, new Date(),
+        UserListIPBansEntry entry = new UserListIPBansEntry(target, new Date(),
                 StringUtils.isBlank(source) ? null : source, expires,
                 StringUtils.isBlank(reason) ? null : reason);
 
@@ -57,7 +58,7 @@ public class CraftIpBanList implements org.bukkit.BanList {
     public Set<org.bukkit.BanEntry> getBanEntries() {
         ImmutableSet.Builder<org.bukkit.BanEntry> builder = ImmutableSet.builder();
         for (String target : list.getEntries()) {
-            builder.add(new CraftIpBanEntry(target, (IpBanEntry) list.get(target), list));
+            builder.add(new CraftIpBanEntry(target, (UserListIPBansEntry) list.get(target), list));
         }
 
         return builder.build();

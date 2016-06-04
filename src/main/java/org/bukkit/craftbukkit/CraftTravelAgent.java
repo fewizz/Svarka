@@ -1,13 +1,13 @@
 package org.bukkit.craftbukkit;
 
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.PortalTravelAgent;
-import net.minecraft.server.WorldServer;
-
 import org.bukkit.Location;
 import org.bukkit.TravelAgent;
 
-public class CraftTravelAgent extends PortalTravelAgent implements TravelAgent {
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Teleporter;
+import net.minecraft.world.WorldServer;
+
+public class CraftTravelAgent extends Teleporter implements TravelAgent {
 
     public static TravelAgent DEFAULT = null;
 
@@ -40,14 +40,14 @@ public class CraftTravelAgent extends PortalTravelAgent implements TravelAgent {
 
     @Override
     public Location findPortal(Location location) {
-        PortalTravelAgent pta = ((CraftWorld) location.getWorld()).getHandle().getTravelAgent();
-        BlockPosition found = pta.findPortal(location.getX(), location.getY(), location.getZ(), this.getSearchRadius());
+    	Teleporter pta = ((CraftWorld) location.getWorld()).getHandle().getTravelAgent();
+        BlockPos found = pta.findPortal(location.getX(), location.getY(), location.getZ(), this.getSearchRadius());
         return found != null ? new Location(location.getWorld(), found.getX(), found.getY(), found.getZ(), location.getYaw(), location.getPitch()) : null;
     }
 
     @Override
     public boolean createPortal(Location location) {
-        PortalTravelAgent pta = ((CraftWorld) location.getWorld()).getHandle().getTravelAgent();
+    	Teleporter pta = ((CraftWorld) location.getWorld()).getHandle().getTravelAgent();
         return pta.createPortal(location.getX(), location.getY(), location.getZ(), this.getCreationRadius());
     }
 

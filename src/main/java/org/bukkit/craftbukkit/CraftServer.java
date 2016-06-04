@@ -23,7 +23,38 @@ import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.ICommand;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ServerCommandManager;
+import net.minecraft.entity.EntityTracker;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Enchantments;
+import net.minecraft.init.Items;
+import net.minecraft.init.MobEffects;
+import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.server.*;
+import net.minecraft.server.dedicated.DedicatedPlayerList;
+import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.server.dedicated.PendingCommand;
+import net.minecraft.server.dedicated.PropertyManager;
+import net.minecraft.server.management.PlayerList;
+import net.minecraft.server.management.UserListEntry;
+import net.minecraft.util.IProgressUpdate;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.ServerWorldEventHandler;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldSettings;
+import net.minecraft.world.WorldType;
+import net.minecraft.world.chunk.storage.AnvilSaveConverter;
+import net.minecraft.world.chunk.storage.AnvilSaveHandler;
+import net.minecraft.world.storage.MapData;
+import net.minecraft.world.storage.MapStorage;
+import net.minecraft.world.storage.SaveHandler;
+import net.minecraft.world.storage.WorldInfo;
 
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
@@ -181,7 +212,7 @@ public final class CraftServer implements Server {
     public CraftServer(MinecraftServer console, PlayerList playerList) {
         this.console = console;
         this.playerList = (DedicatedPlayerList) playerList;
-        this.playerView = Collections.unmodifiableList(Lists.transform(playerList.players, new Function<EntityPlayer, CraftPlayer>() {
+        this.playerView = Collections.unmodifiableList(Lists.transform(playerList.playerEntityList, new Function<EntityPlayer, CraftPlayer>() {
             @Override
             public CraftPlayer apply(EntityPlayer player) {
                 return player.getBukkitEntity();
@@ -193,7 +224,7 @@ public final class CraftServer implements Server {
         Bukkit.setServer(this);
 
         // Register all the Enchantments and PotionTypes now so we can stop new registration immediately after
-        Enchantments.DAMAGE_ALL.getClass();
+        Enchantments.SHARPNESS.getClass();
         org.bukkit.enchantments.Enchantment.stopAcceptingRegistrations();
 
         Potion.setPotionBrewer(new CraftPotionBrewer());
@@ -336,9 +367,9 @@ public final class CraftServer implements Server {
     }
 
     private void setVanillaCommands() {
-        Map<String, ICommand> commands = new CommandDispatcher(console).getCommands();
+        Map<String, ICommand> commands = new ServerCommandManager(console).getCommands();
         for (ICommand cmd : commands.values()) {
-            commandMap.register("minecraft", new VanillaCommandWrapper((CommandAbstract) cmd, LocaleI18n.get(cmd.getUsage(null))));
+            commandMap.register("minecraft", new VanillaCommandWrapper((CommandBase) cmd, I18n.translateToLocal(cmd.getCommandUsage(null))));
         }
     }
 
@@ -597,7 +628,7 @@ public final class CraftServer implements Server {
     }
 
     // NOTE: Should only be called from DedicatedServer.ah()
-    public boolean dispatchServerCommand(CommandSender sender, ServerCommand serverCommand) {
+    public boolean dispatchServerCommand(CommandSender sender, PendingCommand serverCommand) {
         if (sender instanceof Conversable) {
             Conversable conversable = (Conversable)sender;
 
@@ -813,7 +844,7 @@ public final class CraftServer implements Server {
         ChunkGenerator generator = creator.generator();
         File folder = new File(getWorldContainer(), name);
         World world = getWorld(name);
-        WorldType type = WorldType.getType(creator.type().getName());
+        WorldType type = WorldType.parseWorldType(creator.type().getName());
         boolean generateStructures = creator.generateStructures();
 
         if (world != null) {
@@ -828,10 +859,10 @@ public final class CraftServer implements Server {
             generator = getGenerator(name);
         }
 
-        Convertable converter = new WorldLoaderServer(getWorldContainer(), getHandle().getServer().getDataConverterManager());
-        if (converter.isConvertable(name)) {
+        AnvilSaveConverter converter = new AnvilSaveConverter(getWorldContainer(), getHandle().getServerInstance().getDataConverterManager());
+        if (converter.isOldMapFormat(name)) {
             getLogger().info("Converting world '" + name + "'");
-            converter.convert(name, new IProgressUpdate() {
+            converter.convertMapFormat(name, new IProgressUpdate() {
                 private long b = System.currentTimeMillis();
 
                 public void a(String s) {}
@@ -861,13 +892,13 @@ public final class CraftServer implements Server {
         } while(used);
         boolean hardcore = false;
 
-        IDataManager sdm = new ServerNBTManager(getWorldContainer(), name, true, getHandle().getServer().getDataConverterManager());
-        WorldData worlddata = sdm.getWorldData();
+        AnvilSaveHandler sdm = new AnvilSaveHandler(getWorldContainer(), name, true, getHandle().getServerInstance().getDataConverterManager());
+        WorldInfo worlddata = sdm.loadWorldInfo();
         WorldSettings worldSettings = null;
         if (worlddata == null) {
-            worldSettings = new WorldSettings(creator.seed(), WorldSettings.EnumGamemode.getById(getDefaultGameMode().getValue()), generateStructures, hardcore, type);
-            worldSettings.setGeneratorSettings(creator.generatorSettings());
-            worlddata = new WorldData(worldSettings, name);
+            worldSettings = new WorldSettings(creator.seed(), WorldSettings.GameType.getByID(getDefaultGameMode().getValue()), generateStructures, hardcore, type);
+            worldSettings.setGeneratorOptions(creator.generatorSettings());
+            worlddata = new WorldInfo(worldSettings, name);
         }
         worlddata.checkName(name); // CraftBukkit - Migration did not rewrite the level.dat; This forces 1.8 to take the last loaded world as respawn (in this case the end)
         WorldServer internal = (WorldServer) new WorldServer(console, sdm, worlddata, dimension, console.methodProfiler, creator.environment(), generator).b();
@@ -882,7 +913,7 @@ public final class CraftServer implements Server {
         internal.scoreboard = getScoreboardManager().getMainScoreboard().getHandle();
 
         internal.tracker = new EntityTracker(internal);
-        internal.addIWorldAccess(new WorldManager(console, internal));
+        internal.addIWorldAccess(new ServerWorldEventHandler(console, internal));
         internal.worldData.setDifficulty(EnumDifficulty.EASY);
         internal.setSpawnFlags(true, true);
         console.worlds.add(internal);
@@ -913,8 +944,8 @@ public final class CraftServer implements Server {
                         i = l;
                     }
 
-                    BlockPosition chunkcoordinates = internal.getSpawn();
-                    internal.getChunkProviderServer().getChunkAt(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4);
+                    BlockPos chunkcoordinates = internal.getSpawn();
+                    internal.getChunkProvider().getChunkAt(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4);
                 }
             }
         }
@@ -1091,17 +1122,17 @@ public final class CraftServer implements Server {
     @Override
     public void clearRecipes() {
         CraftingManager.getInstance().recipes.clear();
-        RecipesFurnace.getInstance().recipes.clear();
-        RecipesFurnace.getInstance().customRecipes.clear();
-        RecipesFurnace.getInstance().customExperience.clear();
+        FurnaceRecipes.instance().smeltingList.clear();
+        FurnaceRecipes.instance().customRecipes.clear();
+        FurnaceRecipes.instance().customExperience.clear();
     }
 
     @Override
     public void resetRecipes() {
         CraftingManager.getInstance().recipes = new CraftingManager().recipes;
-        RecipesFurnace.getInstance().recipes = new RecipesFurnace().recipes;
-        RecipesFurnace.getInstance().customRecipes.clear();
-        RecipesFurnace.getInstance().customExperience.clear();
+        FurnaceRecipes.instance().smeltingList = new FurnaceRecipes().smeltingList;
+        FurnaceRecipes.instance().customRecipes.clear();
+        FurnaceRecipes.instance().customExperience.clear();
     }
 
     @Override
@@ -1142,7 +1173,7 @@ public final class CraftServer implements Server {
 
     @Override
     public int getSpawnRadius() {
-        return ((DedicatedServer) console).propertyManager.getInt("spawn-protection", 16);
+        return ((DedicatedServer) console).settings.getIntProperty("spawn-protection", 16);
     }
 
     @Override
@@ -1210,7 +1241,7 @@ public final class CraftServer implements Server {
     @Override
     @Deprecated
     public CraftMapView getMap(short id) {
-        PersistentCollection collection = console.worlds.get(0).worldMaps;
+    	MapStorage collection = console.worlds.get(0).worldMaps;
         WorldMap worldmap = (WorldMap) collection.get(WorldMap.class, "map_" + id);
         if (worldmap == null) {
             return null;
@@ -1222,8 +1253,8 @@ public final class CraftServer implements Server {
     public CraftMapView createMap(World world) {
         Validate.notNull(world, "World cannot be null");
 
-        net.minecraft.server.ItemStack stack = new net.minecraft.server.ItemStack(Items.MAP, 1, -1);
-        WorldMap worldmap = Items.FILLED_MAP.getSavedMap(stack, ((CraftWorld) world).getHandle());
+        net.minecraft.item.ItemStack stack = new net.minecraft.item.ItemStack(Items.MAP, 1, -1);
+        MapData worldmap = Items.FILLED_MAP.getSavedMap(stack, ((CraftWorld) world).getHandle());
         return worldmap.mapView;
     }
 
@@ -1324,7 +1355,7 @@ public final class CraftServer implements Server {
     public Set<OfflinePlayer> getBannedPlayers() {
         Set<OfflinePlayer> result = new HashSet<OfflinePlayer>();
 
-        for (JsonListEntry entry : playerList.getProfileBans().getValues()) {
+        for (UserListEntry entry : playerList.getProfileBans().getValues()) {
             result.add(getOfflinePlayer((GameProfile) entry.getKey()));
         }        
 
@@ -1354,7 +1385,7 @@ public final class CraftServer implements Server {
     public Set<OfflinePlayer> getWhitelistedPlayers() {
         Set<OfflinePlayer> result = new LinkedHashSet<OfflinePlayer>();
 
-        for (JsonListEntry entry : playerList.getWhitelist().getValues()) {
+        for (UserListEntry entry : playerList.getWhitelist().getValues()) {
             result.add(getOfflinePlayer((GameProfile) entry.getKey()));
         }
 
@@ -1365,7 +1396,7 @@ public final class CraftServer implements Server {
     public Set<OfflinePlayer> getOperators() {
         Set<OfflinePlayer> result = new HashSet<OfflinePlayer>();
 
-        for (JsonListEntry entry : playerList.getOPs().getValues()) {
+        for (UserListEntry entry : playerList.getOPs().getValues()) {
             result.add(getOfflinePlayer((GameProfile) entry.getKey()));
         }
 
@@ -1423,7 +1454,7 @@ public final class CraftServer implements Server {
 
     @Override
     public OfflinePlayer[] getOfflinePlayers() {
-        WorldNBTStorage storage = (WorldNBTStorage) console.worlds.get(0).getDataManager();
+    	SaveHandler storage = (SaveHandler) console.worlds.get(0).getDataManager();
         String[] files = storage.getPlayerDir().list(new DatFileFilter());
         Set<OfflinePlayer> players = new HashSet<OfflinePlayer>();
 
@@ -1532,7 +1563,7 @@ public final class CraftServer implements Server {
         return warningState;
     }
 
-    public List<String> tabComplete(net.minecraft.server.ICommandListener sender, String message) {
+    public List<String> tabComplete(ICommandSender sender, String message) {
         if (!(sender instanceof EntityPlayer)) {
             return ImmutableList.of();
         }

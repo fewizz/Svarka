@@ -7,9 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.WorldNBTStorage;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.storage.SaveHandler;
 
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
@@ -26,12 +25,12 @@ import org.bukkit.plugin.Plugin;
 public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializable {
     private final GameProfile profile;
     private final CraftServer server;
-    private final WorldNBTStorage storage;
+    private final SaveHandler storage;
 
     protected CraftOfflinePlayer(CraftServer server, GameProfile profile) {
         this.server = server;
         this.profile = profile;
-        this.storage = (WorldNBTStorage) (server.console.worlds.get(0).getDataManager());
+        this.storage = (SaveHandler) (server.console.worlds.get(0).getDataManager());
 
     }
 
@@ -177,9 +176,9 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
 
         if (result != null) {
             if (!result.hasKey("bukkit")) {
-                result.set("bukkit", new NBTTagCompound());
+                result.setTag("bukkit", new NBTTagCompound());
             }
-            result = result.getCompound("bukkit");
+            result = result.getCompoundTag("bukkit");
         }
 
         return result;
@@ -238,7 +237,7 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
             if (spawnWorld.equals("")) {
                 spawnWorld = server.getWorlds().get(0).getName();
             }
-            return new Location(server.getWorld(spawnWorld), data.getInt("SpawnX"), data.getInt("SpawnY"), data.getInt("SpawnZ"));
+            return new Location(server.getWorld(spawnWorld), data.getInteger("SpawnX"), data.getInteger("SpawnY"), data.getInteger("SpawnZ"));
         }
         return null;
     }

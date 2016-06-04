@@ -1,8 +1,8 @@
 package org.bukkit.craftbukkit;
 
-import net.minecraft.server.IpBanEntry;
-import net.minecraft.server.IpBanList;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.UserListIPBans;
+import net.minecraft.server.management.UserListIPBansEntry;
 
 import java.io.IOException;
 import java.util.Date;
@@ -10,14 +10,14 @@ import java.util.logging.Level;
 import org.bukkit.Bukkit;
 
 public final class CraftIpBanEntry implements org.bukkit.BanEntry {
-    private final IpBanList list;
+    private final UserListIPBans list;
     private final String target;
     private Date created;
     private String source;
     private Date expiration;
     private String reason;
 
-    public CraftIpBanEntry(String target, IpBanEntry entry, IpBanList list) {
+    public CraftIpBanEntry(String target, UserListIPBansEntry entry, UserListIPBans list) {
         this.list = list;
         this.target = target;
         this.created = entry.getCreated() != null ? new Date(entry.getCreated().getTime()) : null;
@@ -77,7 +77,7 @@ public final class CraftIpBanEntry implements org.bukkit.BanEntry {
 
     @Override
     public void save() {
-        IpBanEntry entry = new IpBanEntry(target, this.created, this.source, this.expiration, this.reason);
+    	UserListIPBansEntry entry = new UserListIPBansEntry(target, this.created, this.source, this.expiration, this.reason);
         this.list.add(entry);
         try {
             this.list.save();

@@ -1,20 +1,18 @@
 package org.bukkit.craftbukkit;
 
-import net.minecraft.server.Block;
-import net.minecraft.server.EnumParticle;
-import net.minecraft.server.IBlockData;
 import org.bukkit.Particle;
-import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
+import net.minecraft.util.EnumParticleTypes;
+
 public class CraftParticle {
 
-    public static EnumParticle toNMS(Particle bukkit) {
-        return EnumParticle.valueOf(bukkit.name());
+    public static EnumParticleTypes toNMS(Particle bukkit) {
+        return EnumParticleTypes.valueOf(bukkit.name());
     }
 
-    public static Particle toBukkit(EnumParticle nms) {
+    public static Particle toBukkit(EnumParticleTypes nms) {
         return Particle.valueOf(nms.name());
     }
 

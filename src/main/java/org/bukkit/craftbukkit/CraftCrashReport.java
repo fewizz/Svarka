@@ -5,6 +5,8 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.Callable;
+
+import net.minecraft.crash.ICrashReportDetail;
 import net.minecraft.server.CrashReportCallable;
 
 import org.bukkit.Bukkit;
@@ -13,7 +15,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 
 import net.minecraft.server.MinecraftServer;
 
-public class CraftCrashReport implements CrashReportCallable<Object> {
+public class CraftCrashReport implements ICrashReportDetail<Object> {
 
     public Object call() throws Exception {
         StringWriter value = new StringWriter();
