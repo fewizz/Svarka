@@ -2,9 +2,6 @@ package org.bukkit.craftbukkit.block;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.NBTTagList;
-import net.minecraft.server.TileEntityBanner;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.block.Banner;
@@ -12,6 +9,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
 import org.bukkit.craftbukkit.CraftWorld;
+
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntityBanner;
 
 public class CraftBanner extends CraftBlockState implements Banner {
 
@@ -25,12 +26,12 @@ public class CraftBanner extends CraftBlockState implements Banner {
         CraftWorld world = (CraftWorld) block.getWorld();
         banner = (TileEntityBanner) world.getTileEntityAt(getX(), getY(), getZ());
 
-        base = DyeColor.getByDyeData((byte) banner.color);
+        base = DyeColor.getByDyeData((byte) banner.baseColor);
 
         if (banner.patterns != null) {
-            for (int i = 0; i < banner.patterns.size(); i++) {
-                NBTTagCompound p = (NBTTagCompound) banner.patterns.get(i);
-                patterns.add(new Pattern(DyeColor.getByDyeData((byte) p.getInt("Color")), PatternType.getByIdentifier(p.getString("Pattern"))));
+            for (int i = 0; i < banner.patterns.tagCount(); i++) {
+            	NBTTagCompound p = (NBTTagCompound) banner.patterns.get(i);
+                patterns.add(new Pattern(DyeColor.getByDyeData((byte) p.getInteger("Color")), PatternType.getByIdentifier(p.getString("Pattern"))));
             }
         }
     }
@@ -39,12 +40,12 @@ public class CraftBanner extends CraftBlockState implements Banner {
         super(material);
         banner = te;
 
-        base = DyeColor.getByDyeData((byte) banner.color);
+        base = DyeColor.getByDyeData((byte) banner.baseColor);
 
         if (banner.patterns != null) {
-            for (int i = 0; i < banner.patterns.size(); i++) {
+            for (int i = 0; i < banner.patterns.tagCount(); i++) {
                 NBTTagCompound p = (NBTTagCompound) banner.patterns.get(i);
-                patterns.add(new Pattern(DyeColor.getByDyeData((byte) p.getInt("Color")), PatternType.getByIdentifier(p.getString("Pattern"))));
+                patterns.add(new Pattern(DyeColor.getByDyeData((byte) p.getInteger("Color")), PatternType.getByIdentifier(p.getString("Pattern"))));
             }
         }
     }
@@ -99,15 +100,15 @@ public class CraftBanner extends CraftBlockState implements Banner {
         boolean result = (isPlaced()) ? super.update(force, applyPhysics) : true;
 
         if (result) {
-            banner.color = base.getDyeData();
+            banner.baseColor = base.getDyeData();
 
             NBTTagList newPatterns = new NBTTagList();
 
             for (Pattern p : patterns) {
                 NBTTagCompound compound = new NBTTagCompound();
-                compound.setInt("Color", p.getColor().getDyeData());
+                compound.setInteger("Color", p.getColor().getDyeData());
                 compound.setString("Pattern", p.getPattern().getIdentifier());
-                newPatterns.add(compound);
+                newPatterns.appendTag(compound);
             }
 
             banner.patterns = newPatterns;

@@ -1,21 +1,23 @@
 package org.bukkit.craftbukkit.util;
 
 import com.google.common.collect.Lists;
+
+import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.nbt.JsonToNBT;
+import net.minecraft.nbt.NBTException;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.stats.StatBase;
+import net.minecraft.stats.StatList;
+import net.minecraft.util.ResourceLocation;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import net.minecraft.server.Block;
-import net.minecraft.server.Blocks;
-import net.minecraft.server.Item;
-import net.minecraft.server.MinecraftKey;
-import net.minecraft.server.MojangsonParseException;
-import net.minecraft.server.MojangsonParser;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.StatisticList;
 
 import org.bukkit.Achievement;
 import org.bukkit.Material;
@@ -45,34 +47,34 @@ public final class CraftMagicNumbers implements UnsafeValues {
     @Deprecated
     // A bad method for bad magic.
     public static int getId(Block block) {
-        return Block.getId(block);
+        return Block.getIdFromBlock(block);
     }
 
     public static Material getMaterial(Block block) {
-        return Material.getMaterial(Block.getId(block));
+        return Material.getMaterial(Block.getIdFromBlock(block));
     }
 
     public static Item getItem(Material material) {
         // TODO: Don't use ID
-        Item item = Item.getById(material.getId());
+        Item item = Item.getItemById(material.getId());
         return item;
     }
 
     @Deprecated
     // A bad method for bad magic.
     public static Item getItem(int id) {
-        return Item.getById(id);
+        return Item.getItemById(id);
     }
 
     @Deprecated
     // A bad method for bad magic.
     public static int getId(Item item) {
-        return Item.getId(item);
+        return Item.getIdFromItem(item);
     }
 
     public static Material getMaterial(Item item) {
         // TODO: Don't use ID
-        Material material = Material.getMaterial(Item.getId(item));
+        Material material = Material.getMaterial(Item.getIdFromItem(item));
 
         if (material == null) {
             return Material.AIR;
@@ -86,7 +88,7 @@ public final class CraftMagicNumbers implements UnsafeValues {
             return null;
         }
         // TODO: Don't use ID
-        Block block = Block.getById(material.getId());
+        Block block = Block.getBlockById(material.getId());
 
         if (block == null) {
             return Blocks.AIR;
@@ -97,13 +99,13 @@ public final class CraftMagicNumbers implements UnsafeValues {
 
     @Override
     public Material getMaterialFromInternalName(String name) {
-        return getMaterial((Item) Item.REGISTRY.get(new MinecraftKey(name)));
+        return getMaterial((Item) Item.REGISTRY.getObject(new ResourceLocation(name)));
     }
 
     @Override
     public List<String> tabCompleteInternalMaterialName(String token, List<String> completions) {
         ArrayList<String> results = Lists.newArrayList();
-        for (MinecraftKey key : (Set<MinecraftKey>)Item.REGISTRY.keySet()) {
+        for (ResourceLocation key : (Set<ResourceLocation>)Item.REGISTRY.getKeys()) {
             results.add(key.toString());
         }
         return StringUtil.copyPartialMatches(token, results, completions);
@@ -111,11 +113,11 @@ public final class CraftMagicNumbers implements UnsafeValues {
 
     @Override
     public ItemStack modifyItemStack(ItemStack stack, String arguments) {
-        net.minecraft.server.ItemStack nmsStack = CraftItemStack.asNMSCopy(stack);
+    	net.minecraft.item.ItemStack nmsStack = CraftItemStack.asNMSCopy(stack);
 
         try {
-            nmsStack.setTag((NBTTagCompound) MojangsonParser.parse(arguments));
-        } catch (MojangsonParseException ex) {
+            nmsStack.setTagCompound((NBTTagCompound) JsonToNBT.getTagFromJson(arguments));
+        } catch (NBTException ex) {
             Logger.getLogger(CraftMagicNumbers.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -137,9 +139,9 @@ public final class CraftMagicNumbers implements UnsafeValues {
     @Override
     public List<String> tabCompleteInternalStatisticOrAchievementName(String token, List<String> completions) {
         List<String> matches = new ArrayList<String>();
-        Iterator iterator = StatisticList.stats.iterator();
+        Iterator iterator = StatList.ALL_STATS.iterator();
         while (iterator.hasNext()) {
-            String statistic = ((net.minecraft.server.Statistic) iterator.next()).name;
+            String statistic = ((StatBase) iterator.next()).statId;
             if (statistic.startsWith(token)) {
                 matches.add(statistic);
             }

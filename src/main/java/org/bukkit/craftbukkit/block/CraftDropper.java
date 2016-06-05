@@ -1,16 +1,16 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.BlockDropper;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.Blocks;
-import net.minecraft.server.TileEntityDropper;
-
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Dropper;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftInventory;
 import org.bukkit.inventory.Inventory;
+
+import net.minecraft.block.BlockDropper;
+import net.minecraft.init.Blocks;
+import net.minecraft.tileentity.TileEntityDropper;
+import net.minecraft.util.math.BlockPos;
 
 public class CraftDropper extends CraftBlockState implements Dropper {
     private final CraftWorld world;
@@ -39,7 +39,7 @@ public class CraftDropper extends CraftBlockState implements Dropper {
         if (block.getType() == Material.DROPPER) {
             BlockDropper drop = (BlockDropper) Blocks.DROPPER;
 
-            drop.dispense(world.getHandle(), new BlockPosition(getX(), getY(), getZ()));
+            drop.dispense(world.getHandle(), new BlockPos(getX(), getY(), getZ()));
         }
     }
 

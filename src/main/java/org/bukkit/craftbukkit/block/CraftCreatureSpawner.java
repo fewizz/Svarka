@@ -1,12 +1,13 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.TileEntityMobSpawner;
 import org.bukkit.Material;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.EntityType;
+
+import net.minecraft.tileentity.TileEntityMobSpawner;
 
 public class CraftCreatureSpawner extends CraftBlockState implements CreatureSpawner {
     private final TileEntityMobSpawner spawner;
@@ -23,7 +24,7 @@ public class CraftCreatureSpawner extends CraftBlockState implements CreatureSpa
     }
 
     public EntityType getSpawnedType() {
-        return EntityType.fromName(spawner.getSpawner().getMobName());
+        return EntityType.fromName(spawner.getSpawnerBaseLogic().getEntityNameToSpawn());
     }
 
     public void setSpawnedType(EntityType entityType) {
@@ -31,12 +32,12 @@ public class CraftCreatureSpawner extends CraftBlockState implements CreatureSpa
             throw new IllegalArgumentException("Can't spawn EntityType " + entityType + " from mobspawners!");
         }
 
-        spawner.getSpawner().setMobName(entityType.getName());
+        spawner.getSpawnerBaseLogic().setEntityName(entityType.getName());
     }
 
     @Deprecated
     public String getCreatureTypeId() {
-        return spawner.getSpawner().getMobName();
+        return spawner.getSpawnerBaseLogic().getEntityNameToSpawn();
     }
 
     @Deprecated
@@ -45,7 +46,7 @@ public class CraftCreatureSpawner extends CraftBlockState implements CreatureSpa
     }
 
     public String getCreatureTypeName() {
-        return spawner.getSpawner().getMobName();
+        return spawner.getSpawnerBaseLogic().getEntityNameToSpawn();
     }
 
     public void setCreatureTypeByName(String creatureType) {
@@ -58,11 +59,11 @@ public class CraftCreatureSpawner extends CraftBlockState implements CreatureSpa
     }
 
     public int getDelay() {
-        return spawner.getSpawner().spawnDelay;
+        return spawner.getSpawnerBaseLogic().spawnDelay;
     }
 
     public void setDelay(int delay) {
-        spawner.getSpawner().spawnDelay = delay;
+        spawner.getSpawnerBaseLogic().spawnDelay = delay;
     }
 
     @Override

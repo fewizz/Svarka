@@ -1,12 +1,13 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.TileEntityEndGateway;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.EndGateway;
 import org.bukkit.craftbukkit.CraftWorld;
+
+import net.minecraft.tileentity.TileEntityEndGateway;
+import net.minecraft.util.math.BlockPos;
 
 public class CraftEndGateway extends CraftBlockState implements EndGateway {
 
@@ -28,7 +29,7 @@ public class CraftEndGateway extends CraftBlockState implements EndGateway {
     
     @Override
     public Location getExitLocation() {
-        BlockPosition pos = gateway.exitPortal;
+        BlockPos pos = gateway.exitPortal;
         return pos == null ? null : new Location(world, pos.getX(), pos.getY(), pos.getZ());
     }
 
@@ -39,7 +40,7 @@ public class CraftEndGateway extends CraftBlockState implements EndGateway {
         } else if (location.getWorld() != world) {
             throw new IllegalArgumentException("Cannot set exit location to different world");
         } else {
-            gateway.exitPortal = new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+            gateway.exitPortal = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
         }
     }
 
