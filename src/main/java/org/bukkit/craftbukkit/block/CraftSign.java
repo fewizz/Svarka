@@ -49,7 +49,7 @@ public class CraftSign extends CraftBlockState implements Sign {
         if (result) {
         	ITextComponent[] newLines = sanitizeLines(lines);
             System.arraycopy(newLines, 0, sign.signText, 0, 4);
-            sign.update();
+            sign.markDirty();
         }
 
         return result;

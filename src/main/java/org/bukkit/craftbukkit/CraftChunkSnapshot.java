@@ -1,8 +1,9 @@
 package org.bukkit.craftbukkit;
 
 import org.bukkit.ChunkSnapshot;
-import org.bukkit.block.Biome;
 import org.bukkit.craftbukkit.block.CraftBlock;
+
+import net.minecraft.world.biome.Biome;
 
 /**
  * Represents a static, thread-safe snapshot of chunk of blocks
@@ -73,7 +74,7 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
         return hmap[z << 4 | x];
     }
 
-    public final Biome getBiome(int x, int z) {
+    public final org.bukkit.block.Biome getBiome(int x, int z) {
         return CraftBlock.biomeBaseToBiome(biome[z << 4 | x]);
     }
 

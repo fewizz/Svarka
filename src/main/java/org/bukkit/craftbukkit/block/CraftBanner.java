@@ -113,7 +113,7 @@ public class CraftBanner extends CraftBlockState implements Banner {
 
             banner.patterns = newPatterns;
 
-            banner.update();
+            banner.markDirty();
         }
 
         return result;

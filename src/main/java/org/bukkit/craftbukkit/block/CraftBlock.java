@@ -113,7 +113,7 @@ public class CraftBlock implements Block {
     private void setData(final byte data, int flag) {
     	net.minecraft.world.World world = chunk.getHandle().getWorld();
         BlockPos position = new BlockPos(x, y, z);
-        IBlockState blockData = world.getType(position);
+        IBlockState blockData = world.getBlockState(position);
         world.setBlockState(position, blockData.getBlock().getStateFromMeta(data), flag);
     }
 

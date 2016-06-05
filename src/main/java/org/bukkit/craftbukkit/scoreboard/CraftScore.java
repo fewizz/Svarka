@@ -2,14 +2,13 @@ package org.bukkit.craftbukkit.scoreboard;
 
 import java.util.Map;
 
-import net.minecraft.server.Scoreboard;
-import net.minecraft.server.ScoreboardObjective;
-import net.minecraft.server.ScoreboardScore;
-
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
+
+import net.minecraft.scoreboard.ScoreObjective;
+import net.minecraft.scoreboard.Scoreboard;
 
 /**
  * TL;DR: This class is special and lazily grabs a handle...
@@ -41,11 +40,11 @@ final class CraftScore implements Score {
     public int getScore() throws IllegalStateException {
         Scoreboard board = objective.checkState().board;
 
-        if (board.getPlayers().contains(entry)) { // Lazy
-            Map<ScoreboardObjective, ScoreboardScore> scores = board.getPlayerObjectives(entry);
-            ScoreboardScore score = scores.get(objective.getHandle());
+        if (board.getObjectiveNames().contains(entry)) { // Lazy
+            Map<ScoreObjective, net.minecraft.scoreboard.Score> scores = board.getObjectivesForEntity(entry);
+            net.minecraft.scoreboard.Score score = scores.get(objective.getHandle());
             if (score != null) { // Lazy
-                return score.getScore();
+                return score.getScorePoints();
             }
         }
 
@@ -53,7 +52,7 @@ final class CraftScore implements Score {
     }
 
     public void setScore(int score) throws IllegalStateException {
-        objective.checkState().board.getPlayerScoreForObjective(entry, objective.getHandle()).setScore(score);
+        objective.checkState().board.getOrCreateScore(entry, objective.getHandle()).setScorePoints(score);
     }
 
     public CraftScoreboard getScoreboard() {

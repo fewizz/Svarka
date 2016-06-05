@@ -51,7 +51,7 @@ public class CraftJukebox extends CraftBlockState implements Jukebox {
         if (!isPlaced()) {
             return;
         }
-        jukebox.update();
+        jukebox.markDirty();
         
         if (record == Material.AIR) {
             world.getHandle().setTypeAndData(new BlockPos(getX(), getY(), getZ()),

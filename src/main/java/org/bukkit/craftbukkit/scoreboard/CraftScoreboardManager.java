@@ -8,22 +8,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.IScoreboardCriteria;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.PacketPlayOutScoreboardObjective;
-import net.minecraft.server.PacketPlayOutScoreboardTeam;
-import net.minecraft.server.Scoreboard;
-import net.minecraft.server.ScoreboardObjective;
-import net.minecraft.server.ScoreboardScore;
-import net.minecraft.server.ScoreboardServer;
-import net.minecraft.server.ScoreboardTeam;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.util.WeakCollection;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.ScoreboardManager;
+
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.SPacketScoreboardObjective;
+import net.minecraft.network.play.server.SPacketTeams;
+import net.minecraft.scoreboard.IScoreCriteria;
+import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreObjective;
+import net.minecraft.scoreboard.ScorePlayerTeam;
+import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.scoreboard.ServerScoreboard;
+import net.minecraft.server.MinecraftServer;
 
 public final class CraftScoreboardManager implements ScoreboardManager {
     private final CraftScoreboard mainScoreboard;
@@ -31,7 +31,7 @@ public final class CraftScoreboardManager implements ScoreboardManager {
     private final Collection<CraftScoreboard> scoreboards = new WeakCollection<CraftScoreboard>();
     private final Map<CraftPlayer, CraftScoreboard> playerBoards = new HashMap<CraftPlayer, CraftScoreboard>();
 
-    public CraftScoreboardManager(MinecraftServer minecraftserver, net.minecraft.server.Scoreboard scoreboardServer) {
+    public CraftScoreboardManager(MinecraftServer minecraftserver, Scoreboard scoreboardServer) {
         mainScoreboard = new CraftScoreboard(scoreboardServer);
         server = minecraftserver;
         scoreboards.add(mainScoreboard);
@@ -42,7 +42,7 @@ public final class CraftScoreboardManager implements ScoreboardManager {
     }
 
     public CraftScoreboard getNewScoreboard() {
-        CraftScoreboard scoreboard = new CraftScoreboard(new ScoreboardServer(server));
+        CraftScoreboard scoreboard = new CraftScoreboard(new ServerScoreboard(server));
         scoreboards.add(scoreboard);
         return scoreboard;
     }
@@ -58,9 +58,9 @@ public final class CraftScoreboardManager implements ScoreboardManager {
         Validate.isTrue(bukkitScoreboard instanceof CraftScoreboard, "Cannot set player scoreboard to an unregistered Scoreboard");
 
         CraftScoreboard scoreboard = (CraftScoreboard) bukkitScoreboard;
-        net.minecraft.server.Scoreboard oldboard = getPlayerBoard(player).getHandle();
-        net.minecraft.server.Scoreboard newboard = scoreboard.getHandle();
-        EntityPlayer entityplayer = player.getHandle();
+        Scoreboard oldboard = getPlayerBoard(player).getHandle();
+        Scoreboard newboard = scoreboard.getHandle();
+        EntityPlayerMP entityplayer = player.getHandle();
 
         if (oldboard == newboard) {
             return;
@@ -73,11 +73,11 @@ public final class CraftScoreboardManager implements ScoreboardManager {
         }
 
         // Old objective tracking
-        HashSet<ScoreboardObjective> removed = new HashSet<ScoreboardObjective>();
+        HashSet<ScoreObjective> removed = new HashSet<ScoreObjective>();
         for (int i = 0; i < 3; ++i) {
-            ScoreboardObjective scoreboardobjective = oldboard.getObjectiveForSlot(i);
+        	ScoreObjective scoreboardobjective = oldboard.getObjectiveInDisplaySlot(i);
             if (scoreboardobjective != null && !removed.contains(scoreboardobjective)) {
-                entityplayer.playerConnection.sendPacket(new PacketPlayOutScoreboardObjective(scoreboardobjective, 1));
+                entityplayer.connection.sendPacket(new SPacketScoreboardObjective(scoreboardobjective, 1));
                 removed.add(scoreboardobjective);
             }
         }
@@ -85,12 +85,12 @@ public final class CraftScoreboardManager implements ScoreboardManager {
         // Old team tracking
         Iterator<?> iterator = oldboard.getTeams().iterator();
         while (iterator.hasNext()) {
-            ScoreboardTeam scoreboardteam = (ScoreboardTeam) iterator.next();
-            entityplayer.playerConnection.sendPacket(new PacketPlayOutScoreboardTeam(scoreboardteam, 1));
+        	ScorePlayerTeam scoreboardteam = (ScorePlayerTeam) iterator.next();
+            entityplayer.connection.sendPacket(new SPacketTeams(scoreboardteam, 1));
         }
 
         // The above is the reverse of the below method.
-        server.getPlayerList().sendScoreboard((ScoreboardServer) newboard, player.getHandle());
+        server.getPlayerList().sendScoreboard((ServerScoreboard) newboard, player.getHandle());
     }
 
     // CraftBukkit method
@@ -99,11 +99,11 @@ public final class CraftScoreboardManager implements ScoreboardManager {
     }
 
     // CraftBukkit method
-    public Collection<ScoreboardScore> getScoreboardScores(IScoreboardCriteria criteria, String name, Collection<ScoreboardScore> collection) {
+    public Collection<Score> getScoreboardScores(IScoreCriteria criteria, String name, Collection<Score> collection) {
         for (CraftScoreboard scoreboard : scoreboards) {
             Scoreboard board = scoreboard.board;
-            for (ScoreboardObjective objective : (Iterable<ScoreboardObjective>) board.getObjectivesForCriteria(criteria)) {
-                collection.add(board.getPlayerScoreForObjective(name, objective));
+            for (ScoreObjective objective : (Iterable<ScoreObjective>) board.getObjectivesFromCriteria(criteria)) {
+                collection.add(board.getOrCreateScore(name, objective));
             }
         }
         return collection;

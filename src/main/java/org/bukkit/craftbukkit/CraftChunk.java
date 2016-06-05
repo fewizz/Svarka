@@ -48,7 +48,7 @@ public class CraftChunk implements Chunk {
     	net.minecraft.world.chunk.Chunk c = weakChunk.get();
 
         if (c == null) {
-            c = worldServer.getChunkAt(x, z);
+            c = worldServer.getChunkFromChunkCoords(x, z);
 
             weakChunk = new WeakReference<net.minecraft.world.chunk.Chunk>(c);
         }
@@ -82,7 +82,7 @@ public class CraftChunk implements Chunk {
         net.minecraft.world.chunk.Chunk chunk = getHandle();
 
         for (int i = 0; i < 16; i++) {
-            count += chunk.entitySlices[i].size();
+            count += chunk.entityLists[i].size();
         }
 
         Entity[] entities = new Entity[count];
@@ -90,7 +90,7 @@ public class CraftChunk implements Chunk {
         for (int i = 0; i < 16; i++) {
 
             for (Object obj : chunk.entityLists[i].toArray()) {
-                if (!(obj instanceof net.minecraft.server.Entity)) {
+                if (!(obj instanceof net.minecraft.entity.Entity)) {
                     continue;
                 }
 
@@ -241,12 +241,12 @@ public class CraftChunk implements Chunk {
         double[] biomeRain = null;
 
         if (includeBiome || includeBiomeTempRain) {
-        	BiomeProvider wcm = world.getHandle().getWorldChunkManager();
+        	BiomeProvider wcm = world.getHandle().getBiomeProvider();
 
             if (includeBiome) {
                 biome = new Biome[256];
                 for (int i = 0; i < 256; i++) {
-                    biome[i] = world.getHandle().getBiome(new BlockPos((x << 4) + (i & 0xF), 0, (z << 4) + (i >> 4)));
+                    biome[i] = world.getHandle().getBiomeForCoordsBody(new BlockPos((x << 4) + (i & 0xF), 0, (z << 4) + (i >> 4)));
                 }
             }
 

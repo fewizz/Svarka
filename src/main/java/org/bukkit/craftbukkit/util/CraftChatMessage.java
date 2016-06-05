@@ -12,6 +12,7 @@ import com.google.common.collect.ImmutableMap.Builder;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.ClickEvent.Action;
@@ -216,7 +217,7 @@ public final class CraftChatMessage {
             }
         }
 
-        List extras = component.a();
+        List extras = component.getSiblings();
         for (int i = 0; i < extras.size(); i++) {
         	ITextComponent comp = (ITextComponent) extras.get(i);
             if (comp.getChatModifier() != null && comp.getChatModifier().h() == null) {
@@ -224,17 +225,17 @@ public final class CraftChatMessage {
             }
         }
 
-        if (component instanceof ChatMessage) {
-            Object[] subs = ((ChatMessage) component).j();
+        if (component instanceof TextComponentTranslation) {
+            Object[] subs = ((TextComponentTranslation) component).j();
             for (int i = 0; i < subs.length; i++) {
                 Object comp = subs[i];
-                if (comp instanceof IChatBaseComponent) {
+                if (comp instanceof ITextComponent) {
                 	ITextComponent c = (ITextComponent) comp;
                     if (c.getChatModifier() != null && c.getChatModifier().h() == null) {
                         subs[i] = fixComponent(c, matcher);
                     }
                 } else if (comp instanceof String && matcher.reset((String)comp).find()) {
-                    subs[i] = fixComponent(new ChatComponentText((String) comp), matcher);
+                    subs[i] = fixComponent(new TextComponentString((String) comp), matcher);
                 }
             }
         }
