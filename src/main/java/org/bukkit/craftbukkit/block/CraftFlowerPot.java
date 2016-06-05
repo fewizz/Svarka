@@ -1,12 +1,13 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.TileEntityFlowerPot;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.FlowerPot;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.material.MaterialData;
+
+import net.minecraft.tileentity.TileEntityFlowerPot;
 
 public class CraftFlowerPot extends CraftBlockState implements FlowerPot {
 
@@ -26,15 +27,15 @@ public class CraftFlowerPot extends CraftBlockState implements FlowerPot {
 
     @Override
     public MaterialData getContents() {
-        return (pot.d() == null) ? null : CraftMagicNumbers.getMaterial(pot.d()).getNewData((byte) pot.e()); // PAIL: rename
+        return (pot.getFlowerPotItem() == null) ? null : CraftMagicNumbers.getMaterial(pot.getFlowerPotItem()).getNewData((byte) pot.getFlowerPotData()); // PAIL: rename
     }
 
     @Override
     public void setContents(MaterialData item) {
         if (item == null) {
-            pot.a(null, 0);
+            pot.setFlowerPotData(null, 0);
         } else {
-            pot.a(CraftMagicNumbers.getItem(item.getItemType()), item.getData()); // PAIL: rename
+            pot.setFlowerPotData(CraftMagicNumbers.getItem(item.getItemType()), item.getData()); // PAIL: rename
         }
     }
 }

@@ -1,12 +1,13 @@
 package org.bukkit.craftbukkit.block;
 
-import net.minecraft.server.TileEntityFurnace;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Furnace;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftInventoryFurnace;
 import org.bukkit.inventory.FurnaceInventory;
+
+import net.minecraft.tileentity.TileEntityFurnace;
 
 public class CraftFurnace extends CraftBlockState implements Furnace {
     private final TileEntityFurnace furnace;
