@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.map;
 
-import net.minecraft.server.WorldMap;
-import net.minecraft.server.MapIcon;
+import net.minecraft.util.math.Vec4b;
+import net.minecraft.world.storage.MapData;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -12,9 +12,9 @@ import org.bukkit.map.MapView;
 
 public class CraftMapRenderer extends MapRenderer {
 
-    private final WorldMap worldMap;
+    private final MapData worldMap;
 
-    public CraftMapRenderer(CraftMapView mapView, WorldMap worldMap) {
+    public CraftMapRenderer(CraftMapView mapView, MapData worldMap) {
         super(false);
         this.worldMap = worldMap;
     }
@@ -34,7 +34,7 @@ public class CraftMapRenderer extends MapRenderer {
             cursors.removeCursor(cursors.getCursor(0));
         }
 
-        for (Object key : worldMap.decorations.keySet()) {
+        for (Object key : worldMap.mapDecorations.keySet()) {
             // If this cursor is for a player check visibility with vanish system
             Player other = Bukkit.getPlayerExact((String) key);
             if (other != null && !player.canSee(other)) {
@@ -42,7 +42,7 @@ public class CraftMapRenderer extends MapRenderer {
             }
 
       
-            MapIcon decoration = (MapIcon) worldMap.decorations.get(key);
+            Vec4b decoration = (Vec4b) worldMap.mapDecorations.get(key);
             cursors.addCursor(decoration.getX(), decoration.getY(), (byte) (decoration.getRotation() & 15), decoration.getType());
         }
     }

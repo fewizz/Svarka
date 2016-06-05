@@ -4,16 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.server.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunkGenerator;
 
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.generator.BlockPopulator;
 
 public class NormalChunkGenerator extends InternalChunkGenerator {
-    private final ChunkGenerator generator;
+    private final IChunkGenerator generator;
 
     public NormalChunkGenerator(World world, long seed) {
-        generator = world.worldProvider.getChunkGenerator();
+        generator = world.provider.createChunkGenerator();
     }
 
     @Override
@@ -23,7 +29,7 @@ public class NormalChunkGenerator extends InternalChunkGenerator {
 
     @Override
     public boolean canSpawn(org.bukkit.World world, int x, int z) {
-        return ((CraftWorld) world).getHandle().worldProvider.canSpawn(x, z);
+        return ((CraftWorld) world).getHandle().provider.canCoordinateBeSpawn(x, z);
     }
 
     @Override
@@ -32,28 +38,28 @@ public class NormalChunkGenerator extends InternalChunkGenerator {
     }
 
     @Override
-    public Chunk getOrCreateChunk(int i, int i1) {
-        return generator.getOrCreateChunk(i, i1);
+    public Chunk provideChunk(int i, int i1) {
+        return generator.provideChunk(i, i1);
     }
 
     @Override
-    public void recreateStructures(int i, int i1) {
-        generator.recreateStructures(i, i1);
+    public void populate(int i, int i1) {
+        generator.populate(i, i1);
     }
 
     @Override
-    public boolean a(Chunk chunk, int i, int i1) {
-        return generator.a(chunk, i, i1);
+    public boolean generateStructures(Chunk chunk, int i, int i1) {
+        return generator.generateStructures(chunk, i, i1);
     }
 
     @Override
-    public List<BiomeBase.BiomeMeta> getMobsFor(EnumCreatureType enumCreatureType, BlockPosition blockPosition) {
-        return generator.getMobsFor(enumCreatureType, blockPosition);
+    public List<Biome.SpawnListEntry> getPossibleCreatures(EnumCreatureType enumCreatureType, BlockPos blockPosition) {
+        return generator.getPossibleCreatures(enumCreatureType, blockPosition);
     }
 
     @Override
-    public BlockPosition findNearestMapFeature(World world, String s, BlockPosition blockPosition) {
-        return generator.findNearestMapFeature(world, s, blockPosition);
+    public BlockPos getStrongholdGen(World world, String s, BlockPos blockPosition) {
+        return generator.getStrongholdGen(world, s, blockPosition);
     }
 
     @Override
