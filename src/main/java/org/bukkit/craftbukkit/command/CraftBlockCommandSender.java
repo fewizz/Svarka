@@ -1,30 +1,30 @@
 package org.bukkit.craftbukkit.command;
 
-import net.minecraft.server.ICommandListener;
-import net.minecraft.server.IChatBaseComponent;
-
 import org.bukkit.block.Block;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.craftbukkit.util.CraftChatMessage;
+
+import net.minecraft.command.ICommandSender;
+import net.minecraft.util.text.ITextComponent;
 
 /**
  * Represents input from a command block
  */
 public class CraftBlockCommandSender extends ServerCommandSender implements BlockCommandSender {
-    private final ICommandListener block;
+    private final ICommandSender block;
 
-    public CraftBlockCommandSender(ICommandListener commandBlockListenerAbstract) {
+    public CraftBlockCommandSender(ICommandSender commandBlockListenerAbstract) {
         super();
         this.block = commandBlockListenerAbstract;
     }
 
     public Block getBlock() {
-        return block.getWorld().getWorld().getBlockAt(block.getChunkCoordinates().getX(), block.getChunkCoordinates().getY(), block.getChunkCoordinates().getZ());
+        return block.getEntityWorld().getWorld().getBlockAt(block.getPosition().getX(), block.getPosition().getY(), block.getPosition().getZ());
     }
 
     public void sendMessage(String message) {
-        for (IChatBaseComponent component : CraftChatMessage.fromString(message)) {
-            block.sendMessage(component);
+        for (ITextComponent component : CraftChatMessage.fromString(message)) {
+            block.addChatMessage(component);
         }
     }
 
@@ -46,7 +46,7 @@ public class CraftBlockCommandSender extends ServerCommandSender implements Bloc
         throw new UnsupportedOperationException("Cannot change operator status of a block");
     }
 
-    public ICommandListener getTileEntity() {
+    public ICommandSender getTileEntity() {
         return block;
     }
 }

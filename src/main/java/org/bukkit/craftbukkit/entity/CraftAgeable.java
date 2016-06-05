@@ -1,9 +1,9 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityAgeable;
-
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Ageable;
+
+import net.minecraft.entity.EntityAgeable;
 
 public class CraftAgeable extends CraftCreature implements Ageable {
     public CraftAgeable(CraftServer server, EntityAgeable entity) {
