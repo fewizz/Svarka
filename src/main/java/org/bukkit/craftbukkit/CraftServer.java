@@ -29,6 +29,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Enchantments;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
@@ -1334,7 +1335,7 @@ public final class CraftServer implements Server {
     @Override
     @SuppressWarnings("unchecked")
     public Set<String> getIPBans() {
-        return new HashSet<String>(Arrays.asList(playerList.getIPBans().getEntries()));
+        return new HashSet<String>(Arrays.asList(playerList.getBannedIPs().getKeys()));
     }
 
     @Override
@@ -1355,8 +1356,8 @@ public final class CraftServer implements Server {
     public Set<OfflinePlayer> getBannedPlayers() {
         Set<OfflinePlayer> result = new HashSet<OfflinePlayer>();
 
-        for (UserListEntry entry : playerList.getProfileBans().getValues()) {
-            result.add(getOfflinePlayer((GameProfile) entry.getKey()));
+        for (UserListEntry entry : playerList.getBannedPlayers().getValuesBukkit()) {
+            result.add(getOfflinePlayer((GameProfile) entry.getValue()));
         }        
 
         return result;
@@ -1368,16 +1369,16 @@ public final class CraftServer implements Server {
 
         switch(type){
         case IP:
-            return new CraftIpBanList(playerList.getIPBans());
+            return new CraftIpBanList(playerList.getBannedIPs());
         case NAME:
         default:
-            return new CraftProfileBanList(playerList.getProfileBans());
+            return new CraftProfileBanList(playerList.getBannedPlayers());
         }
     }
 
     @Override
     public void setWhitelist(boolean value) {
-        playerList.setHasWhitelist(value);
+        playerList.setWhiteListEnabled(value);
         console.getPropertyManager().setProperty("white-list", value);
     }
 
@@ -1385,8 +1386,8 @@ public final class CraftServer implements Server {
     public Set<OfflinePlayer> getWhitelistedPlayers() {
         Set<OfflinePlayer> result = new LinkedHashSet<OfflinePlayer>();
 
-        for (UserListEntry entry : playerList.getWhitelist().getValues()) {
-            result.add(getOfflinePlayer((GameProfile) entry.getKey()));
+        for (UserListEntry entry : playerList.getWhitelistedPlayers().getValuesBukkit()) {
+            result.add(getOfflinePlayer((GameProfile) entry.getValue()));
         }
 
         return result;
@@ -1396,8 +1397,8 @@ public final class CraftServer implements Server {
     public Set<OfflinePlayer> getOperators() {
         Set<OfflinePlayer> result = new HashSet<OfflinePlayer>();
 
-        for (UserListEntry entry : playerList.getOPs().getValues()) {
-            result.add(getOfflinePlayer((GameProfile) entry.getKey()));
+        for (UserListEntry entry : playerList.getOppedPlayers().getValuesBukkit()) {
+            result.add(getOfflinePlayer((GameProfile) entry.getValue()));
         }
 
         return result;
@@ -1564,12 +1565,12 @@ public final class CraftServer implements Server {
     }
 
     public List<String> tabComplete(ICommandSender sender, String message) {
-        if (!(sender instanceof EntityPlayer)) {
+        if (!(sender instanceof EntityPlayerMP)) {
             return ImmutableList.of();
         }
 
         List<String> offers;
-        Player player = ((EntityPlayer) sender).getBukkitEntity();
+        Player player = ((EntityPlayerMP) sender).getBukkitEntity();
         if (message.startsWith("/")) {
             offers = tabCompleteCommand(player, message);
         } else {

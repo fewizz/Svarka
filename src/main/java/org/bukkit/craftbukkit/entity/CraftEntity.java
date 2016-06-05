@@ -9,6 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityFlying;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.boss.EntityWither;
@@ -100,7 +101,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         /**
          * Order is *EXTREMELY* important -- keep it right! =D
          */
-        if (entity instanceof EntityLiving) {
+        if (entity instanceof EntityLivingBase) {
             // Players
             if (entity instanceof EntityPlayer) {
                 if (entity instanceof EntityPlayerMP) { return new CraftPlayer(server, (EntityPlayerMP) entity); }

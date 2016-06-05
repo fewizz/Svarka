@@ -1,9 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityEgg;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.EntityType;
+
+import net.minecraft.entity.projectile.EntityEgg;
 
 public class CraftEgg extends CraftProjectile implements Egg {
     public CraftEgg(CraftServer server, EntityEgg entity) {

@@ -1,10 +1,11 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityGuardian;
-import net.minecraft.server.GenericAttributes;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Guardian;
+
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.monster.EntityGuardian;
 
 public class CraftGuardian extends CraftMonster implements Guardian {
 
@@ -41,16 +42,16 @@ public class CraftGuardian extends CraftMonster implements Guardian {
 
             // Since aW() calls its supers it will try to re register attributes which is invalid
             // check these on update
-            entityGuardian.getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).setValue(6.0D);
-            entityGuardian.getAttributeInstance(GenericAttributes.MOVEMENT_SPEED).setValue(0.5D);
-            entityGuardian.getAttributeInstance(GenericAttributes.FOLLOW_RANGE).setValue(16.0D);
-            entityGuardian.getAttributeInstance(GenericAttributes.maxHealth).setValue(30.0D);
+            entityGuardian.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0D);
+            entityGuardian.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.5D);
+            entityGuardian.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16.0D);
+            entityGuardian.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(30.0D);
 
             // Update pathfinding (random stroll back to 80)
-            entityGuardian.goalRandomStroll.setTimeBetweenMovement(80);
+            entityGuardian.wander.setExecutionChance(80);
 
             // Tell minecraft that we need persistence since the guardian changed
-            entityGuardian.initAttributes();
+            entityGuardian.applyEntityAttributes();
         }
     }
 }

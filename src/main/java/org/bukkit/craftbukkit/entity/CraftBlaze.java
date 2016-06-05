@@ -1,10 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityBlaze;
-
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.EntityType;
+
+import net.minecraft.entity.monster.EntityBlaze;
 
 public class CraftBlaze extends CraftMonster implements Blaze {
     public CraftBlaze(CraftServer server, EntityBlaze entity) {

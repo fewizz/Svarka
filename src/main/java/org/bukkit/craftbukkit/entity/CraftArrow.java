@@ -1,13 +1,13 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityArrow;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.projectiles.ProjectileSource;
+
+import net.minecraft.entity.projectile.EntityArrow;
 
 public class CraftArrow extends AbstractProjectile implements Arrow {
 
@@ -25,11 +25,11 @@ public class CraftArrow extends AbstractProjectile implements Arrow {
     }
 
     public boolean isCritical() {
-        return getHandle().isCritical();
+        return getHandle().getIsCritical();
     }
 
     public void setCritical(boolean critical) {
-        getHandle().setCritical(critical);
+        getHandle().setIsCritical(critical);
     }
 
     public ProjectileSource getShooter() {
@@ -38,9 +38,9 @@ public class CraftArrow extends AbstractProjectile implements Arrow {
 
     public void setShooter(ProjectileSource shooter) {
         if (shooter instanceof LivingEntity) {
-            getHandle().shooter = ((CraftLivingEntity) shooter).getHandle();
+            getHandle().shootingEntity = ((CraftLivingEntity) shooter).getHandle();
         } else {
-            getHandle().shooter = null;
+            getHandle().shootingEntity = null;
         }
         getHandle().projectileSource = shooter;
     }
@@ -61,14 +61,14 @@ public class CraftArrow extends AbstractProjectile implements Arrow {
 
     @Deprecated
     public LivingEntity _INVALID_getShooter() {
-        if (getHandle().shooter == null) {
+        if (getHandle().shootingEntity == null) {
             return null;
         }
-        return (LivingEntity) getHandle().shooter.getBukkitEntity();
+        return (LivingEntity) getHandle().shootingEntity.getBukkitEntity();
     }
 
     @Deprecated
     public void _INVALID_setShooter(LivingEntity shooter) {
-        getHandle().shooter = ((CraftLivingEntity) shooter).getHandle();
+        getHandle().shootingEntity = ((CraftLivingEntity) shooter).getHandle();
     }
 }

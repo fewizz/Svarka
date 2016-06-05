@@ -1,9 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityEndermite;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Endermite;
 import org.bukkit.entity.EntityType;
+
+import net.minecraft.entity.monster.EntityEndermite;
 
 public class CraftEndermite extends CraftMonster implements Endermite {
 

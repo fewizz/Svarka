@@ -1,9 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityDragonFireball;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.DragonFireball;
 import org.bukkit.entity.EntityType;
+
+import net.minecraft.entity.projectile.EntityDragonFireball;
 
 public class CraftDragonFireball extends CraftFireball implements DragonFireball {
     public CraftDragonFireball(CraftServer server, EntityDragonFireball entity) {

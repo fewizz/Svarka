@@ -1,10 +1,11 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityBoat;
 import org.bukkit.TreeSpecies;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.EntityType;
+
+import net.minecraft.entity.item.EntityBoat;
 
 public class CraftBoat extends CraftVehicle implements Boat {
 
@@ -72,7 +73,7 @@ public class CraftBoat extends CraftVehicle implements Boat {
         return EntityType.BOAT;
     }
 
-    public static TreeSpecies getTreeSpecies(EntityBoat.EnumBoatType boatType) {
+    public static TreeSpecies getTreeSpecies(EntityBoat.Type boatType) {
         switch (boatType) {
             case SPRUCE:
                 return TreeSpecies.REDWOOD;
@@ -90,21 +91,21 @@ public class CraftBoat extends CraftVehicle implements Boat {
         }
     }
 
-    public static EntityBoat.EnumBoatType getBoatType(TreeSpecies species) {
+    public static EntityBoat.Type getBoatType(TreeSpecies species) {
         switch (species) {
             case REDWOOD:
-                return EntityBoat.EnumBoatType.SPRUCE;
+                return EntityBoat.Type.SPRUCE;
             case BIRCH:
-                return EntityBoat.EnumBoatType.BIRCH;
+                return EntityBoat.Type.BIRCH;
             case JUNGLE:
-                return EntityBoat.EnumBoatType.JUNGLE;
+                return EntityBoat.Type.JUNGLE;
             case ACACIA:
-                return EntityBoat.EnumBoatType.ACACIA;
+                return EntityBoat.Type.ACACIA;
             case DARK_OAK:
-                return EntityBoat.EnumBoatType.DARK_OAK;
+                return EntityBoat.Type.DARK_OAK;
             case GENERIC:
             default:
-                return EntityBoat.EnumBoatType.OAK;
+                return EntityBoat.Type.OAK;
         }
     }
 }

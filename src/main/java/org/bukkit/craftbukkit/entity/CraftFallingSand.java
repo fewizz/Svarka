@@ -1,12 +1,12 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityFallingBlock;
-
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingSand;
+
+import net.minecraft.entity.item.EntityFallingBlock;
 
 public class CraftFallingSand extends CraftEntity implements FallingSand {
 
@@ -37,15 +37,15 @@ public class CraftFallingSand extends CraftEntity implements FallingSand {
     }
 
     public byte getBlockData() {
-        return (byte) getHandle().getBlock().getBlock().toLegacyData(getHandle().getBlock());
+        return (byte) getHandle().getBlock().getBlock().getMetaFromState(getHandle().getBlock());
     }
 
     public boolean getDropItem() {
-        return getHandle().dropItem;
+        return getHandle().shouldDropItem;
     }
 
     public void setDropItem(boolean drop) {
-        getHandle().dropItem = drop;
+        getHandle().shouldDropItem = drop;
     }
 
     @Override

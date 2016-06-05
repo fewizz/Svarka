@@ -1,8 +1,5 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityFireball;
-import net.minecraft.server.MathHelper;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
@@ -10,6 +7,9 @@ import org.bukkit.entity.Fireball;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
+
+import net.minecraft.entity.projectile.EntityFireball;
+import net.minecraft.util.math.MathHelper;
 
 public class CraftFireball extends AbstractProjectile implements Fireball {
     public CraftFireball(CraftServer server, EntityFireball entity) {
@@ -38,15 +38,15 @@ public class CraftFireball extends AbstractProjectile implements Fireball {
 
     public void setShooter(ProjectileSource shooter) {
         if (shooter instanceof CraftLivingEntity) {
-            getHandle().shooter = ((CraftLivingEntity) shooter).getHandle();
+            getHandle().shootingEntity = ((CraftLivingEntity) shooter).getHandle();
         } else {
-            getHandle().shooter = null;
+            getHandle().shootingEntity = null;
         }
         getHandle().projectileSource = shooter;
     }
 
     public Vector getDirection() {
-        return new Vector(getHandle().dirX, getHandle().dirY, getHandle().dirZ);
+        return new Vector(getHandle().accelerationX, getHandle().accelerationY, getHandle().accelerationZ);
     }
 
     public void setDirection(Vector direction) {
@@ -54,10 +54,10 @@ public class CraftFireball extends AbstractProjectile implements Fireball {
         double x = direction.getX();
         double y = direction.getY();
         double z = direction.getZ();
-        double magnitude = (double) MathHelper.sqrt(x * x + y * y + z * z);
-        getHandle().dirX = x / magnitude;
-        getHandle().dirY = y / magnitude;
-        getHandle().dirZ = z / magnitude;
+        double magnitude = (double) MathHelper.sqrt_double(x * x + y * y + z * z);
+        getHandle().accelerationX = x / magnitude;
+        getHandle().accelerationY = y / magnitude;
+        getHandle().accelerationZ = z / magnitude;
     }
 
     @Override
@@ -81,8 +81,8 @@ public class CraftFireball extends AbstractProjectile implements Fireball {
 
     @Deprecated
     public LivingEntity _INVALID_getShooter() {
-        if (getHandle().shooter != null) {
-            return (LivingEntity) getHandle().shooter.getBukkitEntity();
+        if (getHandle().shootingEntity != null) {
+            return (LivingEntity) getHandle().shootingEntity.getBukkitEntity();
         }
         return null;
     }

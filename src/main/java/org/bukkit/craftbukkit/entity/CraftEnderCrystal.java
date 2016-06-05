@@ -1,11 +1,12 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.EntityEnderCrystal;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.EntityType;
+
+import net.minecraft.entity.item.EntityEnderCrystal;
+import net.minecraft.util.math.BlockPos;
 
 public class CraftEnderCrystal extends CraftEntity implements EnderCrystal {
     public CraftEnderCrystal(CraftServer server, EntityEnderCrystal entity) {
@@ -14,28 +15,28 @@ public class CraftEnderCrystal extends CraftEntity implements EnderCrystal {
 
     @Override
     public boolean isShowingBottom() {
-        return getHandle().isShowingBottom();
+        return getHandle().shouldShowBottom();
     }
 
     @Override
     public void setShowingBottom(boolean showing) {
-        getHandle().setShowingBottom(showing);
+        getHandle().setShowBottom(showing);
     }
 
     @Override
     public Location getBeamTarget() {
-        BlockPosition pos = getHandle().getBeamTarget();
+        BlockPos pos = getHandle().getBeamTarget();
         return pos == null ? null : new Location(getWorld(), pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Override
     public void setBeamTarget(Location location) {
         if (location == null) {
-            getHandle().setBeamTarget((BlockPosition) null);
+            getHandle().setBeamTarget((BlockPos) null);
         } else if (location.getWorld() != getWorld()) {
             throw new IllegalArgumentException("Cannot set beam target location to different world");
         } else {
-            getHandle().setBeamTarget(new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+            getHandle().setBeamTarget(new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
         }
     }
 

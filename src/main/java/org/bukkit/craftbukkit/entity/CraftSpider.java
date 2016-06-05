@@ -1,10 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntitySpider;
-
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Spider;
+
+import net.minecraft.entity.monster.EntitySpider;
 
 public class CraftSpider extends CraftMonster implements Spider {
 

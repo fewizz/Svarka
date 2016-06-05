@@ -1,13 +1,13 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.EntityHanging;
-import net.minecraft.server.EnumDirection;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Hanging;
+
+import net.minecraft.entity.EntityHanging;
+import net.minecraft.util.EnumFacing;
 
 public class CraftHanging extends CraftEntity implements Hanging {
     public CraftHanging(CraftServer server, EntityHanging entity) {
@@ -24,32 +24,32 @@ public class CraftHanging extends CraftEntity implements Hanging {
 
     public boolean setFacingDirection(BlockFace face, boolean force) {
         EntityHanging hanging = getHandle();
-        EnumDirection dir = hanging.direction;
+        EnumFacing dir = hanging.facingDirection;
         switch (face) {
             case SOUTH:
             default:
-                getHandle().setDirection(EnumDirection.SOUTH);
+                getHandle().updateFacingWithBoundingBox(EnumFacing.SOUTH);
                 break;
             case WEST:
-                getHandle().setDirection(EnumDirection.WEST);
+                getHandle().updateFacingWithBoundingBox(EnumFacing.WEST);
                 break;
             case NORTH:
-                getHandle().setDirection(EnumDirection.NORTH);
+                getHandle().updateFacingWithBoundingBox(EnumFacing.NORTH);
                 break;
             case EAST:
-                getHandle().setDirection(EnumDirection.EAST);
+                getHandle().updateFacingWithBoundingBox(EnumFacing.EAST);
                 break;
         }
-        if (!force && !hanging.survives()) {
+        if (!force && !hanging.onValidSurface()) {
             // Revert since it doesn't fit
-            hanging.setDirection(dir);
+            hanging.updateFacingWithBoundingBox(dir);
             return false;
         }
         return true;
     }
 
     public BlockFace getFacing() {
-        EnumDirection direction = this.getHandle().direction;
+    	EnumFacing direction = this.getHandle().facingDirection;
         if (direction == null) return BlockFace.SELF;
         switch (direction) {
             case SOUTH:
