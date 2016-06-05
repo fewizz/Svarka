@@ -4,6 +4,7 @@
 /projects
 /plugin
 /eclipse
+/.gradle
 
 # Mac filesystem dust
 .DS_Store
