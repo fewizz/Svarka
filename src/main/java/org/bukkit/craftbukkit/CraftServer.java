@@ -46,6 +46,7 @@ import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.MinecraftException;
 import net.minecraft.world.ServerWorldEventHandler;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
@@ -450,7 +451,7 @@ public final class CraftServer implements Server {
     public Player getPlayerExact(String name) {
         Validate.notNull(name, "Name cannot be null");
 
-        EntityPlayer player = playerList.getPlayer(name);
+        EntityPlayerMP player = playerList.getPlayerByUsername(name);
         return (player != null) ? player.getBukkitEntity() : null;
     }
 
@@ -676,15 +677,15 @@ public final class CraftServer implements Server {
 
         ((DedicatedServer) console).propertyManager = config;
 
-        boolean animals = config.getBoolean("spawn-animals", console.getSpawnAnimals());
-        boolean monsters = config.getBoolean("spawn-monsters", console.worlds.get(0).getDifficulty() != EnumDifficulty.PEACEFUL);
-        EnumDifficulty difficulty = EnumDifficulty.getById(config.getInt("difficulty", console.worlds.get(0).getDifficulty().ordinal()));
+        boolean animals = config.getBooleanProperty("spawn-animals", console.getSpawnAnimals());
+        boolean monsters = config.getBooleanProperty("spawn-monsters", console.worlds.get(0).getDifficulty() != EnumDifficulty.PEACEFUL);
+        EnumDifficulty difficulty = EnumDifficulty.getDifficultyEnum(config.getIntProperty("difficulty", console.worlds.get(0).getDifficulty().ordinal()));
 
-        online.value = config.getBoolean("online-mode", console.getOnlineMode());
-        console.setSpawnAnimals(config.getBoolean("spawn-animals", console.getSpawnAnimals()));
-        console.setPVP(config.getBoolean("pvp", console.getPVP()));
-        console.setAllowFlight(config.getBoolean("allow-flight", console.getAllowFlight()));
-        console.setMotd(config.getString("motd", console.getMotd()));
+        online.value = config.getBooleanProperty("online-mode", console.getOnlineMode());
+        console.setSpawnAnimals(config.getBooleanProperty("spawn-animals", console.getSpawnAnimals()));
+        console.setPVP(config.getBooleanProperty("pvp", console.getPVP()));
+        console.setAllowFlight(config.getBooleanProperty("allow-flight", console.getAllowFlight()));
+        console.setMotd(config.getStringProperty("motd", console.getMotd()));
         monsterSpawn = configuration.getInt("spawn-limits.monsters");
         animalSpawn = configuration.getInt("spawn-limits.animals");
         waterAnimalSpawn = configuration.getInt("spawn-limits.water-animals");
@@ -697,19 +698,19 @@ public final class CraftServer implements Server {
         loadIcon();
 
         try {
-            playerList.getIPBans().load();
+            playerList.getBannedIPs().readSavedFile();
         } catch (IOException ex) {
             logger.log(Level.WARNING, "Failed to load banned-ips.json, " + ex.getMessage());
         }
         try {
-            playerList.getProfileBans().load();
+            playerList.getBannedPlayers().readSavedFile();
         } catch (IOException ex) {
             logger.log(Level.WARNING, "Failed to load banned-players.json, " + ex.getMessage());
         }
 
         for (WorldServer world : console.worlds) {
-            world.worldData.setDifficulty(difficulty);
-            world.setSpawnFlags(monsters, animals);
+            world.worldInfo.setDifficulty(difficulty);
+            world.setAllowedSpawnTypes(monsters, animals);
             if (this.getTicksPerAnimalSpawns() < 0) {
                 world.ticksPerAnimalSpawns = 400;
             } else {
@@ -866,9 +867,11 @@ public final class CraftServer implements Server {
             converter.convertMapFormat(name, new IProgressUpdate() {
                 private long b = System.currentTimeMillis();
 
-                public void a(String s) {}
+                @Override
+                public void displaySavingString(String s) {}
 
-                public void a(int i) {
+                @Override
+                public void setLoadingProgress(int i) {
                     if (System.currentTimeMillis() - this.b >= 1000L) {
                         this.b = System.currentTimeMillis();
                         MinecraftServer.LOGGER.info("Converting... " + i + "%");
@@ -876,7 +879,14 @@ public final class CraftServer implements Server {
 
                 }
 
-                public void c(String s) {}
+                @Override
+                public void displayLoadingString(String s) {}
+
+				@Override
+				public void resetProgressAndMessage(String message) {}
+
+				@Override
+				public void setDoneWorking() {}
             });
         }
 
@@ -909,14 +919,14 @@ public final class CraftServer implements Server {
         }
 
         if (worldSettings != null) {
-            internal.a(worldSettings);
+            internal.initialize(worldSettings);
         }
-        internal.scoreboard = getScoreboardManager().getMainScoreboard().getHandle();
+        internal.worldScoreboard = getScoreboardManager().getMainScoreboard().getHandle();
 
-        internal.tracker = new EntityTracker(internal);
-        internal.addIWorldAccess(new ServerWorldEventHandler(console, internal));
-        internal.worldData.setDifficulty(EnumDifficulty.EASY);
-        internal.setSpawnFlags(true, true);
+        internal.theEntityTracker = new EntityTracker(internal);
+        internal.addEventListener(new ServerWorldEventHandler(console, internal));
+        internal.worldInfo.setDifficulty(EnumDifficulty.EASY);
+        internal.setAllowedSpawnTypes(true, true);
         console.worlds.add(internal);
 
         if (generator != null) {
@@ -945,8 +955,8 @@ public final class CraftServer implements Server {
                         i = l;
                     }
 
-                    BlockPos chunkcoordinates = internal.getSpawn();
-                    internal.getChunkProvider().getChunkAt(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4);
+                    BlockPos chunkcoordinates = internal.getSpawnPoint();
+                    internal.getChunkProvider().provideChunk(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4);
                 }
             }
         }
@@ -975,7 +985,7 @@ public final class CraftServer implements Server {
             return false;
         }
 
-        if (handle.players.size() > 0) {
+        if (handle.playerEntities.size() > 0) {
             return false;
         }
 
@@ -988,9 +998,9 @@ public final class CraftServer implements Server {
 
         if (save) {
             try {
-                handle.save(true, null);
-                handle.saveLevel();
-            } catch (ExceptionWorldConflict ex) {
+                handle.saveAllChunks(true, null);
+                handle.flush();
+            } catch (MinecraftException ex) {
                 getLogger().log(Level.SEVERE, null, ex);
             }
         }
@@ -1053,7 +1063,7 @@ public final class CraftServer implements Server {
     @Override
     public void savePlayers() {
         checkSaveState();
-        playerList.savePlayers();
+        playerList.saveAllPlayerData();
     }
 
     @Override
@@ -1242,8 +1252,8 @@ public final class CraftServer implements Server {
     @Override
     @Deprecated
     public CraftMapView getMap(short id) {
-    	MapStorage collection = console.worlds.get(0).worldMaps;
-        WorldMap worldmap = (WorldMap) collection.get(WorldMap.class, "map_" + id);
+    	MapStorage collection = console.worlds.get(0).mapStorage;
+    	MapData worldmap = (MapData) collection.getOrLoadData(MapData.class, "map_" + id);
         if (worldmap == null) {
             return null;
         }
@@ -1255,7 +1265,7 @@ public final class CraftServer implements Server {
         Validate.notNull(world, "World cannot be null");
 
         net.minecraft.item.ItemStack stack = new net.minecraft.item.ItemStack(Items.MAP, 1, -1);
-        MapData worldmap = Items.FILLED_MAP.getSavedMap(stack, ((CraftWorld) world).getHandle());
+        MapData worldmap = Items.FILLED_MAP.getMapData(stack, ((CraftWorld) world).getHandle());
         return worldmap.mapView;
     }
 
@@ -1411,7 +1421,7 @@ public final class CraftServer implements Server {
 
     @Override
     public GameMode getDefaultGameMode() {
-        return GameMode.getByValue(console.worlds.get(0).getWorldData().getGameType().getId());
+        return GameMode.getByValue(console.worlds.get(0).getWorldInfo().getGameType().getID());
     }
 
     @Override
@@ -1419,7 +1429,7 @@ public final class CraftServer implements Server {
         Validate.notNull(mode, "Mode cannot be null");
 
         for (World world : getWorlds()) {
-            ((CraftWorld) world).getHandle().worldData.setGameType(WorldSettings.EnumGamemode.getById(mode.getValue()));
+            ((CraftWorld) world).getHandle().worldInfo.setGameType(WorldSettings.GameType.getByID(mode.getValue()));
         }
     }
 
@@ -1455,7 +1465,7 @@ public final class CraftServer implements Server {
 
     @Override
     public OfflinePlayer[] getOfflinePlayers() {
-    	SaveHandler storage = (SaveHandler) console.worlds.get(0).getDataManager();
+    	SaveHandler storage = (SaveHandler) console.worlds.get(0).getSaveHandler();
         String[] files = storage.getPlayerDir().list(new DatFileFilter());
         Set<OfflinePlayer> players = new HashSet<OfflinePlayer>();
 

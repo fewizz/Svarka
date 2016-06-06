@@ -60,7 +60,7 @@ public class CraftStatistic {
     private CraftStatistic() {}
 
     public static org.bukkit.Achievement getBukkitAchievement(net.minecraft.stats.Achievement achievement) {
-        return getBukkitAchievementByName(achievement.name);
+        return getBukkitAchievementByName(achievement.statId);
     }
 
     public static org.bukkit.Achievement getBukkitAchievementByName(String name) {
@@ -68,7 +68,7 @@ public class CraftStatistic {
     }
 
     public static org.bukkit.Statistic getBukkitStatistic(StatBase statistic) {
-        return getBukkitStatisticByName(statistic.name);
+        return getBukkitStatisticByName(statistic.statId);
     }
 
     public static org.bukkit.Statistic getBukkitStatisticByName(String name) {
@@ -110,19 +110,19 @@ public class CraftStatistic {
     public static StatBase getMaterialStatistic(org.bukkit.Statistic stat, Material material) {
         try {
             if (stat == Statistic.MINE_BLOCK) {
-                return StatList.a(CraftMagicNumbers.getBlock(material)); // PAIL: getMineBlockStatistic
+                return StatList.getBlockStats(CraftMagicNumbers.getBlock(material)); // PAIL: getMineBlockStatistic
             }
             if (stat == Statistic.CRAFT_ITEM) {
-                return StatList.a(CraftMagicNumbers.getItem(material)); // PAIL: getCraftItemStatistic
+                return StatList.getCraftStats(CraftMagicNumbers.getItem(material)); // PAIL: getCraftItemStatistic
             }
             if (stat == Statistic.USE_ITEM) {
-                return StatList.b(CraftMagicNumbers.getItem(material)); // PAIL: getUseItemStatistic
+                return StatList.getCraftStats(CraftMagicNumbers.getItem(material)); // PAIL: getUseItemStatistic
             }
             if (stat == Statistic.BREAK_ITEM) {
-                return StatList.c(CraftMagicNumbers.getItem(material)); // PAIL: getBreakItemStatistic
+                return StatList.getCraftStats(CraftMagicNumbers.getItem(material)); // PAIL: getBreakItemStatistic
             }
             if (stat == Statistic.DROP) {
-                return StatList.e(CraftMagicNumbers.getItem(material)); // PAIL: getDropItemStatistic
+                return StatList.getCraftStats(CraftMagicNumbers.getItem(material)); // PAIL: getDropItemStatistic
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             return null;
@@ -145,18 +145,18 @@ public class CraftStatistic {
     }
 
     public static EntityType getEntityTypeFromStatistic(StatBase statistic) {
-        String statisticString = statistic.name;
+        String statisticString = statistic.statId;
         return EntityType.fromName(statisticString.substring(statisticString.lastIndexOf(".") + 1));
     }
 
     public static Material getMaterialFromStatistic(StatBase statistic) {
-        String statisticString = statistic.name;
+        String statisticString = statistic.statId;
         String val = statisticString.substring(statisticString.lastIndexOf(".") + 1);
         Item item = (Item) Item.REGISTRY.getObject(new ResourceLocation(val));
         if (item != null) {
             return Material.getMaterial(Item.getIdFromItem(item));
         }
-        Block block = (Block) Block.REGISTRY.get(new ResourceLocation(val));
+        Block block = (Block) Block.REGISTRY.getObject(new ResourceLocation(val));
         if (block != null) {
             return Material.getMaterial(Block.getIdFromBlock(block));
         }

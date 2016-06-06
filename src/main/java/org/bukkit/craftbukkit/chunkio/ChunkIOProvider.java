@@ -41,7 +41,7 @@ class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChu
         }
 
         queuedChunk.loader.loadEntities(chunk, queuedChunk.compound.getCompoundTag("Level"), queuedChunk.world);
-        chunk.setLastSaved(queuedChunk.provider.worldObj.getTime());
+        chunk.setLastSaveTime(queuedChunk.provider.worldObj.getTotalWorldTime());
         queuedChunk.provider.id2ChunkMap.put(ChunkPos.chunkXZ2Int(queuedChunk.x, queuedChunk.z), chunk);
         chunk.onChunkLoad();
 
@@ -61,7 +61,7 @@ class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChu
                     continue;
                 }
 
-                Chunk neighbor = queuedChunk.provider.getLoadedChunkAt(chunk.locX + x, chunk.locZ + z);
+                Chunk neighbor = queuedChunk.provider.getLoadedChunkAt(chunk.xPosition + x, chunk.zPosition + z);
                 if (neighbor != null) {
                     neighbor.setNeighborLoaded(-x, -z);
                     chunk.setNeighborLoaded(x, z);

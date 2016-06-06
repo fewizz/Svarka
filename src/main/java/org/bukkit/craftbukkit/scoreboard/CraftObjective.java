@@ -102,7 +102,7 @@ final class CraftObjective extends CraftScoreboardComponent implements Objective
     public void unregister() throws IllegalStateException {
         CraftScoreboard scoreboard = checkState();
 
-        scoreboard.board.unregisterObjective(objective);
+        scoreboard.board.removeObjective(objective);
     }
 
     @Override

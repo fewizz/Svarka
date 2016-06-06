@@ -9,12 +9,12 @@ public final class CraftDamageSource extends DamageSource {
 
         // Check ignoresArmor
         if (original.isUnblockable()) {
-            newSource.setIgnoreArmor();
+            newSource.setDamageBypassesArmor();
         }
 
         // Check magic
         if (original.isMagicDamage()) {
-            newSource.setMagic();
+            newSource.setMagicDamage();
         }
 
         // Check fire

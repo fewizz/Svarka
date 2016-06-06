@@ -113,7 +113,7 @@ public final class CraftChatMessage {
             if (index <= currentIndex) {
                 return;
             }
-            ITextComponent addition = new TextComponentString(message.substring(currentIndex, index)).setChatModifier(modifier);
+            ITextComponent addition = new TextComponentString(message.substring(currentIndex, index)).setStyle(modifier);
             currentIndex = index;
             modifier = modifier.createShallowCopy();
             if (currentChatComponent == null) {
@@ -179,10 +179,10 @@ public final class CraftChatMessage {
             if (matcher.reset(msg).find()) {
                 matcher.reset();
 
-                Style modifier = text.getChatModifier() != null ?
-                        text.getChatModifier() : new Style();
+                Style modifier = text.getStyle() != null ?
+                        text.getStyle() : new Style();
                 List<ITextComponent> extras = new ArrayList<ITextComponent>();
-                List<ITextComponent> extrasOld = new ArrayList<ITextComponent>(text.a());
+                List<ITextComponent> extrasOld = new ArrayList<ITextComponent>(text.getSiblings());
                 component = text = new TextComponentString("");
 
                 int pos = 0;
@@ -194,25 +194,25 @@ public final class CraftChatMessage {
                     }
 
                     TextComponentString prev = new TextComponentString(msg.substring(pos, matcher.start()));
-                    prev.setChatModifier(modifier);
+                    prev.setStyle(modifier);
                     extras.add(prev);
 
                     TextComponentString link = new TextComponentString(matcher.group());
                     Style linkModi = modifier.createShallowCopy();
                     linkModi.setClickEvent(new ClickEvent(Action.OPEN_URL, match));
-                    link.setChatModifier(linkModi);
+                    link.setStyle(linkModi);
                     extras.add(link);
 
                     pos = matcher.end();
                 }
 
                 TextComponentString prev = new TextComponentString(msg.substring(pos));
-                prev.setChatModifier(modifier);
+                prev.setStyle(modifier);
                 extras.add(prev);
                 extras.addAll(extrasOld);
 
                 for (ITextComponent c : extras) {
-                    text.addSibling(c);
+                    text.appendSibling(c);
                 }
             }
         }
@@ -220,18 +220,18 @@ public final class CraftChatMessage {
         List extras = component.getSiblings();
         for (int i = 0; i < extras.size(); i++) {
         	ITextComponent comp = (ITextComponent) extras.get(i);
-            if (comp.getChatModifier() != null && comp.getChatModifier().h() == null) {
+            if (comp.getStyle() != null && comp.getStyle().getClickEvent() == null) {
                 extras.set(i, fixComponent(comp, matcher));
             }
         }
 
         if (component instanceof TextComponentTranslation) {
-            Object[] subs = ((TextComponentTranslation) component).j();
+            Object[] subs = ((TextComponentTranslation) component).getFormatArgs();
             for (int i = 0; i < subs.length; i++) {
                 Object comp = subs[i];
                 if (comp instanceof ITextComponent) {
                 	ITextComponent c = (ITextComponent) comp;
-                    if (c.getChatModifier() != null && c.getChatModifier().h() == null) {
+                    if (c.getStyle() != null && c.getStyle().getClickEvent() == null) {
                         subs[i] = fixComponent(c, matcher);
                     }
                 } else if (comp instanceof String && matcher.reset((String)comp).find()) {

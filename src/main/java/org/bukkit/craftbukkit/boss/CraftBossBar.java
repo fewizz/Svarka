@@ -71,12 +71,12 @@ public class CraftBossBar implements BossBar {
 
     @Override
     public String getTitle() {
-        return CraftChatMessage.fromComponent(handle.e());
+        return CraftChatMessage.fromComponent(handle.getName());
     }
 
     @Override
     public void setTitle(String title) {
-        handle.title = CraftChatMessage.fromString(title, true)[0];
+        handle.name = CraftChatMessage.fromString(title, true)[0];
         handle.sendUpdate(Operation.UPDATE_NAME);
     }
 
@@ -100,7 +100,7 @@ public class CraftBossBar implements BossBar {
     @Override
     public void setStyle(BarStyle style) {
         this.style = style;
-        handle.style = convertStyle(style);
+        handle.overlay = convertStyle(style);
         handle.sendUpdate(Operation.UPDATE_STYLE);
     }
 
@@ -129,7 +129,7 @@ public class CraftBossBar implements BossBar {
 
     @Override
     public double getProgress() {
-        return handle.getProgress();
+        return handle.getPercent();
     }
 
     @Override

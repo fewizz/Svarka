@@ -17,26 +17,96 @@ import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockOldLog;
 import net.minecraft.block.BlockPlanks.EnumType;
+import net.minecraft.block.BlockRedstoneDiode;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityAreaEffectCloud;
+import net.minecraft.entity.EntityHanging;
+import net.minecraft.entity.EntityLeashKnot;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.IEntityLivingData;
+import net.minecraft.entity.boss.EntityDragon;
+import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.effect.EntityLightningBolt;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityBoat;
+import net.minecraft.entity.item.EntityEnderCrystal;
+import net.minecraft.entity.item.EntityEnderEye;
+import net.minecraft.entity.item.EntityEnderPearl;
+import net.minecraft.entity.item.EntityExpBottle;
 import net.minecraft.entity.item.EntityFallingBlock;
+import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.entity.item.EntityMinecartChest;
+import net.minecraft.entity.item.EntityMinecartCommandBlock;
+import net.minecraft.entity.item.EntityMinecartEmpty;
+import net.minecraft.entity.item.EntityMinecartFurnace;
+import net.minecraft.entity.item.EntityMinecartHopper;
+import net.minecraft.entity.item.EntityMinecartMobSpawner;
+import net.minecraft.entity.item.EntityMinecartTNT;
+import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.item.EntityTNTPrimed;
+import net.minecraft.entity.item.EntityXPOrb;
+import net.minecraft.entity.monster.EntityBlaze;
+import net.minecraft.entity.monster.EntityCaveSpider;
+import net.minecraft.entity.monster.EntityCreeper;
+import net.minecraft.entity.monster.EntityEnderman;
+import net.minecraft.entity.monster.EntityEndermite;
+import net.minecraft.entity.monster.EntityGhast;
+import net.minecraft.entity.monster.EntityGiantZombie;
+import net.minecraft.entity.monster.EntityGuardian;
+import net.minecraft.entity.monster.EntityIronGolem;
+import net.minecraft.entity.monster.EntityMagmaCube;
+import net.minecraft.entity.monster.EntityPigZombie;
+import net.minecraft.entity.monster.EntityShulker;
+import net.minecraft.entity.monster.EntitySilverfish;
+import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.EntitySlime;
+import net.minecraft.entity.monster.EntitySnowman;
+import net.minecraft.entity.monster.EntitySpider;
+import net.minecraft.entity.monster.EntityWitch;
+import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.passive.EntityBat;
+import net.minecraft.entity.passive.EntityChicken;
+import net.minecraft.entity.passive.EntityCow;
+import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.EntityMooshroom;
+import net.minecraft.entity.passive.EntityOcelot;
+import net.minecraft.entity.passive.EntityPig;
+import net.minecraft.entity.passive.EntityRabbit;
+import net.minecraft.entity.passive.EntitySheep;
+import net.minecraft.entity.passive.EntitySquid;
+import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.entity.passive.EntityWolf;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.entity.projectile.EntityDragonFireball;
+import net.minecraft.entity.projectile.EntityEgg;
+import net.minecraft.entity.projectile.EntityFireball;
+import net.minecraft.entity.projectile.EntityLargeFireball;
+import net.minecraft.entity.projectile.EntityPotion;
+import net.minecraft.entity.projectile.EntityShulkerBullet;
+import net.minecraft.entity.projectile.EntitySmallFireball;
+import net.minecraft.entity.projectile.EntitySnowball;
 import net.minecraft.entity.projectile.EntitySpectralArrow;
 import net.minecraft.entity.projectile.EntityTippedArrow;
+import net.minecraft.entity.projectile.EntityWitherSkull;
 import net.minecraft.init.Blocks;
 import net.minecraft.network.play.server.SPacketCustomSound;
 import net.minecraft.network.play.server.SPacketEffect;
+import net.minecraft.network.play.server.SPacketTimeUpdate;
 import net.minecraft.server.*;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.MinecraftException;
+import net.minecraft.world.WorldProviderEnd;
+import net.minecraft.world.WorldProviderHell;
+import net.minecraft.world.WorldProviderSurface;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
@@ -133,7 +203,7 @@ public class CraftWorld implements World {
     }
 
     public int getBlockTypeIdAt(int x, int y, int z) {
-        return CraftMagicNumbers.getId(world.getType(new BlockPos(x, y, z)).getBlock());
+        return CraftMagicNumbers.getId(world.getBlockState(new BlockPos(x, y, z)).getBlock());
     }
 
     public int getHighestBlockYAt(int x, int z) {
@@ -141,18 +211,18 @@ public class CraftWorld implements World {
             loadChunk(x >> 4, z >> 4);
         }
 
-        return world.getHighestBlockYAt(new BlockPos(x, 0, z)).getY();
+        return world.getHeight(new BlockPos(x, 0, z)).getY();
     }
 
     public Location getSpawnLocation() {
-        BlockPos spawn = world.getSpawn();
+        BlockPos spawn = world.getSpawnPoint();
         return new Location(this, spawn.getX(), spawn.getY(), spawn.getZ());
     }
 
     public boolean setSpawnLocation(int x, int y, int z) {
         try {
             Location previousLocation = getSpawnLocation();
-            world.worldData.setSpawn(new BlockPos(x, y, z));
+            world.worldInfo.setSpawn(new BlockPos(x, y, z));
 
             // Notify anyone who's listening.
             SpawnChangeEvent event = new SpawnChangeEvent(this, previousLocation);
@@ -165,7 +235,7 @@ public class CraftWorld implements World {
     }
 
     public Chunk getChunkAt(int x, int z) {
-        return this.world.getChunkProvider().getChunkAt(x, z).bukkitChunk;
+        return this.world.getChunkProvider()provideChunk(x, z).bukkitChunk;
     }
 
     public Chunk getChunkAt(Block block) {
@@ -213,7 +283,7 @@ public class CraftWorld implements World {
             return false;
         }
 
-        net.minecraft.world.chunk.Chunk chunk = world.getChunkProvider().getLoadedChunkAt(x, z);
+        net.minecraft.world.chunk.Chunk chunk = world.getChunkProvider().getLoadedChunk(x, z);
         if (chunk != null) {
             world.getChunkProvider().unload(chunk);
         }
@@ -230,7 +300,7 @@ public class CraftWorld implements World {
     }
 
     private boolean unloadChunk0(int x, int z, boolean save, boolean safe) {
-    	net.minecraft.world.chunk.Chunk chunk = world.getChunkProvider().getChunkAt(x, z);
+    	net.minecraft.world.chunk.Chunk chunk = world.getChunkProvider().provideChunk(x, z);
         if (chunk.mustSave) {   // If chunk had previously been queued to save, must do save to avoid loss of that data
             save = true;
         }
@@ -296,9 +366,9 @@ public class CraftWorld implements World {
         // This flags 65 blocks distributed across all the sections of the chunk, so that everything is sent, including biomes
         int height = getMaxHeight() / 16;
         for (int idx = 0; idx < 64; idx++) {
-            world.notify(new BlockPos(px + (idx / height), ((idx % height) * 16), pz), Blocks.AIR.getDefaultState(), Blocks.STONE.getDefaultState(), 3);
+            world.notifyBlockUpdate(new BlockPos(px + (idx / height), ((idx % height) * 16), pz), Blocks.AIR.getDefaultState(), Blocks.STONE.getDefaultState(), 3);
         }
-        world.notify(new BlockPos(px + 15, (height * 16) - 1, pz + 15), Blocks.AIR.getDefaultState(), Blocks.STONE.getDefaultState(), 3);
+        world.notifyBlockUpdate(new BlockPos(px + 15, (height * 16) - 1, pz + 15), Blocks.AIR.getDefaultState(), Blocks.STONE.getDefaultState(), 3);
 
         return true;
     }
@@ -311,7 +381,7 @@ public class CraftWorld implements World {
         chunkLoadCount++;
         if (generate) {
             // Use the default variant of loadChunk when generate == true.
-            return world.getChunkProvider().getChunkAt(x, z) != null;
+            return world.getChunkProvider().provideChunk(x, z) != null;
         }
 
         world.getChunkProvider().droppedChunksSet.remove(Long.valueOf(ChunkPos.chunkXZ2Int(x, z)));
@@ -336,7 +406,7 @@ public class CraftWorld implements World {
                         continue;
                     }
 
-                    net.minecraft.world.chunk.Chunk neighbor = world.getChunkProvider().getLoadedChunkAt(chunk.xPosition + x, chunk.zPosition + z);
+                    net.minecraft.world.chunk.Chunk neighbor = world.getChunkProvider().getLoadedChunk(chunk.xPosition + x, chunk.zPosition + z);
                     if (neighbor != null) {
                         neighbor.setNeighborLoaded(-x, -z);
                         chunk.setNeighborLoaded(x, z);
@@ -367,7 +437,7 @@ public class CraftWorld implements World {
         Validate.isTrue(item.getTypeId() != 0, "Cannot drop AIR.");
         EntityItem entity = new EntityItem(world, loc.getX(), loc.getY(), loc.getZ(), CraftItemStack.asNMSCopy(item));
         entity.delayBeforeCanPickup = 10;
-        world.addEntity(entity);
+        world.spawnEntityInWorld(entity);
         // TODO this is inconsistent with how Entity.getBukkitEntity() works.
         // However, this entity is not at the moment backed by a server entity class so it may be left.
         return new CraftItem(world.getServer(), entity);
@@ -399,9 +469,9 @@ public class CraftWorld implements World {
     }
 
     public org.bukkit.entity.Item dropItemNaturally(Location loc, ItemStack item) {
-        double xs = world.random.nextFloat() * 0.7F - 0.35D;
-        double ys = world.random.nextFloat() * 0.7F - 0.35D;
-        double zs = world.random.nextFloat() * 0.7F - 0.35D;
+        double xs = world.rand.nextFloat() * 0.7F - 0.35D;
+        double ys = world.rand.nextFloat() * 0.7F - 0.35D;
+        double zs = world.rand.nextFloat() * 0.7F - 0.35D;
         loc = loc.clone();
         // Makes sure the new item is created within the block the location points to.
         // This prevents item spill in 1-block wide farms.
@@ -428,9 +498,9 @@ public class CraftWorld implements World {
             arrow = new EntityTippedArrow(world);
         }
 
-        arrow.setPositionRotation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
-        arrow.shoot(velocity.getX(), velocity.getY(), velocity.getZ(), speed, spread);
-        world.addEntity(arrow);
+        arrow.setLocationAndAngles(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
+        arrow.setThrowableHeading(velocity.getX(), velocity.getY(), velocity.getZ(), speed, spread);
+        world.spawnEntityInWorld(arrow);
         return (T) arrow.getBukkitEntity();
     }
 
@@ -440,13 +510,13 @@ public class CraftWorld implements World {
 
     public LightningStrike strikeLightning(Location loc) {
     	EntityLightningBolt lightning = new EntityLightningBolt(world, loc.getX(), loc.getY(), loc.getZ(), false);
-        world.strikeLightning(lightning);
+        world.addWeatherEffect(lightning);
         return new CraftLightningStrike(server, lightning);
     }
 
     public LightningStrike strikeLightningEffect(Location loc) {
     	EntityLightningBolt lightning = new EntityLightningBolt(world, loc.getX(), loc.getY(), loc.getZ(), true);
-        world.strikeLightning(lightning);
+        world.addWeatherEffect(lightning);
         return new CraftLightningStrike(server, lightning);
     }
 
@@ -469,22 +539,22 @@ public class CraftWorld implements World {
             break;
         case JUNGLE:
             IBlockState iblockdata1 = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, EnumType.JUNGLE);
-            IBlockState iblockdata2 = Blocks.LEAVES.getBlockData().withProperty(BlockOldLeaf.VARIANT, EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+            IBlockState iblockdata2 = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
             gen = new WorldGenMegaJungle(true, 10, 20, iblockdata1, iblockdata2); // Magic values as in BlockSapling
             break;
         case SMALL_JUNGLE:
             iblockdata1 = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, EnumType.JUNGLE);
-            iblockdata2 = Blocks.LEAVES.getBlockData().withProperty(BlockOldLeaf.VARIANT, EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+            iblockdata2 = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
             gen = new WorldGenTrees(true, 4 + rand.nextInt(7), iblockdata1, iblockdata2, false);
             break;
         case COCOA_TREE:
             iblockdata1 = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, EnumType.JUNGLE);
-            iblockdata2 = Blocks.LEAVES.getBlockData().withProperty(BlockOldLeaf.VARIANT, EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+            iblockdata2 = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
             gen = new WorldGenTrees(true, 4 + rand.nextInt(7), iblockdata1, iblockdata2, true);
             break;
         case JUNGLE_BUSH:
             iblockdata1 = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, EnumType.JUNGLE);
-            iblockdata2 = Blocks.LEAVES.getBlockData().withProperty(BlockOldLeaf.VARIANT, EnumType.OAK).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+            iblockdata2 = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, EnumType.OAK).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
             gen = new WorldGenShrub(iblockdata1, iblockdata2);
             break;
         case RED_MUSHROOM:
@@ -531,13 +601,13 @@ public class CraftWorld implements World {
                 int x = blockstate.getX();
                 int y = blockstate.getY();
                 int z = blockstate.getZ();
-                BlockPosition position = new BlockPosition(x, y, z);
-                net.minecraft.server.IBlockData oldBlock = world.getType(position);
+                BlockPos position = new BlockPos(x, y, z);
+                IBlockState oldBlock = world.getBlockState(position);
                 int typeId = blockstate.getTypeId();
                 int data = blockstate.getRawData();
                 int flag = ((CraftBlockState)blockstate).getFlag();
                 delegate.setTypeIdAndData(x, y, z, typeId, data);
-                net.minecraft.server.IBlockData newBlock = world.getType(position);
+                IBlockState newBlock = world.getBlockState(position);
                 world.notifyAndUpdatePhysics(position, null, oldBlock, newBlock, flag);
             }
             world.capturedBlockStates.clear();
@@ -553,16 +623,16 @@ public class CraftWorld implements World {
     }
 
     public String getName() {
-        return world.worldData.getName();
+        return world.worldInfo.getWorldName();
     }
 
     @Deprecated
     public long getId() {
-        return world.worldData.getSeed();
+        return world.worldInfo.getSeed();
     }
 
     public UUID getUID() {
-        return world.getDataManager().getUUID();
+        return world.getSaveHandler().getUUID();
     }
 
     @Override
@@ -583,18 +653,18 @@ public class CraftWorld implements World {
     }
 
     public long getFullTime() {
-        return world.getDayTime();
+        return world.getWorldTime();
     }
 
     public void setFullTime(long time) {
-        world.setDayTime(time);
+        world.setWorldTime(time);
 
         // Forces the client to update to the new time immediately
         for (Player p : getPlayers()) {
             CraftPlayer cp = (CraftPlayer) p;
-            if (cp.getHandle().playerConnection == null) continue;
+            if (cp.getHandle().connection == null) continue;
 
-            cp.getHandle().playerConnection.sendPacket(new PacketPlayOutUpdateTime(cp.getHandle().world.getTime(), cp.getHandle().getPlayerTime(), cp.getHandle().world.getGameRules().getBoolean("doDaylightCycle")));
+            cp.getHandle().connection.sendPacket(new SPacketTimeUpdate(cp.getHandle().worldObj.getTotalWorldTime(), cp.getHandle().getPlayerTime(), cp.getHandle().worldObj.getGameRules().getBoolean("doDaylightCycle")));
         }
     }
 
@@ -607,7 +677,7 @@ public class CraftWorld implements World {
     }
 
     public boolean createExplosion(double x, double y, double z, float power, boolean setFire, boolean breakBlocks) {
-        return !world.createExplosion(null, x, y, z, power, setFire, breakBlocks).wasCanceled;
+        return !world.newExplosion(null, x, y, z, power, setFire, breakBlocks).wasCanceled;
     }
 
     public boolean createExplosion(Location loc, float power) {
@@ -627,13 +697,13 @@ public class CraftWorld implements World {
             environment = env;
             switch (env) {
                 case NORMAL:
-                    world.worldProvider = new WorldProviderSurface();
+                    world.provider = new WorldProviderSurface();
                     break;
                 case NETHER:
-                    world.worldProvider = new WorldProviderHell();
+                    world.provider = new WorldProviderHell();
                     break;
                 case THE_END:
-                    world.worldProvider = new WorldProviderEnd();
+                    world.provider = new WorldProviderEnd();
                     break;
             }
         }
@@ -672,35 +742,35 @@ public class CraftWorld implements World {
     }
 
     public Biome getBiome(int x, int z) {
-        return CraftBlock.biomeBaseToBiome(this.world.getBiome(new BlockPos(x, 0, z)));
+        return CraftBlock.biomeBaseToBiome(this.world.getBiomeGenForCoords(new BlockPos(x, 0, z)));
     }
 
     public void setBiome(int x, int z, Biome bio) {
     	net.minecraft.world.biome.Biome bb = CraftBlock.biomeToBiomeBase(bio);
-        if (this.world.isLoaded(new BlockPosition(x, 0, z))) {
-            net.minecraft.server.Chunk chunk = this.world.getChunkAtWorldCoords(new BlockPosition(x, 0, z));
+        if (this.world.isBlockLoaded(new BlockPos(x, 0, z))) {
+            net.minecraft.world.chunk.Chunk chunk = this.world.getChunkFromBlockCoords(new BlockPos(x, 0, z));
 
             if (chunk != null) {
-                byte[] biomevals = chunk.getBiomeIndex();
-                biomevals[((z & 0xF) << 4) | (x & 0xF)] = (byte) BiomeBase.REGISTRY_ID.a(bb);
+                byte[] biomevals = chunk.getBiomeArray();
+                biomevals[((z & 0xF) << 4) | (x & 0xF)] = (byte) net.minecraft.world.biome.Biome.REGISTRY.getIDForObject(bb);
             }
         }
     }
 
     public double getTemperature(int x, int z) {
-        return this.world.getBiome(new BlockPos(x, 0, z)).getTemperature();
+        return this.world.getBiomeGenForCoords(new BlockPos(x, 0, z)).getTemperature();
     }
 
     public double getHumidity(int x, int z) {
-        return this.world.getBiome(new BlockPos(x, 0, z)).getHumidity();
+        return this.world.getBiomeGenForCoords(new BlockPos(x, 0, z)).getRainfall();
     }
 
     public List<Entity> getEntities() {
         List<Entity> list = new ArrayList<Entity>();
 
-        for (Object o : world.entityList) {
-            if (o instanceof net.minecraft.server.Entity) {
-                net.minecraft.server.Entity mcEnt = (net.minecraft.server.Entity) o;
+        for (Object o : world.loadedEntityList) {
+            if (o instanceof net.minecraft.entity.Entity) {
+            	net.minecraft.entity.Entity mcEnt = (net.minecraft.entity.Entity) o;
                 Entity bukkitEntity = mcEnt.getBukkitEntity();
 
                 // Assuming that bukkitEntity isn't null
@@ -716,9 +786,9 @@ public class CraftWorld implements World {
     public List<LivingEntity> getLivingEntities() {
         List<LivingEntity> list = new ArrayList<LivingEntity>();
 
-        for (Object o : world.entityList) {
-            if (o instanceof net.minecraft.server.Entity) {
-                net.minecraft.server.Entity mcEnt = (net.minecraft.server.Entity) o;
+        for (Object o : world.loadedEntityList) {
+            if (o instanceof net.minecraft.entity.Entity) {
+            	net.minecraft.entity.Entity mcEnt = (net.minecraft.entity.Entity) o;
                 Entity bukkitEntity = mcEnt.getBukkitEntity();
 
                 // Assuming that bukkitEntity isn't null
@@ -741,9 +811,9 @@ public class CraftWorld implements World {
     public <T extends Entity> Collection<T> getEntitiesByClass(Class<T> clazz) {
         Collection<T> list = new ArrayList<T>();
 
-        for (Object entity: world.entityList) {
-            if (entity instanceof net.minecraft.server.Entity) {
-                Entity bukkitEntity = ((net.minecraft.server.Entity) entity).getBukkitEntity();
+        for (Object entity: world.loadedEntityList) {
+            if (entity instanceof net.minecraft.entity.Entity) {
+                Entity bukkitEntity = ((net.minecraft.entity.Entity) entity).getBukkitEntity();
 
                 if (bukkitEntity == null) {
                     continue;
@@ -763,9 +833,9 @@ public class CraftWorld implements World {
     public Collection<Entity> getEntitiesByClasses(Class<?>... classes) {
         Collection<Entity> list = new ArrayList<Entity>();
 
-        for (Object entity: world.entityList) {
-            if (entity instanceof net.minecraft.server.Entity) {
-                Entity bukkitEntity = ((net.minecraft.server.Entity) entity).getBukkitEntity();
+        for (Object entity: world.loadedEntityList) {
+            if (entity instanceof net.minecraft.entity.Entity) {
+                Entity bukkitEntity = ((net.minecraft.entity.Entity) entity).getBukkitEntity();
 
                 if (bukkitEntity == null) {
                     continue;
@@ -792,18 +862,18 @@ public class CraftWorld implements World {
         }
 
         AxisAlignedBB bb = new AxisAlignedBB(location.getX() - x, location.getY() - y, location.getZ() - z, location.getX() + x, location.getY() + y, location.getZ() + z);
-        List<net.minecraft.entity.Entity> entityList = getHandle().getEntities((net.minecraft.entity.Entity) null, bb, null);
+        List<net.minecraft.entity.Entity> entityList = getHandle().getEntitiesInAABBexcluding((net.minecraft.entity.Entity) null, bb, null);
         List<Entity> bukkitEntityList = new ArrayList<org.bukkit.entity.Entity>(entityList.size());
         for (Object entity : entityList) {
-            bukkitEntityList.add(((net.minecraft.server.Entity) entity).getBukkitEntity());
+            bukkitEntityList.add(((net.minecraft.entity.Entity) entity).getBukkitEntity());
         }
         return bukkitEntityList;
     }
 
     public List<Player> getPlayers() {
-        List<Player> list = new ArrayList<Player>(world.players.size());
+        List<Player> list = new ArrayList<Player>(world.playerEntities.size());
 
-        for (EntityHuman human : world.players) {
+        for (EntityPlayer human : world.playerEntities) {
             HumanEntity bukkitEntity = human.getBukkitEntity();
 
             if ((bukkitEntity != null) && (bukkitEntity instanceof Player)) {
@@ -837,7 +907,7 @@ public class CraftWorld implements World {
     }
 
     public void setDifficulty(Difficulty difficulty) {
-        this.getHandle().worldData.setDifficulty(EnumDifficulty.getById(difficulty.getValue()));
+        this.getHandle().worldInfo.setDifficulty(EnumDifficulty.getDifficultyEnum(difficulty.getValue()));
     }
 
     public Difficulty getDifficulty() {
@@ -849,39 +919,39 @@ public class CraftWorld implements World {
     }
 
     public boolean hasStorm() {
-        return world.worldData.hasStorm();
+        return world.worldInfo.isRaining();
     }
 
     public void setStorm(boolean hasStorm) {
-        world.worldData.setStorm(hasStorm);
+        world.worldInfo.setRaining(hasStorm);
     }
 
     public int getWeatherDuration() {
-        return world.worldData.getWeatherDuration();
+        return world.worldInfo.getRainTime();
     }
 
     public void setWeatherDuration(int duration) {
-        world.worldData.setWeatherDuration(duration);
+        world.worldInfo.setRainTime(duration);
     }
 
     public boolean isThundering() {
-        return world.worldData.isThundering();
+        return world.worldInfo.isThundering();
     }
 
     public void setThundering(boolean thundering) {
-        world.worldData.setThundering(thundering);
+        world.worldInfo.setThundering(thundering);
     }
 
     public int getThunderDuration() {
-        return world.worldData.getThunderDuration();
+        return world.worldInfo.getThunderTime();
     }
 
     public void setThunderDuration(int duration) {
-        world.worldData.setThunderDuration(duration);
+        world.worldInfo.setThunderTime(duration);
     }
 
     public long getSeed() {
-        return world.worldData.getSeed();
+        return world.worldInfo.getSeed();
     }
 
     public boolean getPVP() {
@@ -980,11 +1050,11 @@ public class CraftWorld implements World {
             x = location.getBlockX();
             y = location.getBlockY();
             z = location.getBlockZ();
-            IBlockState blockData = world.getType(new BlockPos(x, y, z));
+            IBlockState blockData = world.getBlockState(new BlockPos(x, y, z));
             int type = CraftMagicNumbers.getId(blockData.getBlock());
-            int data = blockData.getBlock().toLegacyData(blockData);
+            int data = blockData.getBlock().getMetaFromState(blockData);
 
-            entity = new EntityFallingBlock(world, x + 0.5, y + 0.5, z + 0.5, net.minecraft.server.Block.getById(type).fromLegacyData(data));
+            entity = new EntityFallingBlock(world, x + 0.5, y + 0.5, z + 0.5, net.minecraft.block.Block.getBlockById(type).getStateFromMeta(data));
         } else if (Projectile.class.isAssignableFrom(clazz)) {
             if (Snowball.class.isAssignableFrom(clazz)) {
                 entity = new EntitySnowball(world, x, y, z);
@@ -999,13 +1069,13 @@ public class CraftWorld implements World {
                 } else {
                     entity = new EntityTippedArrow(world);
                 }
-                entity.setPositionRotation(x, y, z, 0, 0);
+                entity.setLocationAndAngles(x, y, z, 0, 0);
             } else if (ThrownExpBottle.class.isAssignableFrom(clazz)) {
-                entity = new EntityThrownExpBottle(world);
-                entity.setPositionRotation(x, y, z, 0, 0);
+                entity = new EntityExpBottle(world);
+                entity.setLocationAndAngles(x, y, z, 0, 0);
             } else if (EnderPearl.class.isAssignableFrom(clazz)) {
                 entity = new EntityEnderPearl(world);
-                entity.setPositionRotation(x, y, z, 0, 0);
+                entity.setLocationAndAngles(x, y, z, 0, 0);
             } else if (ThrownPotion.class.isAssignableFrom(clazz)) {
                 if (LingeringPotion.class.isAssignableFrom(clazz)) {
                     entity = new EntityPotion(world, x, y, z, CraftItemStack.asNMSCopy(new ItemStack(org.bukkit.Material.LINGERING_POTION, 1)));
@@ -1022,12 +1092,12 @@ public class CraftWorld implements World {
                 } else {
                     entity = new EntityLargeFireball(world);
                 }
-                entity.setPositionRotation(x, y, z, yaw, pitch);
+                entity.setLocationAndAngles(x, y, z, yaw, pitch);
                 Vector direction = location.getDirection().multiply(10);
                 ((EntityFireball) entity).setDirection(direction.getX(), direction.getY(), direction.getZ());
             } else if (ShulkerBullet.class.isAssignableFrom(clazz)) {
                 entity = new EntityShulkerBullet(world);
-                entity.setPositionRotation(x, y, z, yaw, pitch);
+                entity.setLocationAndAngles(x, y, z, yaw, pitch);
             }
         } else if (Minecart.class.isAssignableFrom(clazz)) {
             if (PoweredMinecart.class.isAssignableFrom(clazz)) {
@@ -1043,19 +1113,19 @@ public class CraftWorld implements World {
             } else if (CommandMinecart.class.isAssignableFrom(clazz)) {
                 entity = new EntityMinecartCommandBlock(world, x, y, z);
             } else { // Default to rideable minecart for pre-rideable compatibility
-                entity = new EntityMinecartRideable(world, x, y, z);
+                entity = new EntityMinecartEmpty(world, x, y, z);
             }
         } else if (EnderSignal.class.isAssignableFrom(clazz)) {
-            entity = new EntityEnderSignal(world, x, y, z);
+            entity = new EntityEnderEye(world, x, y, z);
         } else if (EnderCrystal.class.isAssignableFrom(clazz)) {
             entity = new EntityEnderCrystal(world);
-            entity.setPositionRotation(x, y, z, 0, 0);
+            entity.setLocationAndAngles(x, y, z, 0, 0);
         } else if (LivingEntity.class.isAssignableFrom(clazz)) {
             if (Chicken.class.isAssignableFrom(clazz)) {
                 entity = new EntityChicken(world);
             } else if (Cow.class.isAssignableFrom(clazz)) {
                 if (MushroomCow.class.isAssignableFrom(clazz)) {
-                    entity = new EntityMushroomCow(world);
+                    entity = new EntityMooshroom(world);
                 } else {
                     entity = new EntityCow(world);
                 }
@@ -1121,7 +1191,7 @@ public class CraftWorld implements World {
                 entity = new EntityWither(world);
             } else if (ComplexLivingEntity.class.isAssignableFrom(clazz)) {
                 if (EnderDragon.class.isAssignableFrom(clazz)) {
-                    entity = new EntityEnderDragon(world);
+                    entity = new EntityDragon(world);
                 }
             } else if (Ambient.class.isAssignableFrom(clazz)) {
                 if (Bat.class.isAssignableFrom(clazz)) {
@@ -1138,7 +1208,7 @@ public class CraftWorld implements World {
             }
 
             if (entity != null) {
-                entity.setLocation(x, y, z, yaw, pitch);
+                entity.setPositionAndRotation(x, y, z, yaw, pitch);
             }
         } else if (Hanging.class.isAssignableFrom(clazz)) {
             Block block = getBlockAt(location);
@@ -1156,15 +1226,15 @@ public class CraftWorld implements World {
             }
 
             BlockFace[] faces = new BlockFace[]{BlockFace.EAST, BlockFace.NORTH, BlockFace.WEST, BlockFace.SOUTH};
-            final BlockPosition pos = new BlockPosition((int) x, (int) y, (int) z);
+            final BlockPos pos = new BlockPos((int) x, (int) y, (int) z);
             for (BlockFace dir : faces) {
-                net.minecraft.server.Block nmsBlock = CraftMagicNumbers.getBlock(block.getRelative(dir));
-                if (nmsBlock.getBlockData().getMaterial().isBuildable() || BlockDiodeAbstract.isDiode(nmsBlock.getBlockData())) {
+                net.minecraft.block.Block nmsBlock = CraftMagicNumbers.getBlock(block.getRelative(dir));
+                if (nmsBlock.getDefaultState().getMaterial().isSolid() || BlockRedstoneDiode.isDiode(nmsBlock.getDefaultState())) {
                     boolean taken = false;
-                    AxisAlignedBB bb = EntityHanging.calculateBoundingBox(null, pos, CraftBlock.blockFaceToNotch(dir).opposite(), width, height);
-                    List<net.minecraft.server.Entity> list = (List<net.minecraft.server.Entity>) world.getEntities(null, bb);
-                    for (Iterator<net.minecraft.server.Entity> it = list.iterator(); !taken && it.hasNext();) {
-                        net.minecraft.server.Entity e = it.next();
+                    AxisAlignedBB bb = EntityHanging.calculateBoundingBox(null, pos, CraftBlock.blockFaceToNotch(dir).getOpposite(), width, height);
+                    List<net.minecraft.entity.Entity> list = (List<net.minecraft.entity.Entity>) world.getEntitiesWithinAABBExcludingEntity(null, bb);
+                    for (Iterator<net.minecraft.entity.Entity> it = list.iterator(); !taken && it.hasNext();) {
+                        net.minecraft.entity.Entity e = it.next();
                         if (e instanceof EntityHanging) {
                             taken = true; // Hanging entities do not like hanging entities which intersect them.
                         }
@@ -1177,31 +1247,31 @@ public class CraftWorld implements World {
                 }
             }
 
-            EnumDirection dir = CraftBlock.blockFaceToNotch(face).opposite();
+            EnumFacing dir = CraftBlock.blockFaceToNotch(face).getOpposite();
             if (Painting.class.isAssignableFrom(clazz)) {
-                entity = new EntityPainting(world, new BlockPosition((int) x, (int) y, (int) z), dir);
+                entity = new EntityPainting(world, new BlockPos((int) x, (int) y, (int) z), dir);
             } else if (ItemFrame.class.isAssignableFrom(clazz)) {
-                entity = new EntityItemFrame(world, new BlockPosition((int) x, (int) y, (int) z), dir);
+                entity = new EntityItemFrame(world, new BlockPos((int) x, (int) y, (int) z), dir);
             } else if (LeashHitch.class.isAssignableFrom(clazz)) {
-                entity = new EntityLeash(world, new BlockPosition((int) x, (int) y, (int) z));
-                entity.attachedToPlayer = true;
+                entity = new EntityLeashKnot(world, new BlockPos((int) x, (int) y, (int) z));
+                entity.forceSpawn = true;
             }
 
-            if (entity != null && !((EntityHanging) entity).survives()) {
+            if (entity != null && !((EntityHanging) entity).onValidSurface()) {
                 throw new IllegalArgumentException("Cannot spawn hanging entity for " + clazz.getName() + " at " + location);
             }
         } else if (TNTPrimed.class.isAssignableFrom(clazz)) {
             entity = new EntityTNTPrimed(world, x, y, z, null);
         } else if (ExperienceOrb.class.isAssignableFrom(clazz)) {
-            entity = new EntityExperienceOrb(world, x, y, z, 0);
+            entity = new EntityXPOrb(world, x, y, z, 0);
         } else if (Weather.class.isAssignableFrom(clazz)) {
             // not sure what this can do
             if (LightningStrike.class.isAssignableFrom(clazz)) {
-                entity = new EntityLightning(world, x, y, z, false);
+                entity = new EntityLightningBolt(world, x, y, z, false);
                 // what is this, I don't even
             }
         } else if (Firework.class.isAssignableFrom(clazz)) {
-            entity = new EntityFireworks(world, x, y, z, null);
+            entity = new EntityFireworkRocket(world, x, y, z, null);
         } else if (AreaEffectCloud.class.isAssignableFrom(clazz)) {
             entity = new EntityAreaEffectCloud(world, x, y, z);
         }
@@ -1218,7 +1288,7 @@ public class CraftWorld implements World {
         Preconditions.checkArgument(entity != null, "Cannot spawn null entity");
 
         if (entity instanceof EntityLiving) {
-            ((EntityLiving) entity).onInitialSpawn(getHandle().D(new BlockPos(entity)), (GroupDataEntity) null);
+            ((EntityLiving) entity).onInitialSpawn(getHandle().getDifficultyForLocation(new BlockPos(entity)), (IEntityLivingData) null);
         }
 
         world.addEntity(entity, reason);
@@ -1236,15 +1306,15 @@ public class CraftWorld implements World {
     }
 
     public void setSpawnFlags(boolean allowMonsters, boolean allowAnimals) {
-        world.setSpawnFlags(allowMonsters, allowAnimals);
+        world.setAllowedSpawnTypes(allowMonsters, allowAnimals);
     }
 
     public boolean getAllowAnimals() {
-        return world.allowAnimals;
+        return world.spawnPeacefulMobs;
     }
 
     public boolean getAllowMonsters() {
-        return world.allowMonsters;
+        return world.spawnHostileMobs;
     }
 
     public int getMaxHeight() {
@@ -1262,7 +1332,7 @@ public class CraftWorld implements World {
     public void setKeepSpawnInMemory(boolean keepLoaded) {
         world.keepSpawnInMemory = keepLoaded;
         // Grab the worlds spawn chunk
-        BlockPosition chunkcoordinates = this.world.getSpawn();
+        BlockPos chunkcoordinates = this.world.getSpawnPoint();
         int chunkCoordX = chunkcoordinates.getX() >> 4;
         int chunkCoordZ = chunkcoordinates.getZ() >> 4;
         // Cycle through the 25x25 Chunks around it to load/unload the chunks.
@@ -1299,7 +1369,7 @@ public class CraftWorld implements World {
     }
 
     public File getWorldFolder() {
-        return ((SaveHandler) world.getDataManager()).getDirectory();
+        return ((SaveHandler) world.getSaveHandler()).getWorldDirectory();
     }
 
     public void sendPluginMessage(Plugin source, String channel, byte[] message) {
@@ -1321,11 +1391,11 @@ public class CraftWorld implements World {
     }
 
     public org.bukkit.WorldType getWorldType() {
-        return org.bukkit.WorldType.getByName(world.getWorldData().getType().name());
+        return org.bukkit.WorldType.getByName(world.getWorldInfo().getTerrainType().getWorldTypeName());
     }
 
     public boolean canGenerateStructures() {
-        return world.getWorldData().shouldGenerateMapFeatures();
+        return world.getWorldInfo().isMapFeaturesEnabled();
     }
 
     public long getTicksPerAnimalSpawns() {
@@ -1416,7 +1486,7 @@ public class CraftWorld implements World {
         double y = loc.getY();
         double z = loc.getZ();
 
-        getHandle().a(null, x, y, z, CraftSound.getSoundEffect(CraftSound.getSound(sound)), SoundCategory.MASTER, volume, pitch); // PAIL: rename
+        getHandle().playSound(null, x, y, z, CraftSound.getSoundEffect(CraftSound.getSound(sound)), SoundCategory.MASTER, volume, pitch); // PAIL: rename
     }
 
     public void playSound(Location loc, String sound, float volume, float pitch) {
@@ -1427,7 +1497,7 @@ public class CraftWorld implements World {
         double z = loc.getZ();
 
         SPacketCustomSound packet = new SPacketCustomSound(sound, SoundCategory.MASTER, x, y, z, volume, pitch);
-        world.getMinecraftServer().getPlayerList().sendPacketNearby(null, x, y, z, volume > 1.0F ? 16.0F * volume : 16.0D, this.world.dimension, packet);
+        world.getMinecraftServer().getPlayerList().sendToAllNearExcept(null, x, y, z, volume > 1.0F ? 16.0F * volume : 16.0D, this.world.dimension, packet);
     }
 
     public String getGameRuleValue(String rule) {

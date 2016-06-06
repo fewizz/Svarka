@@ -24,7 +24,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
     public String getName() throws IllegalStateException {
         CraftScoreboard scoreboard = checkState();
 
-        return team.getName();
+        return team.getRegisteredName();
     }
 
     public String getDisplayName() throws IllegalStateException {
@@ -72,7 +72,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
     public boolean allowFriendlyFire() throws IllegalStateException {
         CraftScoreboard scoreboard = checkState();
 
-        return team.allowFriendlyFire();
+        return team.getAllowFriendlyFire();
     }
 
     public void setAllowFriendlyFire(boolean enabled) throws IllegalStateException {
@@ -109,7 +109,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
         CraftScoreboard scoreboard = checkState();
 
         ImmutableSet.Builder<OfflinePlayer> players = ImmutableSet.builder();
-        for (String playerName : team.getPlayerNameSet()) {
+        for (String playerName : team.getMembershipCollection()) {
             players.add(Bukkit.getOfflinePlayer(playerName));
         }
         return players.build();
@@ -120,7 +120,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
         CraftScoreboard scoreboard = checkState();
 
         ImmutableSet.Builder<String> entries = ImmutableSet.builder();
-        for (String playerName: team.getPlayerNameSet()){
+        for (String playerName: team.getMembershipCollection()){
             entries.add(playerName);
         }
         return entries.build();
@@ -129,7 +129,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
     public int getSize() throws IllegalStateException {
         CraftScoreboard scoreboard = checkState();
 
-        return team.getPlayerNameSet().size();
+        return team.getMembershipCollection().size();
     }
 
     public void addPlayer(OfflinePlayer player) throws IllegalStateException, IllegalArgumentException {
@@ -141,7 +141,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
         Validate.notNull(entry, "Entry cannot be null");
         CraftScoreboard scoreboard = checkState();
 
-        scoreboard.board.addPlayerToTeam(entry, team.getName());
+        scoreboard.board.addPlayerToTeam(entry, team.getRegisteredName());
     }
 
     public boolean removePlayer(OfflinePlayer player) throws IllegalStateException, IllegalArgumentException {
@@ -153,7 +153,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
         Validate.notNull(entry, "Entry cannot be null");
         CraftScoreboard scoreboard = checkState();
 
-        if (!team.getPlayerNameSet().contains(entry)) {
+        if (!team.getMembershipCollection().contains(entry)) {
             return false;
         }
 
@@ -171,7 +171,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
 
         CraftScoreboard scoreboard = checkState();
 
-        return team.getPlayerNameSet().contains(entry);
+        return team.getMembershipCollection().contains(entry);
     }
 
     @Override
@@ -248,7 +248,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
 
     @Override
     CraftScoreboard checkState() throws IllegalStateException {
-        if (getScoreboard().board.getTeam(team.getName()) == null) {
+        if (getScoreboard().board.getTeam(team.getRegisteredName()) == null) {
             throw new IllegalStateException("Unregistered scoreboard component");
         }
 

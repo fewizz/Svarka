@@ -40,14 +40,14 @@ public class CraftTravelAgent extends Teleporter implements TravelAgent {
 
     @Override
     public Location findPortal(Location location) {
-    	Teleporter pta = ((CraftWorld) location.getWorld()).getHandle().getTravelAgent();
+    	Teleporter pta = ((CraftWorld) location.getWorld()).getHandle().getDefaultTeleporter();
         BlockPos found = pta.findPortal(location.getX(), location.getY(), location.getZ(), this.getSearchRadius());
         return found != null ? new Location(location.getWorld(), found.getX(), found.getY(), found.getZ(), location.getYaw(), location.getPitch()) : null;
     }
 
     @Override
     public boolean createPortal(Location location) {
-    	Teleporter pta = ((CraftWorld) location.getWorld()).getHandle().getTravelAgent();
+    	Teleporter pta = ((CraftWorld) location.getWorld()).getHandle().getDefaultTeleporter();
         return pta.createPortal(location.getX(), location.getY(), location.getZ(), this.getCreationRadius());
     }
 
