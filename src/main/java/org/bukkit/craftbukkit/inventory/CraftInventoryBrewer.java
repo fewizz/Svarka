@@ -4,7 +4,7 @@ import org.bukkit.block.BrewingStand;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.ItemStack;
 
-import net.minecraft.server.IInventory;
+import net.minecraft.inventory.IInventory;
 
 public class CraftInventoryBrewer extends CraftInventory implements BrewerInventory {
     public CraftInventoryBrewer(IInventory inventory) {

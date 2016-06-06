@@ -1,10 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntitySquid;
-
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Squid;
+
+import net.minecraft.entity.passive.EntitySquid;
 
 public class CraftSquid extends CraftWaterMob implements Squid {
 

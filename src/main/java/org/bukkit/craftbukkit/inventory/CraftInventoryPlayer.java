@@ -1,11 +1,13 @@
 package org.bukkit.craftbukkit.inventory;
 
 import com.google.common.base.Preconditions;
+
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.network.play.server.SPacketHeldItemChange;
+import net.minecraft.network.play.server.SPacketSetSlot;
+
 import java.util.Arrays;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.PacketPlayOutHeldItemSlot;
-import net.minecraft.server.PacketPlayOutSetSlot;
-import net.minecraft.server.PlayerInventory;
 
 import org.apache.commons.lang.Validate;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -14,24 +16,24 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
 public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.inventory.PlayerInventory, EntityEquipment {
-    public CraftInventoryPlayer(net.minecraft.server.PlayerInventory inventory) {
+    public CraftInventoryPlayer(InventoryPlayer inventory) {
         super(inventory);
     }
 
     @Override
-    public PlayerInventory getInventory() {
-        return (PlayerInventory) inventory;
+    public InventoryPlayer getInventory() {
+        return (InventoryPlayer) inventory;
     }
 
     @Override
     public ItemStack[] getStorageContents() {
-        return Arrays.copyOfRange(getContents(), 0, getInventory().items.length);
+        return Arrays.copyOfRange(getContents(), 0, getInventory().mainInventory.length);
     }
 
 
     @Override
     public ItemStack getItemInMainHand() {
-        return CraftItemStack.asCraftMirror(getInventory().getItemInHand());
+        return CraftItemStack.asCraftMirror(getInventory().getCurrentItem());
     }
 
     @Override
@@ -41,7 +43,7 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
 
     @Override
     public ItemStack getItemInOffHand() {
-        return CraftItemStack.asCraftMirror(getInventory().extraSlots[0]);
+        return CraftItemStack.asCraftMirror(getInventory().offHandInventory[0]);
     }
 
     @Override
@@ -65,8 +67,8 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
     public void setItem(int index, ItemStack item) {
         super.setItem(index, item);
         if (this.getHolder() == null) return;
-        EntityPlayer player = ((CraftPlayer) this.getHolder()).getHandle();
-        if (player.playerConnection == null) return;
+        EntityPlayerMP player = ((CraftPlayer) this.getHolder()).getHandle();
+        if (player.connection == null) return;
         // PacketPlayOutSetSlot places the items differently than setItem()
         //
         // Between, and including, index 9 (the first index outside of the hotbar) and index 35 (the last index before
@@ -95,24 +97,24 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
         // to reverse the order of the index from 8. That means we need 0 to correspond to 8, 1 to correspond to 7,
         // 2 to correspond to 6, and 3 to correspond to 5. We do this simply by taking the result of (index - 36) and
         // subtracting that value from 8.
-        if (index < PlayerInventory.getHotbarSize()) {
+        if (index < InventoryPlayer.getHotbarSize()) {
             index += 36;
         } else if (index > 39) {
             index += 5; // Off hand
         } else if (index > 35) {
             index = 8 - (index - 36);
         }
-        player.playerConnection.sendPacket(new PacketPlayOutSetSlot(player.defaultContainer.windowId, index, CraftItemStack.asNMSCopy(item)));
+        player.connection.sendPacket(new SPacketSetSlot(player.inventoryContainer.windowId, index, CraftItemStack.asNMSCopy(item)));
     }
 
     public int getHeldItemSlot() {
-        return getInventory().itemInHandIndex;
+        return getInventory().currentItem;
     }
 
     public void setHeldItemSlot(int slot) {
-        Validate.isTrue(slot >= 0 && slot < PlayerInventory.getHotbarSize(), "Slot is not between 0 and 8 inclusive");
-        this.getInventory().itemInHandIndex = slot;
-        ((CraftPlayer) this.getHolder()).getHandle().playerConnection.sendPacket(new PacketPlayOutHeldItemSlot(slot));
+        Validate.isTrue(slot >= 0 && slot < InventoryPlayer.getHotbarSize(), "Slot is not between 0 and 8 inclusive");
+        this.getInventory().currentItem = slot;
+        ((CraftPlayer) this.getHolder()).getHandle().connection.sendPacket(new SPacketHeldItemChange(slot));
     }
 
     public ItemStack getHelmet() {
@@ -148,8 +150,8 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
     }
 
     public ItemStack[] getArmorContents() {
-        int start = getInventory().items.length;
-        return Arrays.copyOfRange(getContents(), start, start + getInventory().armor.length);
+        int start = getInventory().mainInventory.length;
+        return Arrays.copyOfRange(getContents(), start, start + getInventory().armorInventory.length);
     }
 
     private void setSlots(ItemStack[] items, int baseSlot, int length) {
@@ -169,23 +171,23 @@ public class CraftInventoryPlayer extends CraftInventory implements org.bukkit.i
 
     @Override
     public void setStorageContents(ItemStack[] items) throws IllegalArgumentException {
-        setSlots(items, 0, getInventory().items.length);
+        setSlots(items, 0, getInventory().mainInventory.length);
     }
 
     @Override
     public void setArmorContents(ItemStack[] items) {
-        setSlots(items, getInventory().items.length, getInventory().armor.length);
+        setSlots(items, getInventory().mainInventory.length, getInventory().armorInventory.length);
     }
 
     @Override
     public ItemStack[] getExtraContents() {
-        int start = getInventory().items.length + getInventory().armor.length;
-        return Arrays.copyOfRange(getContents(), start, start + getInventory().extraSlots.length);
+        int start = getInventory().mainInventory.length + getInventory().armorInventory.length;
+        return Arrays.copyOfRange(getContents(), start, start + getInventory().offHandInventory.length);
     }
 
     @Override
     public void setExtraContents(ItemStack[] items) {
-        setSlots(items, getInventory().items.length + getInventory().armor.length, getInventory().extraSlots.length);
+        setSlots(items, getInventory().mainInventory.length + getInventory().armorInventory.length, getInventory().offHandInventory.length);
     }
 
     public int clear(int id, int data) {

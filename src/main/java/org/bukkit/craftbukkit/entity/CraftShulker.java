@@ -1,10 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityGolem;
-import net.minecraft.server.EntityShulker;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Shulker;
+
+import net.minecraft.entity.monster.EntityShulker;
 
 public class CraftShulker extends CraftGolem implements Shulker {
 

@@ -1,8 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityWitch;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Witch;
+
+import net.minecraft.entity.monster.EntityWitch;
+
 import org.bukkit.entity.EntityType;
 
 public class CraftWitch extends CraftMonster implements Witch {

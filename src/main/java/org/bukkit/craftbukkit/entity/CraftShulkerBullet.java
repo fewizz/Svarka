@@ -1,11 +1,12 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityShulkerBullet;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.ShulkerBullet;
 import org.bukkit.projectiles.ProjectileSource;
+
+import net.minecraft.entity.projectile.EntityShulkerBullet;
 
 public class CraftShulkerBullet extends AbstractProjectile implements ShulkerBullet {
 

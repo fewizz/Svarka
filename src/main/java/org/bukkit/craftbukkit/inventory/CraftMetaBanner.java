@@ -2,11 +2,12 @@ package org.bukkit.craftbukkit.inventory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+
+import net.minecraft.nbt.NBTTagCompound;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.NBTTagList;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.block.banner.Pattern;

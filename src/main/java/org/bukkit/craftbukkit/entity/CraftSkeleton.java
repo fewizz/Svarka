@@ -1,11 +1,11 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntitySkeleton;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Skeleton;
+
+import net.minecraft.entity.monster.EntitySkeleton;
 
 public class CraftSkeleton extends CraftMonster implements Skeleton {
 

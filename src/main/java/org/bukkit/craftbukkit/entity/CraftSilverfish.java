@@ -1,10 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntitySilverfish;
-
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Silverfish;
+
+import net.minecraft.entity.monster.EntitySilverfish;
 
 public class CraftSilverfish extends CraftMonster implements Silverfish {
     public CraftSilverfish(CraftServer server, EntitySilverfish entity) {

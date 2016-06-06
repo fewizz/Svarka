@@ -1,18 +1,19 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityWeather;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Weather;
 
+import net.minecraft.entity.effect.EntityWeatherEffect;
+
 public class CraftWeather extends CraftEntity implements Weather {
-    public CraftWeather(final CraftServer server, final EntityWeather entity) {
+    public CraftWeather(final CraftServer server, final EntityWeatherEffect entity) {
         super(server, entity);
     }
 
     @Override
-    public EntityWeather getHandle() {
-        return (EntityWeather) entity;
+    public EntityWeatherEffect getHandle() {
+        return (EntityWeatherEffect) entity;
     }
 
     @Override

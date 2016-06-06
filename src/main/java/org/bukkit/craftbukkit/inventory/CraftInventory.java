@@ -13,6 +13,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import fewizz.svarka.inventory.IBukkitInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.InventoryEnderChest;
@@ -27,13 +28,21 @@ import net.minecraft.tileentity.TileEntityFurnace;
 import org.bukkit.Material;
 
 public class CraftInventory implements Inventory {
-    protected final IInventory inventory;
+    protected final IBukkitInventory inventory;
 
-    public CraftInventory(IInventory inventory) {
+    public CraftInventory(IBukkitInventory inventory) {
         this.inventory = inventory;
+    }
+    
+    public CraftInventory(IInventory inventory) {
+        this.inventory = (IBukkitInventory) inventory;
     }
 
     public IInventory getInventory() {
+        return inventory;
+    }
+    
+    public IBukkitInventory getBukkitInventory() {
         return inventory;
     }
 
@@ -62,7 +71,7 @@ public class CraftInventory implements Inventory {
 
     public ItemStack[] getContents() {
         ItemStack[] items = new ItemStack[getSize()];
-        net.minecraft.item.ItemStack[] mcItems = getInventory().getContents();
+        net.minecraft.item.ItemStack[] mcItems = getBukkitInventory().getContents();
 
         int size = Math.min(items.length, mcItems.length);
         for (int i = 0; i < size; i++) {

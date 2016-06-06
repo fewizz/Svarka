@@ -4,7 +4,7 @@ import org.bukkit.block.Furnace;
 import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.ItemStack;
 
-import net.minecraft.server.TileEntityFurnace;
+import net.minecraft.tileentity.TileEntityFurnace;
 
 public class CraftInventoryFurnace extends CraftInventory implements FurnaceInventory {
     public CraftInventoryFurnace(TileEntityFurnace inventory) {

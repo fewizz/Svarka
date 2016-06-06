@@ -1,9 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntitySnowman;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Snowman;
+
+import net.minecraft.entity.monster.EntitySnowman;
 
 public class CraftSnowman extends CraftGolem implements Snowman {
     public CraftSnowman(CraftServer server, EntitySnowman entity) {
@@ -12,12 +13,12 @@ public class CraftSnowman extends CraftGolem implements Snowman {
 
     @Override
     public boolean isDerp() {
-        return getHandle().o(); // PAIL: Rename
+        return getHandle().isPumpkinEquipped(); // PAIL: Rename
     }
 
     @Override
     public void setDerp(boolean derpMode) {
-        getHandle().a(derpMode); // PAIL: Rename
+        getHandle().setPumpkinEquipped(derpMode); // PAIL: Rename
     }
 
     @Override

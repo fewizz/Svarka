@@ -1,20 +1,19 @@
 package org.bukkit.craftbukkit.inventory;
 
-import net.minecraft.server.ChatComponentText;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 
-import net.minecraft.server.Container;
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.IInventory;
-import net.minecraft.server.PacketPlayOutOpenWindow;
-import net.minecraft.server.Slot;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Slot;
+import net.minecraft.network.play.server.SPacketOpenWindow;
+import net.minecraft.util.text.TextComponentString;
 
 public class CraftContainer extends Container {
-
     private final InventoryView view;
     private InventoryType cachedType;
     private String cachedTitle;
@@ -66,7 +65,7 @@ public class CraftContainer extends Container {
     }
 
     @Override
-    public boolean c(EntityHuman entityhuman) {
+    public boolean getCanCraft(EntityPlayer entityhuman) {
         if (cachedType == view.getType() && cachedSize == getSize() && cachedTitle.equals(view.getTitle())) {
             return true;
         }
@@ -81,13 +80,13 @@ public class CraftContainer extends Container {
             String type = getNotchInventoryType(cachedType);
             IInventory top = ((CraftInventory) view.getTopInventory()).getInventory();
             IInventory bottom = ((CraftInventory) view.getBottomInventory()).getInventory();
-            this.b.clear();
-            this.c.clear();
+            this.inventoryItemStacks.clear();
+            this.inventorySlots.clear();
             if (typeChanged) {
                 setupSlots(top, bottom);
             }
             int size = getSize();
-            player.getHandle().playerConnection.sendPacket(new PacketPlayOutOpenWindow(this.windowId, type, new ChatComponentText(cachedTitle), size));
+            player.getHandle().connection.sendPacket(new SPacketOpenWindow(this.windowId, type, new TextComponentString(cachedTitle), size));
             player.updateInventory();
         }
         return true;
@@ -150,71 +149,71 @@ public class CraftContainer extends Container {
     }
 
     private void setupChest(IInventory top, IInventory bottom) {
-        int rows = top.getSize() / 9;
+        int rows = top.getSizeInventory() / 9;
         int row;
         int col;
         // This code copied from ContainerChest
         int i = (rows - 4) * 18;
         for (row = 0; row < rows; ++row) {
             for (col = 0; col < 9; ++col) {
-                this.a(new Slot(top, col + row * 9, 8 + col * 18, 18 + row * 18));
+                this.addSlotToContainer(new Slot(top, col + row * 9, 8 + col * 18, 18 + row * 18));
             }
         }
 
         for (row = 0; row < 3; ++row) {
             for (col = 0; col < 9; ++col) {
-                this.a(new Slot(bottom, col + row * 9 + 9, 8 + col * 18, 103 + row * 18 + i));
+                this.addSlotToContainer(new Slot(bottom, col + row * 9 + 9, 8 + col * 18, 103 + row * 18 + i));
             }
         }
 
         for (col = 0; col < 9; ++col) {
-            this.a(new Slot(bottom, col, 8 + col * 18, 161 + i));
+            this.addSlotToContainer(new Slot(bottom, col, 8 + col * 18, 161 + i));
         }
         // End copy from ContainerChest
     }
 
     private void setupWorkbench(IInventory top, IInventory bottom) {
         // This code copied from ContainerWorkbench
-        this.a(new Slot(top, 0, 124, 35));
+        this.addSlotToContainer(new Slot(top, 0, 124, 35));
 
         int row;
         int col;
 
         for (row = 0; row < 3; ++row) {
             for (col = 0; col < 3; ++col) {
-                this.a(new Slot(top, 1 + col + row * 3, 30 + col * 18, 17 + row * 18));
+                this.addSlotToContainer(new Slot(top, 1 + col + row * 3, 30 + col * 18, 17 + row * 18));
             }
         }
 
         for (row = 0; row < 3; ++row) {
             for (col = 0; col < 9; ++col) {
-                this.a(new Slot(bottom, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
+                this.addSlotToContainer(new Slot(bottom, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
             }
         }
 
         for (col = 0; col < 9; ++col) {
-            this.a(new Slot(bottom, col, 8 + col * 18, 142));
+            this.addSlotToContainer(new Slot(bottom, col, 8 + col * 18, 142));
         }
         // End copy from ContainerWorkbench
     }
 
     private void setupFurnace(IInventory top, IInventory bottom) {
         // This code copied from ContainerFurnace
-        this.a(new Slot(top, 0, 56, 17));
-        this.a(new Slot(top, 1, 56, 53));
-        this.a(new Slot(top, 2, 116, 35));
+        this.addSlotToContainer(new Slot(top, 0, 56, 17));
+        this.addSlotToContainer(new Slot(top, 1, 56, 53));
+        this.addSlotToContainer(new Slot(top, 2, 116, 35));
 
         int row;
         int col;
 
         for (row = 0; row < 3; ++row) {
             for (col = 0; col < 9; ++col) {
-                this.a(new Slot(bottom, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
+                this.addSlotToContainer(new Slot(bottom, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
             }
         }
 
         for (col = 0; col < 9; ++col) {
-            this.a(new Slot(bottom, col, 8 + col * 18, 142));
+            this.addSlotToContainer(new Slot(bottom, col, 8 + col * 18, 142));
         }
         // End copy from ContainerFurnace
     }
@@ -226,58 +225,58 @@ public class CraftContainer extends Container {
 
         for (row = 0; row < 3; ++row) {
             for (col = 0; col < 3; ++col) {
-                this.a(new Slot(top, col + row * 3, 61 + col * 18, 17 + row * 18));
+                this.addSlotToContainer(new Slot(top, col + row * 3, 61 + col * 18, 17 + row * 18));
             }
         }
 
         for (row = 0; row < 3; ++row) {
             for (col = 0; col < 9; ++col) {
-                this.a(new Slot(bottom, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
+                this.addSlotToContainer(new Slot(bottom, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
             }
         }
 
         for (col = 0; col < 9; ++col) {
-            this.a(new Slot(bottom, col, 8 + col * 18, 142));
+            this.addSlotToContainer(new Slot(bottom, col, 8 + col * 18, 142));
         }
         // End copy from ContainerDispenser
     }
 
     private void setupEnchanting(IInventory top, IInventory bottom) {
         // This code copied from ContainerEnchantTable
-        this.a((new Slot(top, 0, 15, 47)));
-        this.a((new Slot(top, 0, 35, 47)));
+        this.addSlotToContainer((new Slot(top, 0, 15, 47)));
+        this.addSlotToContainer((new Slot(top, 0, 35, 47)));
 
         int row;
 
         for (row = 0; row < 3; ++row) {
             for (int i1 = 0; i1 < 9; ++i1) {
-                this.a(new Slot(bottom, i1 + row * 9 + 9, 8 + i1 * 18, 84 + row * 18));
+                this.addSlotToContainer(new Slot(bottom, i1 + row * 9 + 9, 8 + i1 * 18, 84 + row * 18));
             }
         }
 
         for (row = 0; row < 9; ++row) {
-            this.a(new Slot(bottom, row, 8 + row * 18, 142));
+            this.addSlotToContainer(new Slot(bottom, row, 8 + row * 18, 142));
         }
         // End copy from ContainerEnchantTable
     }
 
     private void setupBrewing(IInventory top, IInventory bottom) {
         // This code copied from ContainerBrewingStand
-        this.a(new Slot(top, 0, 56, 46));
-        this.a(new Slot(top, 1, 79, 53));
-        this.a(new Slot(top, 2, 102, 46));
-        this.a(new Slot(top, 3, 79, 17));
-        this.a(new Slot(top, 4, 17, 17));
+        this.addSlotToContainer(new Slot(top, 0, 56, 46));
+        this.addSlotToContainer(new Slot(top, 1, 79, 53));
+        this.addSlotToContainer(new Slot(top, 2, 102, 46));
+        this.addSlotToContainer(new Slot(top, 3, 79, 17));
+        this.addSlotToContainer(new Slot(top, 4, 17, 17));
 
         int i;
         for (i = 0; i < 3; ++i) {
             for (int j = 0; j < 9; ++j) {
-                this.a(new Slot(bottom, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
+                this.addSlotToContainer(new Slot(bottom, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
             }
         }
 
         for (i = 0; i < 9; ++i) {
-            this.a(new Slot(bottom, i, 8 + i * 18, 142));
+            this.addSlotToContainer(new Slot(bottom, i, 8 + i * 18, 142));
         }
         // End copy from ContainerBrewingStand
     }
@@ -288,43 +287,44 @@ public class CraftContainer extends Container {
 
         int i;
 
-        for (i = 0; i < top.getSize(); ++i) {
-            this.a(new Slot(top, i, 44 + i * 18, 20));
+        for (i = 0; i < top.getSizeInventory(); ++i) {
+            this.addSlotToContainer(new Slot(top, i, 44 + i * 18, 20));
         }
 
         for (i = 0; i < 3; ++i) {
             for (int j = 0; j < 9; ++j) {
-                this.a(new Slot(bottom, j + i * 9 + 9, 8 + j * 18, i * 18 + b0));
+                this.addSlotToContainer(new Slot(bottom, j + i * 9 + 9, 8 + j * 18, i * 18 + b0));
             }
         }
 
         for (i = 0; i < 9; ++i) {
-            this.a(new Slot(bottom, i, 8 + i * 18, 58 + b0));
+            this.addSlotToContainer(new Slot(bottom, i, 8 + i * 18, 58 + b0));
         }
         // End copy from ContainerHopper
     }
 
     private void setupAnvil(IInventory top, IInventory bottom) {
         // This code copied from ContainerAnvil
-        this.a(new Slot(top, 0, 27, 47));
-        this.a(new Slot(top, 1, 76, 47));
-        this.a(new Slot(top, 2, 134, 47));
+        this.addSlotToContainer(new Slot(top, 0, 27, 47));
+        this.addSlotToContainer(new Slot(top, 1, 76, 47));
+        this.addSlotToContainer(new Slot(top, 2, 134, 47));
 
         int i;
 
         for (i = 0; i < 3; ++i) {
             for (int j = 0; j < 9; ++j) {
-                this.a(new Slot(bottom, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
+                this.addSlotToContainer(new Slot(bottom, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
             }
         }
 
         for (i = 0; i < 9; ++i) {
-            this.a(new Slot(bottom, i, 8 + i * 18, 142));
+            this.addSlotToContainer(new Slot(bottom, i, 8 + i * 18, 142));
         }
         // End copy from ContainerAnvil
     }
 
-    public boolean a(EntityHuman entity) {
+    @Override
+    public boolean canInteractWith(EntityPlayer entity) {
         return true;
     }
 }

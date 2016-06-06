@@ -14,9 +14,8 @@ import org.bukkit.potion.PotionType;
 
 import com.google.common.collect.ImmutableList;
 
-import net.minecraft.server.EntityTippedArrow;
-import net.minecraft.server.MobEffect;
-import net.minecraft.server.MobEffectList;
+import net.minecraft.entity.projectile.EntityTippedArrow;
+import net.minecraft.potion.Potion;
 
 public class CraftTippedArrow extends CraftArrow implements TippedArrow {
 
@@ -42,9 +41,9 @@ public class CraftTippedArrow extends CraftArrow implements TippedArrow {
     @Override
     public boolean addCustomEffect(PotionEffect effect, boolean override) {
         int effectId = effect.getType().getId();
-        MobEffect existing = null;
-        for (MobEffect mobEffect : getHandle().h) {
-            if (MobEffectList.getId(mobEffect.getMobEffect()) == effectId) {
+        net.minecraft.potion.PotionEffect existing = null;
+        for (net.minecraft.potion.PotionEffect mobEffect : getHandle().customPotionEffects) {
+            if (Potion.getIdFromPotion(mobEffect.getPotion()) == effectId) {
                 existing = mobEffect;
             }
         }
@@ -52,9 +51,9 @@ public class CraftTippedArrow extends CraftArrow implements TippedArrow {
             if (!override) {
                 return false;
             }
-            getHandle().h.remove(existing);
+            getHandle().customPotionEffects.remove(existing);
         }
-        getHandle().a(CraftPotionUtil.fromBukkit(effect));
+        getHandle().addEffect(CraftPotionUtil.fromBukkit(effect));
         getHandle().refreshEffects();
         return true;
     }
@@ -62,14 +61,14 @@ public class CraftTippedArrow extends CraftArrow implements TippedArrow {
     @Override
     public void clearCustomEffects() {
         Validate.isTrue(getBasePotionData().getType() != PotionType.UNCRAFTABLE, "Tipped Arrows must have at least 1 effect");
-        getHandle().h.clear();
+        getHandle().customPotionEffects.clear();
         getHandle().refreshEffects();
     }
 
     @Override
     public List<PotionEffect> getCustomEffects() {
         ImmutableList.Builder<PotionEffect> builder = ImmutableList.builder();
-        for (MobEffect effect : getHandle().h) {
+        for (net.minecraft.potion.PotionEffect effect : getHandle().customPotionEffects) {
             builder.add(CraftPotionUtil.toBukkit(effect));
         }
         return builder.build();
@@ -77,8 +76,8 @@ public class CraftTippedArrow extends CraftArrow implements TippedArrow {
 
     @Override
     public boolean hasCustomEffect(PotionEffectType type) {
-        for (MobEffect effect : getHandle().h) {
-            if (CraftPotionUtil.equals(effect.getMobEffect(), type)) {
+        for (net.minecraft.potion.PotionEffect effect : getHandle().customPotionEffects) {
+            if (CraftPotionUtil.equals(effect.getPotion(), type)) {
                 return true;
             }
         }
@@ -87,15 +86,15 @@ public class CraftTippedArrow extends CraftArrow implements TippedArrow {
 
     @Override
     public boolean hasCustomEffects() {
-        return !getHandle().h.isEmpty();
+        return !getHandle().customPotionEffects.isEmpty();
     }
 
     @Override
     public boolean removeCustomEffect(PotionEffectType effect) {
         int effectId = effect.getId();
-        MobEffect existing = null;
-        for (MobEffect mobEffect : getHandle().h) {
-            if (MobEffectList.getId(mobEffect.getMobEffect()) == effectId) {
+        net.minecraft.potion.PotionEffect existing = null;
+        for (net.minecraft.potion.PotionEffect mobEffect : getHandle().customPotionEffects) {
+            if (Potion.getIdFromPotion(mobEffect.getPotion()) == effectId) {
                 existing = mobEffect;
             }
         }
@@ -103,7 +102,7 @@ public class CraftTippedArrow extends CraftArrow implements TippedArrow {
             return false;
         }
         Validate.isTrue(getBasePotionData().getType() != PotionType.UNCRAFTABLE || getHandle().h.size() != 1, "Tipped Arrows must have at least 1 effect");
-        getHandle().h.remove(existing);
+        getHandle().customPotionEffects.remove(existing);
         getHandle().refreshEffects();
         return true;
     }
