@@ -1,6 +1,5 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityPotion;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.CraftServer;
@@ -8,6 +7,8 @@ import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LingeringPotion;
 import org.bukkit.inventory.ItemStack;
+
+import net.minecraft.entity.projectile.EntityPotion;
 
 public class CraftLingeringPotion extends CraftThrownPotion implements LingeringPotion {
 

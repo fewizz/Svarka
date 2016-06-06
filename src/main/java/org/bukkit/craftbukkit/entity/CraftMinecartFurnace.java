@@ -1,10 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityMinecartFurnace;
-
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.PoweredMinecart;
+
+import net.minecraft.entity.item.EntityMinecartFurnace;
 
 @SuppressWarnings("deprecation")
 public class CraftMinecartFurnace extends CraftMinecart implements PoweredMinecart {

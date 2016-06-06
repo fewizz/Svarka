@@ -1,9 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityLargeFireball;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LargeFireball;
+
+import net.minecraft.entity.projectile.EntityLargeFireball;
 
 public class CraftLargeFireball extends CraftFireball implements LargeFireball {
     public CraftLargeFireball(CraftServer server, EntityLargeFireball entity) {
@@ -13,7 +14,7 @@ public class CraftLargeFireball extends CraftFireball implements LargeFireball {
     @Override
     public void setYield(float yield) {
         super.setYield(yield);
-        getHandle().yield = (int) yield;
+        getHandle().explosionPower = (int) yield;
     }
 
     @Override

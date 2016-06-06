@@ -1,7 +1,5 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityHorse;
-import net.minecraft.server.EnumHorseType;
 import org.apache.commons.lang.Validate;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.inventory.CraftInventoryHorse;
@@ -9,6 +7,9 @@ import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.inventory.HorseInventory;
+
+import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.HorseType;
 
 import java.util.UUID;
 
@@ -29,7 +30,7 @@ public class CraftHorse extends CraftAnimals implements Horse {
 
     public void setVariant(Variant variant) {
         Validate.notNull(variant, "Variant cannot be null");
-        getHandle().setType(EnumHorseType.values()[variant.ordinal()]);
+        getHandle().setType(HorseType.values()[variant.ordinal()]);
     }
 
     public Color getColor() {
@@ -51,13 +52,13 @@ public class CraftHorse extends CraftAnimals implements Horse {
     }
 
     public boolean isCarryingChest() {
-        return getHandle().hasChest();
+        return getHandle().isChested();
     }
 
     public void setCarryingChest(boolean chest) {
         if (chest == isCarryingChest()) return;
-        getHandle().setHasChest(chest);
-        getHandle().loadChest();
+        getHandle().setChested(chest);
+        getHandle().initHorseChest();
     }
 
     public int getDomestication() {
@@ -71,7 +72,7 @@ public class CraftHorse extends CraftAnimals implements Horse {
     }
 
     public int getMaxDomestication() {
-        return getHandle().getMaxDomestication();
+        return getHandle().getMaxTemper()();
     }
 
     public void setMaxDomestication(int value) {
@@ -80,22 +81,22 @@ public class CraftHorse extends CraftAnimals implements Horse {
     }
 
     public double getJumpStrength() {
-        return getHandle().getJumpStrength();
+        return getHandle().getHorseJumpStrength();
     }
 
     public void setJumpStrength(double strength) {
         Validate.isTrue(strength >= 0, "Jump strength cannot be less than zero");
-        getHandle().getAttributeInstance(EntityHorse.attributeJumpStrength).setValue(strength);
+        getHandle().getEntityAttribute(EntityHorse.JUMP_STRENGTH).setBaseValue(strength);
     }
 
     @Override
     public boolean isTamed() {
-        return getHandle().isTamed();
+        return getHandle().isTame();
     }
 
     @Override
     public void setTamed(boolean tamed) {
-        getHandle().setTame(tamed);
+        getHandle().setHorseTamed(tamed);
     }
 
     @Override
@@ -117,15 +118,15 @@ public class CraftHorse extends CraftAnimals implements Horse {
     }
 
     public UUID getOwnerUUID() {
-        return getHandle().getOwnerUUID();
+        return getHandle().getOwnerUniqueId();
     }
 
     public void setOwnerUUID(UUID uuid) {
-        getHandle().setOwnerUUID(uuid);
+        getHandle().setOwnerUniqueId(uuid);
     }
 
     public HorseInventory getInventory() {
-        return new CraftInventoryHorse(getHandle().inventoryChest);
+        return new CraftInventoryHorse(getHandle().horseChest);
     }
 
     @Override

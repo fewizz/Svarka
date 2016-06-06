@@ -1,9 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityIronGolem;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.IronGolem;
+
+import net.minecraft.entity.monster.EntityIronGolem;
 
 public class CraftIronGolem extends CraftGolem implements IronGolem {
     public CraftIronGolem(CraftServer server, EntityIronGolem entity) {

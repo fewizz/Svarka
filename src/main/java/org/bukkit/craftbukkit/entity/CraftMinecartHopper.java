@@ -1,12 +1,12 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityMinecartHopper;
-
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.inventory.CraftInventory;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.minecart.HopperMinecart;
 import org.bukkit.inventory.Inventory;
+
+import net.minecraft.entity.item.EntityMinecartHopper;
 
 final class CraftMinecartHopper extends CraftMinecart implements HopperMinecart {
     private final CraftInventory inventory;
@@ -31,11 +31,11 @@ final class CraftMinecartHopper extends CraftMinecart implements HopperMinecart 
 
     @Override
     public boolean isEnabled() {
-        return ((EntityMinecartHopper) getHandle()).isEnabled();
+        return ((EntityMinecartHopper) getHandle()).getBlocked();
     }
 
     @Override
     public void setEnabled(boolean enabled) {
-        ((EntityMinecartHopper) getHandle()).setEnabled(enabled);
+        ((EntityMinecartHopper) getHandle()).setBlocked(enabled);
     }
 }

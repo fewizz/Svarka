@@ -1,10 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntitySlime;
-
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Slime;
+
+import net.minecraft.entity.monster.EntitySlime;
 
 public class CraftSlime extends CraftLivingEntity implements Slime {
 
@@ -13,11 +13,11 @@ public class CraftSlime extends CraftLivingEntity implements Slime {
     }
 
     public int getSize() {
-        return getHandle().getSize();
+        return getHandle().getSlimeSize();
     }
 
     public void setSize(int size) {
-        getHandle().setSize(size);
+        getHandle().setSlimeSize(size);
     }
 
     @Override

@@ -1,10 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityMagmaCube;
-
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.MagmaCube;
+
+import net.minecraft.entity.monster.EntityMagmaCube;
 
 public class CraftMagmaCube extends CraftSlime implements MagmaCube {
 

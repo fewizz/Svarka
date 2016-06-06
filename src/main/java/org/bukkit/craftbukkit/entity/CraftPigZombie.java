@@ -1,10 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityPigZombie;
-
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.PigZombie;
+
+import net.minecraft.entity.monster.EntityPigZombie;
 
 public class CraftPigZombie extends CraftZombie implements PigZombie {
 

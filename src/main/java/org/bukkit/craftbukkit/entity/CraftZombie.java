@@ -1,11 +1,11 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityZombie;
-
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
+
+import net.minecraft.entity.monster.EntityZombie;
 
 public class CraftZombie extends CraftMonster implements Zombie {
 
@@ -28,11 +28,11 @@ public class CraftZombie extends CraftMonster implements Zombie {
     }
 
     public boolean isBaby() {
-        return getHandle().isBaby();
+        return getHandle().isChild();
     }
 
     public void setBaby(boolean flag) {
-        getHandle().setBaby(flag);
+        getHandle().setChild(flag);
     }
 
     public boolean isVillager() {
@@ -43,14 +43,14 @@ public class CraftZombie extends CraftMonster implements Zombie {
         if (flag) {
             getHandle().setVillagerType(0);
         } else {
-            getHandle().clearVillagerType();
+            getHandle().setToNotVillager();
         }
     }
 
     @Override
     public void setVillagerProfession(Villager.Profession profession) {
         if (profession == null) {
-            getHandle().clearVillagerType();
+            getHandle().setToNotVillager();
         } else {
             getHandle().setVillagerType(profession.getId());
         }

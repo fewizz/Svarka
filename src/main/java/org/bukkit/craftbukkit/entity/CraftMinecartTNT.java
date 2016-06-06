@@ -1,10 +1,10 @@
 package org.bukkit.craftbukkit.entity;
 
-import net.minecraft.server.EntityMinecartTNT;
-
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
+
+import net.minecraft.entity.item.EntityMinecartTNT;
 
 final class CraftMinecartTNT extends CraftMinecart implements ExplosiveMinecart {
     CraftMinecartTNT(CraftServer server, EntityMinecartTNT entity) {
