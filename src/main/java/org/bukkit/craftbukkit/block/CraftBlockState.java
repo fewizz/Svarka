@@ -163,7 +163,7 @@ public class CraftBlockState implements BlockState {
         BlockPos pos = new BlockPos(x, y, z);
         IBlockState newBlock = CraftMagicNumbers.getBlock(getType()).getStateFromMeta(getRawData());
         block.setTypeIdAndData(getTypeId(), getRawData(), applyPhysics);
-        world.getHandle().notify(
+        world.getHandle().notifyBlockUpdate(
                 pos,
                 CraftMagicNumbers.getBlock(block).getStateFromMeta(block.getData()),
                 newBlock,
@@ -172,7 +172,7 @@ public class CraftBlockState implements BlockState {
 
         // Update levers etc
         if (applyPhysics && getData() instanceof Attachable) {
-            world.getHandle().applyPhysics(pos.offset(CraftBlock.blockFaceToNotch(((Attachable) getData()).getAttachedFace())), newBlock.getBlock());
+            world.getHandle().notifyNeighborsOfStateChange(pos.offset(CraftBlock.blockFaceToNotch(((Attachable) getData()).getAttachedFace())), newBlock.getBlock());
         }
 
         return true;

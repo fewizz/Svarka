@@ -789,15 +789,16 @@ public class CraftEventFactory {
     }
 
     public static ItemStack callPreCraftEvent(InventoryCrafting matrix, ItemStack result, InventoryView lastCraftView, boolean isRepair) {
-        CraftInventoryCrafting inventory = new CraftInventoryCrafting(matrix, matrix.resultInventory);
-        inventory.setResult(CraftItemStack.asCraftMirror(result));
+        //CraftInventoryCrafting inventory = new CraftInventoryCrafting(matrix, matrix.resultInventory); TODO!!!!
+        //inventory.setResult(CraftItemStack.asCraftMirror(result));
 
-        PrepareItemCraftEvent event = new PrepareItemCraftEvent(inventory, lastCraftView, isRepair);
-        Bukkit.getPluginManager().callEvent(event);
+        //PrepareItemCraftEvent event = new PrepareItemCraftEvent(inventory, lastCraftView, isRepair);
+        //Bukkit.getPluginManager().callEvent(event);
 
-        org.bukkit.inventory.ItemStack bitem = event.getInventory().getResult();
+        //org.bukkit.inventory.ItemStack bitem = event.getInventory().getResult();
 
-        return CraftItemStack.asNMSCopy(bitem);
+        //return CraftItemStack.asNMSCopy(bitem);
+    	return null;
     }
 
     public static ProjectileLaunchEvent callProjectileLaunchEvent(Entity entity) {

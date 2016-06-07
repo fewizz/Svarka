@@ -1,0 +1,99 @@
+--- ../src-base/minecraft/net/minecraft/network/NetHandlerPlayServer.java
++++ ../src-work/minecraft/net/minecraft/network/NetHandlerPlayServer.java
+@@ -112,6 +112,51 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++import org.bukkit.craftbukkit.entity.CraftPlayer;
++
++//CraftBukkit start
++import java.util.HashSet;
++import java.util.concurrent.ExecutionException;
++import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.entity.CraftPlayer;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.craftbukkit.inventory.CraftInventoryView;
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.craftbukkit.util.CraftChatMessage;
++import org.bukkit.craftbukkit.util.LazyPlayerSet;
++import org.bukkit.craftbukkit.util.Waitable;
++import org.bukkit.entity.Player;
++import org.bukkit.event.Event;
++import org.bukkit.event.block.Action;
++import org.bukkit.event.block.SignChangeEvent;
++import org.bukkit.event.inventory.ClickType;
++import org.bukkit.event.inventory.CraftItemEvent;
++import org.bukkit.event.inventory.InventoryAction;
++import org.bukkit.event.inventory.InventoryClickEvent;
++import org.bukkit.event.inventory.InventoryCreativeEvent;
++import org.bukkit.event.inventory.InventoryType.SlotType;
++import org.bukkit.event.player.AsyncPlayerChatEvent;
++import org.bukkit.event.player.PlayerAnimationEvent;
++import org.bukkit.event.player.PlayerChatEvent;
++import org.bukkit.event.player.PlayerCommandPreprocessEvent;
++import org.bukkit.event.player.PlayerInteractAtEntityEvent;
++import org.bukkit.event.player.PlayerInteractEntityEvent;
++import org.bukkit.event.player.PlayerItemHeldEvent;
++import org.bukkit.event.player.PlayerKickEvent;
++import org.bukkit.event.player.PlayerMoveEvent;
++import org.bukkit.event.player.PlayerResourcePackStatusEvent;
++import org.bukkit.event.player.PlayerSwapHandItemsEvent;
++import org.bukkit.event.player.PlayerTeleportEvent;
++import org.bukkit.event.player.PlayerToggleFlightEvent;
++import org.bukkit.event.player.PlayerToggleSneakEvent;
++import org.bukkit.event.player.PlayerToggleSprintEvent;
++import org.bukkit.inventory.CraftingInventory;
++import org.bukkit.inventory.EquipmentSlot;
++import org.bukkit.inventory.InventoryView;
++import org.bukkit.util.NumberConversions;
++// CraftBukkit end
++
+ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable
+ {
+     private static final Logger field_147370_c = LogManager.getLogger();
+@@ -122,7 +167,11 @@
+     private int field_147378_h;
+     private long field_147379_i;
+     private long field_147377_k;
+-    private int field_147374_l;
++   // private int chatSpamThresholdCount;
++    // CraftBukkit start - multithreaded fields
++    private volatile int field_147374_l;
++    //private static final AtomicIntegerFieldUpdater chatSpamField = AtomicIntegerFieldUpdater.newUpdater(NetHandlerPlayServer.class, "chatThrottle"); //TODO!!!
++    // CraftBukkit end
+     private int field_147375_m;
+     private final IntHashMap<Short> field_147372_n = new IntHashMap();
+     private double field_184349_l;
+@@ -147,6 +196,7 @@
+     private int field_184346_E;
+     private int field_184347_F;
+     private int field_184348_G;
++    private boolean processedDisconnect; // CraftBukkit - Added
+ 
+     public NetHandlerPlayServer(MinecraftServer p_i1530_1_, NetworkManager p_i1530_2_, EntityPlayerMP p_i1530_3_)
+     {
+@@ -155,8 +205,23 @@
+         p_i1530_2_.func_150719_a(this);
+         this.field_147369_b = p_i1530_3_;
+         p_i1530_3_.field_71135_a = this;
++        
++        // CraftBukkit start - add fields and methods
++        this.server = p_i1530_1_.server;
+     }
++    
++    private final org.bukkit.craftbukkit.CraftServer server;
++    private int lastTick = MinecraftServer.currentTick;
++    private int allowedPlayerTicks = 1;
++    private int lastDropTick = MinecraftServer.currentTick;
++    private int dropCount = 0;
++    private static final int SURVIVAL_PLACE_DISTANCE_SQUARED = 6 * 6;
++    private static final int CREATIVE_PLACE_DISTANCE_SQUARED = 7 * 7;
+ 
++    public CraftPlayer getPlayer() {
++    	return (this.field_147369_b == null) ? null : (CraftPlayer) this.field_147369_b.getBukkitEntity();
++    }
++    
+     public void func_73660_a()
+     {
+         this.func_184342_d();

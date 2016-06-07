@@ -1,0 +1,107 @@
+--- ../src-base/minecraft/net/minecraft/server/MinecraftServer.java
++++ ../src-work/minecraft/net/minecraft/server/MinecraftServer.java
+@@ -14,6 +14,9 @@
+ import io.netty.buffer.ByteBufOutputStream;
+ import io.netty.buffer.Unpooled;
+ import io.netty.handler.codec.base64.Base64;
++import jline.console.ConsoleReader;
++import joptsimple.OptionSet;
++
+ import java.awt.GraphicsEnvironment;
+ import java.awt.image.BufferedImage;
+ import java.io.File;
+@@ -22,6 +25,7 @@
+ import java.net.Proxy;
+ import java.security.KeyPair;
+ import java.text.SimpleDateFormat;
++import java.util.ArrayList;
+ import java.util.Arrays;
+ import java.util.Collections;
+ import java.util.Date;
+@@ -52,6 +56,7 @@
+ import net.minecraft.profiler.Profiler;
+ import net.minecraft.profiler.Snooper;
+ import net.minecraft.server.dedicated.DedicatedServer;
++import net.minecraft.server.dedicated.PropertyManager;
+ import net.minecraft.server.management.PlayerList;
+ import net.minecraft.server.management.PlayerProfileCache;
+ import net.minecraft.util.IProgressUpdate;
+@@ -85,13 +90,21 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.CraftServer;
++
++// CraftBukkit start
++import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.CraftServer;
++// CraftBukkit end
++
+ public abstract class MinecraftServer implements Runnable, ICommandSender, IThreadListener, ISnooperInfo
+ {
+-    private static final Logger field_147145_h = LogManager.getLogger();
++    public static final Logger field_147145_h = LogManager.getLogger();
+     public static final File field_152367_a = new File("usercache.json");
+     private final ISaveFormat field_71310_m;
+     private final Snooper field_71307_n = new Snooper("server", this, func_130071_aq());
+-    private final File field_71308_o;
++    public final File field_71308_o;
+     private final List<ITickable> field_71322_p = Lists.<ITickable>newArrayList();
+     protected final ICommandManager field_71321_q;
+     public final Profiler field_71304_b = new Profiler();
+@@ -143,6 +156,20 @@
+     protected final Queue < FutureTask<? >> field_175589_i = Queues. < FutureTask<? >> newArrayDeque();
+     private Thread field_175590_aa;
+     private long field_175591_ab = func_130071_aq();
++    
++    // CraftBukkit start
++    public List<WorldServer> worlds = new ArrayList<WorldServer>();
++    public org.bukkit.craftbukkit.CraftServer server;
++    public OptionSet options;
++    public org.bukkit.command.ConsoleCommandSender console;
++    public org.bukkit.command.RemoteConsoleCommandSender remoteConsole;
++    public ConsoleReader reader;
++    public static int currentTick = (int) (System.currentTimeMillis() / 50);
++    public Thread primaryThread;
++    public java.util.Queue<Runnable> processQueue = new java.util.concurrent.ConcurrentLinkedQueue<Runnable>();
++    public int autosavePeriod;
++    // CraftBukkit end
++    
+     @SideOnly(Side.CLIENT)
+     private boolean field_184111_ab;
+ 
+@@ -159,6 +186,9 @@
+         this.field_71310_m = new AnvilSaveConverter(p_i47054_1_, p_i47054_3_);
+         this.field_184112_s = p_i47054_3_;
+     }
++    
++    public PropertyManager getPropertyManager() {return null;};
++    // CraftBukkit end
+ 
+     protected ServerCommandManager func_175582_h()
+     {
+@@ -361,6 +391,11 @@
+         }
+     }
+ 
++    // CraftBukkit start
++    private boolean hasStopped = false;
++    private final Object stopLock = new Object();
++    // CraftBukkit end
++    
+     public void func_71260_j()
+     {
+         field_147145_h.info("Stopping server");
+@@ -1582,4 +1617,11 @@
+     {
+         return this.field_175590_aa;
+     }
++    
++    // CraftBukkit start
++    @Deprecated
++    public static MinecraftServer getServerStatic() {
++    	return (Bukkit.getServer() instanceof CraftServer) ? ((CraftServer) Bukkit.getServer()).getServer() : null;
++    }
++    // CraftBukkit end
+ }

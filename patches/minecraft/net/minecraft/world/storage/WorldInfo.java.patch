@@ -1,0 +1,42 @@
+--- ../src-base/minecraft/net/minecraft/world/storage/WorldInfo.java
++++ ../src-work/minecraft/net/minecraft/world/storage/WorldInfo.java
+@@ -13,11 +13,18 @@
+ import net.minecraft.world.DimensionType;
+ import net.minecraft.world.EnumDifficulty;
+ import net.minecraft.world.GameRules;
++import net.minecraft.world.WorldServer;
+ import net.minecraft.world.WorldSettings;
+ import net.minecraft.world.WorldType;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
+ 
++// CraftBukkit start
++import org.bukkit.Bukkit;
++import org.bukkit.event.weather.ThunderChangeEvent;
++import org.bukkit.event.weather.WeatherChangeEvent;
++// CraftBukkit end
++
+ public class WorldInfo
+ {
+     private String field_186349_b;
+@@ -62,6 +69,7 @@
+     private final Map<DimensionType, NBTTagCompound> field_186348_N = Maps.newEnumMap(DimensionType.class);
+     private GameRules field_82577_x = new GameRules();
+     private java.util.Map<String, net.minecraft.nbt.NBTBase> additionalProperties;
++    public WorldServer world; // CraftBukkit
+ 
+     protected WorldInfo()
+     {
+@@ -835,4 +843,12 @@
+     {
+         return this.field_186349_b;
+     }
++    
++    // CraftBukkit start - Check if the name stored in NBT is the correct one
++    public void checkName( String name ) {
++    	if ( !this.field_76106_k.equals( name ) ) {
++    		this.field_76106_k = name;
++    	}
++    }
++    // CraftBukkit end
+ }

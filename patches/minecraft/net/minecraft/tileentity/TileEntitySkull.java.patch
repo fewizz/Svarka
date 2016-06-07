@@ -1,0 +1,10 @@
+--- ../src-base/minecraft/net/minecraft/tileentity/TileEntitySkull.java
++++ ../src-work/minecraft/net/minecraft/tileentity/TileEntitySkull.java
+@@ -178,7 +178,6 @@
+         return this.field_145908_a;
+     }
+ 
+-    @SideOnly(Side.CLIENT)
+     public int func_145906_b()
+     {
+         return this.field_145910_i;

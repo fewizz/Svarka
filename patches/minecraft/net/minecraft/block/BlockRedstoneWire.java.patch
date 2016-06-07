@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/block/BlockRedstoneWire.java
++++ ../src-work/minecraft/net/minecraft/block/BlockRedstoneWire.java
+@@ -317,7 +317,7 @@
+         }
+     }
+ 
+-    private int func_176342_a(World p_176342_1_, BlockPos p_176342_2_, int p_176342_3_)
++    public int func_176342_a(World p_176342_1_, BlockPos p_176342_2_, int p_176342_3_)
+     {
+         if (p_176342_1_.func_180495_p(p_176342_2_).func_177230_c() != this)
+         {

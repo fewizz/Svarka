@@ -1,0 +1,13 @@
+--- ../src-base/minecraft/net/minecraft/inventory/InventoryLargeChest.java
++++ ../src-work/minecraft/net/minecraft/inventory/InventoryLargeChest.java
+@@ -13,8 +13,8 @@
+ public class InventoryLargeChest implements ILockableContainer
+ {
+     private String field_70479_a;
+-    private ILockableContainer field_70477_b;
+-    private ILockableContainer field_70478_c;
++    public ILockableContainer field_70477_b;
++    public ILockableContainer field_70478_c;
+ 
+     public InventoryLargeChest(String p_i45905_1_, ILockableContainer p_i45905_2_, ILockableContainer p_i45905_3_)
+     {

@@ -268,7 +268,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public void chat(String msg) {
         if (getHandle().connection == null) return;
 
-        getHandle().connection.chat(msg, false);
+        //getHandle().connection.chat(msg, false); //TODO!!!
     }
 
     @Override
@@ -462,7 +462,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
             return false;
         }
 
-        if (entity.connection == null || entity.connection.isDisconnected()) {
+        if (entity.connection == null) { //|| entity.connection.isDisconnected()) { //TODO!!!
            return false;
         }
 
@@ -501,9 +501,9 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
         // Check if the fromWorld and toWorld are the same.
         if (fromWorld == toWorld) {
-            entity.connection.teleport(to);
+            //entity.connection.teleport(to); TODO!!!!
         } else {
-            server.getHandle().moveToWorld(entity, toWorld.dimension, true, to, true);
+            //server.getHandle().moveToWorld(entity, toWorld.dimension, true, to, true); TODO!!!
         }
         return true;
     }
@@ -547,7 +547,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     @Override
     public void setSleepingIgnored(boolean isSleeping) {
         getHandle().fauxSleeping = isSleeping;
-        ((CraftWorld) getWorld()).getHandle().checkSleepStatus();
+        //((CraftWorld) getWorld()).getHandle().checkSleepStatus(); TODO!!!!
     }
 
     @Override
@@ -1272,9 +1272,9 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         if (playerConnection == null) {
             throw new IllegalStateException("Cannot set scoreboard yet");
         }
-        if (playerConnection.isDisconnected()) {
-            throw new IllegalStateException("Cannot set scoreboard for invalid CraftPlayer");
-        }
+        //if (playerConnection.isDisconnected()) { TODO!!!!
+        //    throw new IllegalStateException("Cannot set scoreboard for invalid CraftPlayer");
+        //}
 
         this.server.getScoreboardManager().setPlayerBoard(this, scoreboard);
     }

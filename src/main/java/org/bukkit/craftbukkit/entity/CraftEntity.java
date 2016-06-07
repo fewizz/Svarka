@@ -66,6 +66,7 @@ import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.EntityMooshroom;
 import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.entity.passive.EntityPig;
 import net.minecraft.entity.passive.EntityRabbit;
@@ -210,7 +211,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         }
         else if (entity instanceof EntityDragonPart) {
         	EntityDragonPart part = (EntityDragonPart) entity;
-            if (part.owner instanceof EntityDragon) { return new CraftEnderDragonPart(server, (EntityDragonPart) entity); }
+            if (part.entityDragonObj instanceof EntityDragon) { return new CraftEnderDragonPart(server, (EntityDragonPart) entity); }
             else { return new CraftComplexPart(server, (EntityDragonPart) entity); }
         }
         else if (entity instanceof EntityXPOrb) { return new CraftExperienceOrb(server, (EntityXPOrb) entity); }
@@ -229,7 +230,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
             	else { return new CraftLingeringPotion(server, (EntityPotion) entity); }
             }
             else if (entity instanceof EntityEnderPearl) { return new CraftEnderPearl(server, (EntityEnderPearl) entity); }
-            else if (entity instanceof EntityExpBottle) { return new CraftThrownExpBottle(server, (EntityThrownExpBottle) entity); }
+            else if (entity instanceof EntityExpBottle) { return new CraftThrownExpBottle(server, (EntityExpBottle) entity); }
         }
         else if (entity instanceof EntityFallingBlock) { return new CraftFallingSand(server, (EntityFallingBlock) entity); }
         else if (entity instanceof EntityFireball) {

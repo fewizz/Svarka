@@ -265,7 +265,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
                 break;
             case ANVIL:
                 if (iinventory instanceof BlockAnvil.Anvil) {
-                    getHandle().displayGUIChest((BlockAnvil.Anvil) iinventory);
+                    getHandle().displayGui((BlockAnvil.Anvil) iinventory);
                 } else {
                     openCustomInventory(inventory, player, "minecraft:anvil");
                 }
@@ -283,7 +283,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
 
     private void openCustomInventory(Inventory inventory, EntityPlayerMP player, String windowType) {
         if (player.connection == null) return;
-        Container container = new CraftContainer(inventory, this, player.nextContainerCounter());
+        Container container = new CraftContainer(inventory, this, player.getNextWindowId());
 
         container = CraftEventFactory.callInventoryOpenEvent(player, container);
         if(container == null) return;
@@ -357,7 +357,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         if (inventory instanceof CraftInventoryView) {
             container = ((CraftInventoryView) inventory).getHandle();
         } else {
-            container = new CraftContainer(inventory, player.nextContainerCounter());
+            container = new CraftContainer(inventory, player.getNextWindowId());
         }
 
         // Trigger an INVENTORY_OPEN event

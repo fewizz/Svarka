@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/inventory/InventoryMerchant.java
++++ ../src-work/minecraft/net/minecraft/inventory/InventoryMerchant.java
+@@ -16,7 +16,7 @@
+     private ItemStack[] field_70474_b = new ItemStack[3];
+     private final EntityPlayer field_70475_c;
+     private MerchantRecipe field_70472_d;
+-    private int field_70473_e;
++    public int field_70473_e;
+ 
+     public InventoryMerchant(EntityPlayer p_i1820_1_, IMerchant p_i1820_2_)
+     {

@@ -1,0 +1,7 @@
+--- ../src-base/minecraft/ibxm/Envelope.java
++++ ../src-work/minecraft/ibxm/Envelope.java
+@@ -108,4 +108,3 @@
+ 		}
+ 	}
+ }
+-

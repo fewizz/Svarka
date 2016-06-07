@@ -50,12 +50,13 @@ public class CraftMerchantRecipe extends MerchantRecipe {
 
     @Override
     public boolean hasExperienceReward() {
-        return handle.rewardExp;
+        //return handle.rewardExp;
+    	return false; //TODO!!!
     }
 
     @Override
     public void setExperienceReward(boolean flag) {
-        handle.rewardExp = flag;
+        //handle.rewardExp = flag; TODO!!!
     }
 
     public net.minecraft.village.MerchantRecipe toMinecraft() {

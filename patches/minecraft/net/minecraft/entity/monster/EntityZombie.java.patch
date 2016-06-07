@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/entity/monster/EntityZombie.java
++++ ../src-work/minecraft/net/minecraft/entity/monster/EntityZombie.java
+@@ -693,7 +693,7 @@
+         this.func_146069_a(p_146071_1_ ? 0.5F : 1.0F);
+     }
+ 
+-    protected final void func_70105_a(float p_70105_1_, float p_70105_2_)
++    public final void func_70105_a(float p_70105_1_, float p_70105_2_)
+     {
+         boolean flag = this.field_146074_bv > 0.0F && this.field_146073_bw > 0.0F;
+         this.field_146074_bv = p_70105_1_;

@@ -1,0 +1,40 @@
+--- ../src-base/minecraft/net/minecraft/world/Explosion.java
++++ ../src-work/minecraft/net/minecraft/world/Explosion.java
+@@ -27,6 +27,13 @@
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
+ 
++// CraftBukkit start
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.EntityExplodeEvent;
++import org.bukkit.Location;
++import org.bukkit.event.block.BlockExplodeEvent;
++// CraftBukkit end
++
+ public class Explosion
+ {
+     private final boolean field_77286_a;
+@@ -36,11 +43,12 @@
+     private final double field_77284_b;
+     private final double field_77285_c;
+     private final double field_77282_d;
+-    private final Entity field_77283_e;
++    public final Entity field_77283_e;
+     private final float field_77280_f;
+     private final List<BlockPos> field_77281_g;
+     private final Map<EntityPlayer, Vec3d> field_77288_k;
+     private final Vec3d position;
++    public boolean wasCanceled = false; // CraftBukkit - add field
+ 
+     @SideOnly(Side.CLIENT)
+     public Explosion(World p_i45752_1_, Entity p_i45752_2_, double p_i45752_3_, double p_i45752_5_, double p_i45752_7_, float p_i45752_9_, List<BlockPos> p_i45752_10_)
+@@ -62,7 +70,8 @@
+         this.field_77288_k = Maps.<EntityPlayer, Vec3d>newHashMap();
+         this.field_77287_j = p_i45754_1_;
+         this.field_77283_e = p_i45754_2_;
+-        this.field_77280_f = p_i45754_9_;
++        //this.explosionSize = size;
++        this.field_77280_f = (float) Math.max(p_i45754_9_, 0.0); // CraftBukkit - clamp bad values
+         this.field_77284_b = p_i45754_3_;
+         this.field_77285_c = p_i45754_5_;
+         this.field_77282_d = p_i45754_7_;

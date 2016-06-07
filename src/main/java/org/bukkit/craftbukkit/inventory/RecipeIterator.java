@@ -28,7 +28,8 @@ public class RecipeIterator implements Iterator<Recipe> {
     public Recipe next() {
         if (recipes.hasNext()) {
             removeFrom = recipes;
-            return recipes.next().toBukkitRecipe();
+            //return recipes.next().toBukkitRecipe(); TODO!!!
+            return null;
         } else {
             ItemStack item;
             if (smeltingCustom.hasNext()) {

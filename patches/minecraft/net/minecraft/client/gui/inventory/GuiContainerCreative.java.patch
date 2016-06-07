@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/client/gui/inventory/GuiContainerCreative.java
++++ ../src-work/minecraft/net/minecraft/client/gui/inventory/GuiContainerCreative.java
+@@ -33,6 +33,8 @@
+ import net.minecraft.util.text.TextFormatting;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++
++import org.bukkit.inventory.InventoryView;
+ import org.lwjgl.input.Keyboard;
+ import org.lwjgl.input.Mouse;
+ 

@@ -1,0 +1,7 @@
+--- ../src-base/minecraft/ibxm/FastTracker2.java
++++ ../src-work/minecraft/ibxm/FastTracker2.java
+@@ -254,4 +254,3 @@
+ 		return string;
+ 	}
+ }
+-

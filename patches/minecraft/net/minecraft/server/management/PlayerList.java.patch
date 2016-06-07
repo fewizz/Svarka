@@ -1,0 +1,19 @@
+--- ../src-base/minecraft/net/minecraft/server/management/PlayerList.java
++++ ../src-work/minecraft/net/minecraft/server/management/PlayerList.java
+@@ -74,14 +74,14 @@
+     private static final Logger field_148546_d = LogManager.getLogger();
+     private static final SimpleDateFormat field_72403_e = new SimpleDateFormat("yyyy-MM-dd \'at\' HH:mm:ss z");
+     private final MinecraftServer field_72400_f;
+-    private final List<EntityPlayerMP> field_72404_b = Lists.<EntityPlayerMP>newArrayList();
++    public final List<EntityPlayerMP> field_72404_b = Lists.<EntityPlayerMP>newArrayList();
+     private final Map<UUID, EntityPlayerMP> field_177454_f = Maps.<UUID, EntityPlayerMP>newHashMap();
+     private final UserListBans field_72401_g;
+     private final UserListIPBans field_72413_h;
+     private final UserListOps field_72414_i;
+     private final UserListWhitelist field_72411_j;
+     private final Map<UUID, StatisticsManagerServer> field_148547_k;
+-    private IPlayerFileData field_72412_k;
++    public IPlayerFileData field_72412_k;
+     private boolean field_72409_l;
+     protected int field_72405_c;
+     private int field_72402_d;

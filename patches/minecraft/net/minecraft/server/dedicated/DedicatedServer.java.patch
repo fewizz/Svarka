@@ -1,0 +1,14 @@
+--- ../src-base/minecraft/net/minecraft/server/dedicated/DedicatedServer.java
++++ ../src-work/minecraft/net/minecraft/server/dedicated/DedicatedServer.java
+@@ -48,9 +48,9 @@
+     private static final Logger field_155771_h = LogManager.getLogger();
+     public final List<PendingCommand> field_71341_l = Collections.<PendingCommand>synchronizedList(Lists.<PendingCommand>newArrayList());
+     private RConThreadQuery field_71342_m;
+-    private final RConConsoleSource field_184115_n = new RConConsoleSource(this);
++    public final RConConsoleSource field_184115_n = new RConConsoleSource(this);
+     private RConThreadMain field_71339_n;
+-    private PropertyManager field_71340_o;
++    public PropertyManager field_71340_o;
+     private ServerEula field_154332_n;
+     private boolean field_71338_p;
+     private WorldSettings.GameType field_71337_q;

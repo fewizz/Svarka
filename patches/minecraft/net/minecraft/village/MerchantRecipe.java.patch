@@ -1,0 +1,39 @@
+--- ../src-base/minecraft/net/minecraft/village/MerchantRecipe.java
++++ ../src-work/minecraft/net/minecraft/village/MerchantRecipe.java
+@@ -6,15 +6,31 @@
+ import net.minecraft.nbt.NBTTagCompound;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.inventory.CraftMerchantRecipe; // CraftBukkit
+ 
++import org.bukkit.craftbukkit.inventory.CraftMerchantRecipe;
++
+ public class MerchantRecipe
+ {
+-    private ItemStack field_77403_a;
+-    private ItemStack field_77401_b;
+-    private ItemStack field_77402_c;
+-    private int field_77400_d;
+-    private int field_82786_e;
++    public ItemStack field_77403_a;
++    public ItemStack field_77401_b;
++    public ItemStack field_77402_c;
++    public int field_77400_d;
++    public int field_82786_e;
+     private boolean field_180323_f;
++    
++    // CraftBukkit start
++    private CraftMerchantRecipe bukkitHandle;
++    
++    public CraftMerchantRecipe asBukkit() {
++    	return (bukkitHandle == null) ? bukkitHandle = new CraftMerchantRecipe(this) : bukkitHandle;
++    }
++    
++    public MerchantRecipe(ItemStack itemstack, ItemStack itemstack1, ItemStack itemstack2, int i, int j, CraftMerchantRecipe bukkit) {
++    	this(itemstack, itemstack1, itemstack2, i, j);
++    	this.bukkitHandle = bukkit;
++    }
++    // CraftBukkit end
+ 
+     public MerchantRecipe(NBTTagCompound p_i1940_1_)
+     {

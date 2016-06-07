@@ -1,0 +1,7 @@
+--- ../src-base/minecraft/ibxm/IBXM.java
++++ ../src-work/minecraft/ibxm/IBXM.java
+@@ -340,4 +340,3 @@
+ 		}
+ 	}
+ }
+-

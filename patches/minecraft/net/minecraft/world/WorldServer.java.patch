@@ -1,0 +1,54 @@
+--- ../src-base/minecraft/net/minecraft/world/WorldServer.java
++++ ../src-work/minecraft/net/minecraft/world/WorldServer.java
+@@ -79,11 +79,25 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++import org.bukkit.craftbukkit.CraftWorld;
++
++// CraftBukkit start
++import java.util.logging.Level;
++
++import org.bukkit.WeatherType;
++import org.bukkit.block.BlockState;
++import org.bukkit.craftbukkit.CraftWorld;
++import org.bukkit.craftbukkit.util.HashTreeSet;
++
++import org.bukkit.event.block.BlockFormEvent;
++import org.bukkit.event.weather.LightningStrikeEvent;
++// CraftBukkit end
++
+ public class WorldServer extends World implements IThreadListener
+ {
+     private static final Logger field_147491_a = LogManager.getLogger();
+     private final MinecraftServer field_73061_a;
+-    private final EntityTracker field_73062_L;
++    public EntityTracker field_73062_L;
+     private final PlayerChunkMap field_73063_M;
+     private final Set<NextTickListEntry> field_73064_N = Sets.<NextTickListEntry>newHashSet();
+     private final TreeSet<NextTickListEntry> field_73065_O = new TreeSet();
+@@ -101,10 +115,24 @@
+     /** Stores the recently processed (lighting) chunks */
+     protected Set<ChunkPos> doneChunks = new java.util.HashSet<ChunkPos>();
+     public List<Teleporter> customTeleporters = new ArrayList<Teleporter>();
++    
++    // CraftBukkit start
++    public int dimension;
+ 
++    public WorldServer(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn, org.bukkit.World.Environment env, org.bukkit.generator.ChunkGenerator gen)
++    {
++    	this(server, saveHandlerIn, info, dimensionId, profilerIn);
++    	this.dimension = dimensionId;
++    	this.generator = gen;
++    	this.world = new CraftWorld((WorldServer) this, gen, env);
++    }
+     public WorldServer(MinecraftServer p_i45921_1_, ISaveHandler p_i45921_2_, WorldInfo p_i45921_3_, int p_i45921_4_, Profiler p_i45921_5_)
+     {
+         super(p_i45921_2_, p_i45921_3_, net.minecraftforge.common.DimensionManager.createProviderFor(p_i45921_4_), p_i45921_5_, false);
++    	//this.pvpMode = server.getPVP(); //TODO
++    	//info.world = this;//TODO
++    	// CraftBukkit end
++        
+         this.field_73061_a = p_i45921_1_;
+         this.field_73062_L = new EntityTracker(this);
+         this.field_73063_M = new PlayerChunkMap(this);

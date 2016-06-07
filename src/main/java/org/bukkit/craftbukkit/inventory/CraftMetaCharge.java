@@ -60,7 +60,7 @@ class CraftMetaCharge extends CraftMetaItem implements FireworkEffectMeta {
         super.applyToItem(itemTag);
 
         if (hasEffect()) {
-            itemTag.set(EXPLOSION.NBT, CraftMetaFirework.getExplosion(effect));
+            itemTag.setTag(EXPLOSION.NBT, CraftMetaFirework.getExplosion(effect));
         }
     }
 

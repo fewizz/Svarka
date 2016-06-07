@@ -1,0 +1,86 @@
+--- ../src-base/minecraft/net/minecraft/server/management/PlayerChunkMap.java
++++ ../src-work/minecraft/net/minecraft/server/management/PlayerChunkMap.java
+@@ -21,6 +21,10 @@
+ import net.minecraft.world.WorldServer;
+ import net.minecraft.world.chunk.Chunk;
+ 
++// CraftBukkit start
++import java.util.LinkedList;
++// CraftBukkit end
++
+ public class PlayerChunkMap
+ {
+     private static final Predicate<EntityPlayerMP> field_187308_a = new Predicate<EntityPlayerMP>()
+@@ -48,6 +52,7 @@
+     private long field_111192_g;
+     private boolean field_187312_l = true;
+     private boolean field_187313_m = true;
++    private boolean wasNotEmpty; // CraftBukkit - add field
+ 
+     public PlayerChunkMap(WorldServer p_i1176_1_)
+     {
+@@ -256,6 +261,16 @@
+ 
+         return playerchunkmapentry;
+     }
++    
++    // CraftBukkit start - add method
++    public final boolean isChunkInUse(int x, int z) {
++    	PlayerChunkMapEntry pi = func_187301_b(x, z);
++    	if (pi != null) {
++    		return (pi.field_187283_c.size() > 0);
++    	}
++    	return false;
++    }
++    // CraftBukkit end
+ 
+     public void func_180244_a(BlockPos p_180244_1_)
+     {
+@@ -455,4 +470,47 @@
+             this.func_72688_a().func_72863_F().func_189549_a(chunk);
+         }
+     }
++    
++ // CraftBukkit start - Sorter to load nearby chunks first
++    private static class ChunkCoordComparator implements java.util.Comparator<ChunkPos> {
++    	private int x;
++    	private int z;
++    
++    	public ChunkCoordComparator (EntityPlayerMP entityplayer) {
++    		x = (int) entityplayer.field_70165_t >> 4;
++        	z = (int) entityplayer.field_70161_v >> 4;
++    	}
++    
++    	public int compare(ChunkPos a, ChunkPos b) {
++    		if (a.equals(b)) {
++    			return 0;
++    		}
++    
++    		// Subtract current position to set center point
++    		int ax = a.field_77276_a - this.x;
++    		int az = a.field_77275_b - this.z;
++    		int bx = b.field_77276_a - this.x;
++    		int bz = b.field_77275_b - this.z;
++    
++    		int result = ((ax - bx) * (ax + bx)) + ((az - bz) * (az + bz));
++    		if (result != 0) {
++    			return result;
++    		}
++    
++    		if (ax < 0) {
++    			if (bx < 0) {
++    				return bz - az;
++    			} else {
++    				return -1;
++    			}
++    		} else {
++    			if (bx < 0) {
++    				return 1;
++    			} else {
++    				return az - bz;
++    			}
++    		}
++    	}
++    }
++    // CraftBukkit end
+ }

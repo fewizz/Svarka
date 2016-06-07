@@ -1,0 +1,49 @@
+--- ../src-base/minecraft/net/minecraft/entity/projectile/EntityArrow.java
++++ ../src-work/minecraft/net/minecraft/entity/projectile/EntityArrow.java
+@@ -34,6 +34,14 @@
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
+ 
++import org.bukkit.entity.LivingEntity;
++
++//CraftBukkit start
++import org.bukkit.entity.LivingEntity;
++import org.bukkit.event.entity.EntityCombustByEntityEvent;
++import org.bukkit.event.player.PlayerPickupArrowEvent;
++// CraftBukkit end
++
+ public abstract class EntityArrow extends Entity implements IProjectile
+ {
+     private static final Predicate<Entity> field_184553_f = Predicates.and(new Predicate[] {EntitySelectors.field_180132_d, EntitySelectors.field_94557_a, new Predicate<Entity>()
+@@ -58,7 +66,7 @@
+     private int field_70252_j;
+     private int field_70257_an;
+     private double field_70255_ao;
+-    private int field_70256_ap;
++    public int field_70256_ap;
+ 
+     public EntityArrow(World p_i1753_1_)
+     {
+@@ -81,7 +89,8 @@
+     {
+         this(p_i46777_1_, p_i46777_2_.field_70165_t, p_i46777_2_.field_70163_u + (double)p_i46777_2_.func_70047_e() - 0.10000000149011612D, p_i46777_2_.field_70161_v);
+         this.field_70250_c = p_i46777_2_;
+-
++        this.projectileSource = (LivingEntity) p_i46777_2_.getBukkitEntity(); // CraftBukkit
++        
+         if (p_i46777_2_ instanceof EntityPlayer)
+         {
+             this.field_70251_a = EntityArrow.PickupStatus.ALLOWED;
+@@ -608,6 +617,12 @@
+         byte b0 = ((Byte)this.field_70180_af.func_187225_a(field_184554_g)).byteValue();
+         return (b0 & 1) != 0;
+     }
++    
++    // CraftBukkit start
++    public boolean isInGround() {
++    	return field_70254_i;
++    }
++    // CraftBukkit end
+ 
+     public static enum PickupStatus
+     {

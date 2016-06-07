@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/org/bukkit/event/entity/EntityTargetLivingEntityEvent.java
++++ ../src-work/minecraft/org/bukkit/event/entity/EntityTargetLivingEntityEvent.java
+@@ -3,6 +3,8 @@
+ import org.bukkit.entity.Entity;
+ import org.bukkit.entity.LivingEntity;
+ 
++import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
++
+ /**
+  * Called when an Entity targets a {@link LivingEntity} and can only target
+  * LivingEntity's.

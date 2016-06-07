@@ -101,7 +101,7 @@ public class CraftTippedArrow extends CraftArrow implements TippedArrow {
         if (existing == null) {
             return false;
         }
-        Validate.isTrue(getBasePotionData().getType() != PotionType.UNCRAFTABLE || getHandle().h.size() != 1, "Tipped Arrows must have at least 1 effect");
+        Validate.isTrue(getBasePotionData().getType() != PotionType.UNCRAFTABLE || getHandle().customPotionEffects.size() != 1, "Tipped Arrows must have at least 1 effect");
         getHandle().customPotionEffects.remove(existing);
         getHandle().refreshEffects();
         return true;
@@ -110,7 +110,7 @@ public class CraftTippedArrow extends CraftArrow implements TippedArrow {
     @Override
     public void setBasePotionData(PotionData data) {
         Validate.notNull(data, "PotionData cannot be null");
-        Validate.isTrue(data.getType() != PotionType.UNCRAFTABLE || !getHandle().h.isEmpty(), "Tipped Arrows must have at least 1 effect");
+        Validate.isTrue(data.getType() != PotionType.UNCRAFTABLE || !getHandle().customPotionEffects.isEmpty(), "Tipped Arrows must have at least 1 effect");
         getHandle().setType(CraftPotionUtil.fromBukkit(data));
     }
 

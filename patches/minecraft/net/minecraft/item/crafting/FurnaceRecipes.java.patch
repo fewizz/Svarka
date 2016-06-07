@@ -1,0 +1,35 @@
+--- ../src-base/minecraft/net/minecraft/item/crafting/FurnaceRecipes.java
++++ ../src-work/minecraft/net/minecraft/item/crafting/FurnaceRecipes.java
+@@ -16,15 +16,17 @@
+ public class FurnaceRecipes
+ {
+     private static final FurnaceRecipes field_77606_a = new FurnaceRecipes();
+-    private Map<ItemStack, ItemStack> field_77604_b = Maps.<ItemStack, ItemStack>newHashMap();
++    public Map<ItemStack, ItemStack> field_77604_b = Maps.<ItemStack, ItemStack>newHashMap();
+     private Map<ItemStack, Float> field_77605_c = Maps.<ItemStack, Float>newHashMap();
++    public Map<ItemStack,ItemStack> customRecipes = Maps.newHashMap(); // CraftBukkit - add field
++    public Map<ItemStack,Float> customExperience = Maps.newHashMap(); // CraftBukkit - add field
+ 
+     public static FurnaceRecipes func_77602_a()
+     {
+         return field_77606_a;
+     }
+ 
+-    private FurnaceRecipes()
++    public FurnaceRecipes()
+     {
+         this.func_151393_a(Blocks.field_150366_p, new ItemStack(Items.field_151042_j), 0.7F);
+         this.func_151393_a(Blocks.field_150352_o, new ItemStack(Items.field_151043_k), 1.0F);
+@@ -61,6 +63,12 @@
+         this.func_151393_a(Blocks.field_150369_x, new ItemStack(Items.field_151100_aR, 1, EnumDyeColor.BLUE.func_176767_b()), 0.2F);
+         this.func_151393_a(Blocks.field_150449_bY, new ItemStack(Items.field_151128_bU), 0.2F);
+     }
++    
++    // CraftBukkit start - add method
++    public void registerRecipe(ItemStack itemstack, ItemStack itemstack1, float f) {
++    	this.customRecipes.put(itemstack, itemstack1);
++    }
++    // CraftBukkit end
+ 
+     public void func_151393_a(Block p_151393_1_, ItemStack p_151393_2_, float p_151393_3_)
+     {

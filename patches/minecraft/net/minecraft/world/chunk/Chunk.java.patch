@@ -1,0 +1,79 @@
+--- ../src-base/minecraft/net/minecraft/world/chunk/Chunk.java
++++ ../src-work/minecraft/net/minecraft/world/chunk/Chunk.java
+@@ -40,6 +40,9 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++import com.google.common.collect.Lists; // CraftBukkit
++import org.bukkit.Bukkit; // CraftBukkit
++
+ public class Chunk
+ {
+     private static final Logger field_150817_t = LogManager.getLogger();
+@@ -49,13 +52,13 @@
+     private final int[] field_76638_b;
+     private final boolean[] field_76639_c;
+     private boolean field_76636_d;
+-    private final World field_76637_e;
+-    private final int[] field_76634_f;
++    public final World field_76637_e;
++    public final int[] field_76634_f;
+     public final int field_76635_g;
+     public final int field_76647_h;
+     private boolean field_76650_s;
+-    private final Map<BlockPos, TileEntity> field_150816_i;
+-    private final ClassInheritanceMultiMap<Entity>[] field_76645_j;
++    public final Map<BlockPos, TileEntity> field_150816_i;
++    public final ClassInheritanceMultiMap<Entity>[] field_76645_j;
+     private boolean field_76646_k;
+     private boolean field_150814_l;
+     private boolean field_150815_m;
+@@ -67,6 +70,34 @@
+     private int field_76649_t;
+     private ConcurrentLinkedQueue<BlockPos> field_177447_w;
+     public boolean field_189550_d;
++    
++    // CraftBukkit start - Neighbor loaded cache for chunk lighting and entity ticking
++    private int neighbors = 0x1 << 12;
++    	
++    public boolean areNeighborsLoaded(final int radius) {
++    	switch (radius) {
++    		case 2:
++    			return this.neighbors == Integer.MAX_VALUE >> 6;
++			case 1:
++				final int mask =
++				//       x        z   offset          x        z   offset          x         z   offset
++				(0x1 << (1 * 5 +  1 + 12)) | (0x1 << (0 * 5 +  1 + 12)) | (0x1 << (-1 * 5 +  1 + 12)) |
++				(0x1 << (1 * 5 +  0 + 12)) | (0x1 << (0 * 5 +  0 + 12)) | (0x1 << (-1 * 5 +  0 + 12)) |
++				(0x1 << (1 * 5 + -1 + 12)) | (0x1 << (0 * 5 + -1 + 12)) | (0x1 << (-1 * 5 + -1 + 12));
++				return (this.neighbors & mask) == mask;
++			default:
++				throw new UnsupportedOperationException(String.valueOf(radius));
++    	}
++    }
++    
++    public void setNeighborLoaded(final int x, final int z) {
++    	this.neighbors |= 0x1 << (x * 5 + 12 + z);
++    }
++    
++    public void setNeighborUnloaded(final int x, final int z) {
++    	this.neighbors &= ~(0x1 << (x * 5 + 12 + z));
++    }
++    // CraftBukkit end
+ 
+     public Chunk(World p_i1995_1_, int p_i1995_2_, int p_i1995_3_)
+     {
+@@ -90,7 +121,13 @@
+ 
+         Arrays.fill((int[])this.field_76638_b, (int) - 999);
+         Arrays.fill(this.field_76651_r, (byte) - 1);
++        // CraftBukkit start
++        this.bukkitChunk = new org.bukkit.craftbukkit.CraftChunk(this);
+     }
++    
++    public org.bukkit.Chunk bukkitChunk;
++    public boolean mustSave;
++    // CraftBukkit end
+ 
+     public Chunk(World p_i45645_1_, ChunkPrimer p_i45645_2_, int p_i45645_3_, int p_i45645_4_)
+     {

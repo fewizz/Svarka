@@ -26,12 +26,12 @@ public abstract class CraftMinecart extends CraftVehicle implements Minecart {
     }
 
     public double getMaxSpeed() {
-        return getHandle().maxSpeed;
+        return getHandle().defaultMaxSpeedAirLateral;
     }
 
     public void setMaxSpeed(double speed) {
         if (speed >= 0D) {
-            getHandle().maxSpeed = speed;
+            getHandle().defaultMaxSpeedAirLateral = (float) speed;
         }
     }
 

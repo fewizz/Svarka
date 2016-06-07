@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/org/bukkit/event/player/PlayerUnleashEntityEvent.java
++++ ../src-work/minecraft/org/bukkit/event/player/PlayerUnleashEntityEvent.java
+@@ -5,6 +5,8 @@
+ import org.bukkit.event.Cancellable;
+ import org.bukkit.event.entity.EntityUnleashEvent;
+ 
++import org.bukkit.event.entity.EntityUnleashEvent.UnleashReason;
++
+ /**
+  * Called prior to an entity being unleashed due to a player's action.
+  */

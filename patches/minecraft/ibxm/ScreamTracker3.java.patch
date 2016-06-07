@@ -1,0 +1,7 @@
+--- ../src-base/minecraft/ibxm/ScreamTracker3.java
++++ ../src-work/minecraft/ibxm/ScreamTracker3.java
+@@ -487,4 +487,3 @@
+ 		return string;
+ 	}
+ }
+-

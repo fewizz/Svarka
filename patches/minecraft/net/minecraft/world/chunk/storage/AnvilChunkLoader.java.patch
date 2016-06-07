@@ -1,0 +1,18 @@
+--- ../src-base/minecraft/net/minecraft/world/chunk/storage/AnvilChunkLoader.java
++++ ../src-work/minecraft/net/minecraft/world/chunk/storage/AnvilChunkLoader.java
+@@ -47,6 +47,7 @@
+         this.field_186055_e = p_i46673_2_;
+     }
+ 
++    // CraftBukkit start
+     public boolean chunkExists(World world, int x, int z)
+     {
+         ChunkPos chunkcoordintpair = new ChunkPos(x, z);
+@@ -64,6 +65,7 @@
+ 
+         return RegionFileCache.func_76550_a(this.field_75825_d, x, z).chunkExists(x & 31, z & 31);
+     }
++    // CraftBukkit end
+ 
+ 
+     @Nullable

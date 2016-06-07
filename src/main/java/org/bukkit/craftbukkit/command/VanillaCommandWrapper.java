@@ -63,7 +63,7 @@ public final class VanillaCommandWrapper extends VanillaCommand {
         Validate.notNull(sender, "Sender cannot be null");
         Validate.notNull(args, "Arguments cannot be null");
         Validate.notNull(alias, "Alias cannot be null");
-        return (List<String>) vanillaCommand.tabComplete(MinecraftServer.getServerStatic(), getListener(sender), args, new BlockPos(0, 0, 0));
+        return (List<String>) vanillaCommand.getTabCompletionOptions(MinecraftServer.getServerStatic(), getListener(sender), args, new BlockPos(0, 0, 0));
     }
 
     public static CommandSender lastSender = null; // Nasty :(
@@ -74,22 +74,22 @@ public final class VanillaCommandWrapper extends VanillaCommand {
         int j = 0;
         // Some commands use the worldserver variable but we leave it full of null values,
         // so we must temporarily populate it with the world of the commandsender
-        WorldServer[] prev = MinecraftServer.getServerStatic().worldServer;
+        WorldServer[] prev = MinecraftServer.getServerStatic().worldServers;
         MinecraftServer server = MinecraftServer.getServerStatic();
-        server.worldServer = new WorldServer[server.worlds.size()];
-        server.worldServer[0] = (WorldServer) icommandlistener.getEntityWorld();
+        server.worldServers = new WorldServer[server.worlds.size()];
+        server.worldServers[0] = (WorldServer) icommandlistener.getEntityWorld();
         int bpos = 0;
-        for (int pos = 1; pos < server.worldServer.length; pos++) {
+        for (int pos = 1; pos < server.worldServers.length; pos++) {
             WorldServer world = server.worlds.get(bpos++);
-            if (server.worldServer[0] == world) {
+            if (server.worldServers[0] == world) {
                 pos--;
                 continue;
             }
-            server.worldServer[pos] = world;
+            server.worldServers[pos] = world;
         }
 
         try {
-            if (vanillaCommand.canUse(server, icommandlistener)) {
+            if (vanillaCommand.checkPermission(server, icommandlistener)) {
                 if (i > -1) {
                     List<Entity> list = ((List<Entity>)EntitySelector.matchEntities(icommandlistener, as[i], Entity.class));
                     String s2 = as[i];
@@ -107,7 +107,7 @@ public final class VanillaCommandWrapper extends VanillaCommand {
                             vanillaCommand.execute(server, icommandlistener, as);
                             j++;
                         } catch (WrongUsageException exceptionusage) {
-                        	TextComponentTranslation chatmessage = new TextComponentTranslation("commands.generic.usage", new Object[] { new TextComponentTranslation(exceptionusage.getMessage(), exceptionusage.getArgs())});
+                        	TextComponentTranslation chatmessage = new TextComponentTranslation("commands.generic.usage", new Object[] { new TextComponentTranslation(exceptionusage.getMessage(), exceptionusage.getErrorObjects())});
                             chatmessage.getStyle().setColor(TextFormatting.RED);
                             icommandlistener.addChatMessage(chatmessage);
                         } catch (CommandException commandexception) {
@@ -128,25 +128,25 @@ public final class VanillaCommandWrapper extends VanillaCommand {
                 icommandlistener.addChatMessage(chatmessage);
             }
         } catch (WrongUsageException exceptionusage) {
-        	TextComponentTranslation chatmessage1 = new TextComponentTranslation("commands.generic.usage", new Object[] { new TextComponentTranslation(exceptionusage.getMessage(), exceptionusage.getArgs()) });
+        	TextComponentTranslation chatmessage1 = new TextComponentTranslation("commands.generic.usage", new Object[] { new TextComponentTranslation(exceptionusage.getMessage(), exceptionusage.getErrorObjects()) });
             chatmessage1.getStyle().setColor(TextFormatting.RED);
             icommandlistener.addChatMessage(chatmessage1);
         } catch (CommandException commandexception) {
-        	CommandBase.notifyCommandListener(icommandlistener, vanillaCommand, 0, commandexception.getMessage(), commandexception.getArgs());
+        	CommandBase.notifyCommandListener(icommandlistener, vanillaCommand, 0, commandexception.getMessage(), commandexception.getErrorObjects());
         } catch (Throwable throwable) {
         	TextComponentTranslation chatmessage3 = new TextComponentTranslation("commands.generic.exception", new Object[0]);
             chatmessage3.getStyle().setColor(TextFormatting.RED);
             icommandlistener.addChatMessage(chatmessage3);
             if (icommandlistener.getCommandSenderEntity() instanceof EntityMinecartCommandBlock) {
-                MinecraftServer.LOGGER.log(Level.WARN, String.format("MinecartCommandBlock at (%d,%d,%d) failed to handle command", icommandlistener.getPosition().getX(), icommandlistener.getPosition().getY(), icommandlistener.getPosition().getZ()), throwable);
+                MinecraftServer.LOG.log(Level.WARN, String.format("MinecartCommandBlock at (%d,%d,%d) failed to handle command", icommandlistener.getPosition().getX(), icommandlistener.getPosition().getY(), icommandlistener.getPosition().getZ()), throwable);
             } else if(icommandlistener instanceof CommandBlockBaseLogic) {
             	CommandBlockBaseLogic listener = (CommandBlockBaseLogic) icommandlistener;
-                MinecraftServer.LOGGER.log(Level.WARN, String.format("CommandBlock at (%d,%d,%d) failed to handle command", listener.getPosition().getX(), listener.getPosition().getY(), listener.getPosition().getZ()), throwable);
+                MinecraftServer.LOG.log(Level.WARN, String.format("CommandBlock at (%d,%d,%d) failed to handle command", listener.getPosition().getX(), listener.getPosition().getY(), listener.getPosition().getZ()), throwable);
             } else {
-                MinecraftServer.LOGGER.log(Level.WARN, String.format("Unknown CommandBlock failed to handle command"), throwable);
+                MinecraftServer.LOG.log(Level.WARN, String.format("Unknown CommandBlock failed to handle command"), throwable);
             }
         } finally {
-            MinecraftServer.getServerStatic().worldServer = prev;
+            MinecraftServer.getServerStatic().worldServers = prev;
         }
         icommandlistener.setCommandStat(Type.SUCCESS_COUNT, j);
         return j;

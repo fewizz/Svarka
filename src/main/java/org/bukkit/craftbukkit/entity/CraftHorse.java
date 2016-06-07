@@ -34,21 +34,21 @@ public class CraftHorse extends CraftAnimals implements Horse {
     }
 
     public Color getColor() {
-        return Color.values()[getHandle().getVariant() & 0xFF];
+        return Color.values()[getHandle().getHorseVariant() & 0xFF];
     }
 
     public void setColor(Color color) {
         Validate.notNull(color, "Color cannot be null");
-        getHandle().setVariant(color.ordinal() & 0xFF | getStyle().ordinal() << 8);
+        getHandle().setHorseVariant(color.ordinal() & 0xFF | getStyle().ordinal() << 8);
     }
 
     public Style getStyle() {
-        return Style.values()[getHandle().getVariant() >>> 8];
+        return Style.values()[getHandle().getHorseVariant() >>> 8];
     }
 
     public void setStyle(Style style) {
         Validate.notNull(style, "Style cannot be null");
-        getHandle().setVariant(getColor().ordinal() & 0xFF | style.ordinal() << 8);
+        getHandle().setHorseVariant(getColor().ordinal() & 0xFF | style.ordinal() << 8);
     }
 
     public boolean isCarryingChest() {
@@ -72,7 +72,7 @@ public class CraftHorse extends CraftAnimals implements Horse {
     }
 
     public int getMaxDomestication() {
-        return getHandle().getMaxTemper()();
+        return getHandle().getMaxTemper();
     }
 
     public void setMaxDomestication(int value) {

@@ -1,0 +1,44 @@
+--- ../src-base/minecraft/net/minecraft/entity/EntityAgeable.java
++++ ../src-work/minecraft/net/minecraft/entity/EntityAgeable.java
+@@ -21,6 +21,7 @@
+     protected int field_175503_c;
+     private float field_98056_d = -1.0F;
+     private float field_98057_e;
++    public boolean ageLocked; // CraftBukkit
+ 
+     public EntityAgeable(World p_i1578_1_)
+     {
+@@ -131,6 +132,7 @@
+         super.func_70014_b(p_70014_1_);
+         p_70014_1_.func_74768_a("Age", this.func_70874_b());
+         p_70014_1_.func_74768_a("ForcedAge", this.field_175502_b);
++        p_70014_1_.func_74757_a("AgeLocked", this.ageLocked); // CraftBukkit
+     }
+ 
+     public void func_70037_a(NBTTagCompound p_70037_1_)
+@@ -138,6 +140,7 @@
+         super.func_70037_a(p_70037_1_);
+         this.func_70873_a(p_70037_1_.func_74762_e("Age"));
+         this.field_175502_b = p_70037_1_.func_74762_e("ForcedAge");
++        this.ageLocked = p_70037_1_.func_74767_n("AgeLocked"); // CraftBukkit
+     }
+ 
+     public void func_184206_a(DataParameter<?> p_184206_1_)
+@@ -154,7 +157,7 @@
+     {
+         super.func_70636_d();
+ 
+-        if (this.field_70170_p.field_72995_K)
++        if (this.field_70170_p.field_72995_K || ageLocked)
+         {
+             if (this.field_175503_c > 0)
+             {
+@@ -202,7 +205,7 @@
+         this.func_98055_j(p_98054_1_ ? 0.5F : 1.0F);
+     }
+ 
+-    protected final void func_70105_a(float p_70105_1_, float p_70105_2_)
++    public final void func_70105_a(float p_70105_1_, float p_70105_2_)
+     {
+         boolean flag = this.field_98056_d > 0.0F;
+         this.field_98056_d = p_70105_1_;

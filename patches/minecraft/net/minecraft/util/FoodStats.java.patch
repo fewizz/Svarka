@@ -1,0 +1,31 @@
+--- ../src-base/minecraft/net/minecraft/util/FoodStats.java
++++ ../src-work/minecraft/net/minecraft/util/FoodStats.java
+@@ -10,12 +10,25 @@
+ 
+ public class FoodStats
+ {
+-    private int field_75127_a = 20;
+-    private float field_75125_b = 5.0F;
+-    private float field_75126_c;
++    public int field_75127_a = 20;
++    public float field_75125_b = 5.0F;
++    public float field_75126_c;
+     private int field_75123_d;
++    private EntityPlayer entityhuman; // CraftBukkit
+     private int field_75124_e = 20;
+ 
++    // CraftBukkit start
++    public FoodStats() { 
++    	// throw new AssertionError("Whoopsie, we missed the bukkit."); // CraftBukkit start - throw an error // Svarka - NO!
++    }
++
++    // CraftBukkit start - added EntityHuman constructor
++    public FoodStats(EntityPlayer entityhuman) {
++        org.apache.commons.lang.Validate.notNull(entityhuman);
++        this.entityhuman = entityhuman;
++    }
++    // CraftBukkit end
++
+     public void func_75122_a(int p_75122_1_, float p_75122_2_)
+     {
+         this.field_75127_a = Math.min(p_75122_1_ + this.field_75127_a, 20);

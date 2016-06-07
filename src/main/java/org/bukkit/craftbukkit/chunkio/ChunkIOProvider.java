@@ -19,7 +19,7 @@ class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChu
     public Chunk callStage1(QueuedChunk queuedChunk) throws RuntimeException {
         try {
         	AnvilChunkLoader loader = queuedChunk.loader;
-            Object[] data = loader.loadChunk(queuedChunk.world, queuedChunk.x, queuedChunk.z);
+            Object[] data = loader.loadChunk__Async(queuedChunk.world, queuedChunk.x, queuedChunk.z);
             
             if (data != null) {
                 queuedChunk.compound = (NBTTagCompound) data[1];
@@ -40,7 +40,7 @@ class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChu
             return;
         }
 
-        queuedChunk.loader.loadEntities(chunk, queuedChunk.compound.getCompoundTag("Level"), queuedChunk.world);
+        queuedChunk.loader.loadEntities(queuedChunk.world, queuedChunk.compound.getCompoundTag("Level"), chunk);
         chunk.setLastSaveTime(queuedChunk.provider.worldObj.getTotalWorldTime());
         queuedChunk.provider.id2ChunkMap.put(ChunkPos.chunkXZ2Int(queuedChunk.x, queuedChunk.z), chunk);
         chunk.onChunkLoad();
@@ -61,7 +61,7 @@ class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChu
                     continue;
                 }
 
-                Chunk neighbor = queuedChunk.provider.getLoadedChunkAt(chunk.xPosition + x, chunk.zPosition + z);
+                Chunk neighbor = queuedChunk.provider.getLoadedChunk(chunk.xPosition + x, chunk.zPosition + z);
                 if (neighbor != null) {
                     neighbor.setNeighborLoaded(-x, -z);
                     chunk.setNeighborLoaded(x, z);

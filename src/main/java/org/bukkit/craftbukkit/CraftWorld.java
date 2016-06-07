@@ -633,7 +633,8 @@ public class CraftWorld implements World {
     }
 
     public UUID getUID() {
-        return world.getSaveHandler().getUUID();
+        //return world.getSaveHandler().getUUID();
+    	return null; //TODO!!!!!!!!!!!!!!!!!!!!!!
     }
 
     @Override
@@ -1022,7 +1023,7 @@ public class CraftWorld implements World {
         EntityFallingBlock entity = new EntityFallingBlock(world, x, y, z, net.minecraft.block.Block.getBlockById(material.getId()).getStateFromMeta(data));
         entity.fallTime = 1;
 
-        world.addEntity(entity, SpawnReason.CUSTOM);
+        world.spawnEntityInWorld(entity, SpawnReason.CUSTOM);
         return (FallingBlock) entity.getBukkitEntity();
     }
 
@@ -1292,7 +1293,7 @@ public class CraftWorld implements World {
             ((EntityLiving) entity).onInitialSpawn(getHandle().getDifficultyForLocation(new BlockPos(entity)), (IEntityLivingData) null);
         }
 
-        world.addEntity(entity, reason);
+        world.spawnEntityInWorld(entity, reason);
         return (T) entity.getBukkitEntity();
     }
 
@@ -1592,7 +1593,7 @@ public class CraftWorld implements World {
         if (data != null && !particle.getDataType().isInstance(data)) {
             throw new IllegalArgumentException("data should be " + particle.getDataType() + " got " + data.getClass());
         }
-        getHandle().sendParticles(
+        getHandle().spawnParticle(
                 null, // Sender
                 CraftParticle.toNMS(particle), // Particle
                 true, // Extended range
