@@ -5,9 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.NBTTagList;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
@@ -21,6 +18,9 @@ import org.bukkit.inventory.meta.FireworkMeta;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap.Builder;
+
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 
 @DelegateDeserialization(SerializableMeta.class)
 class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
@@ -80,7 +80,7 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
             return;
         }
 
-        NBTTagCompound fireworks = tag.getCompound(FIREWORKS.NBT);
+        NBTTagCompound fireworks = tag.getCompoundTag(FIREWORKS.NBT);
 
         power = 0xff & fireworks.getByte(FLIGHT.NBT);
 
@@ -88,10 +88,10 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
             return;
         }
 
-        NBTTagList fireworkEffects = fireworks.getList(EXPLOSIONS.NBT, 10);
-        List<FireworkEffect> effects = this.effects = new ArrayList<FireworkEffect>(fireworkEffects.size());
+        NBTTagList fireworkEffects = fireworks.getTagList(EXPLOSIONS.NBT, 10);
+        List<FireworkEffect> effects = this.effects = new ArrayList<FireworkEffect>(fireworkEffects.tagCount());
 
-        for (int i = 0; i < fireworkEffects.size(); i++) {
+        for (int i = 0; i < fireworkEffects.tagCount(); i++) {
             effects.add(getEffect((NBTTagCompound) fireworkEffects.get(i)));
         }
     }
@@ -208,17 +208,17 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
             return;
         }
 
-        NBTTagCompound fireworks = itemTag.getCompound(FIREWORKS.NBT);
-        itemTag.set(FIREWORKS.NBT, fireworks);
+        NBTTagCompound fireworks = itemTag.getCompoundTag(FIREWORKS.NBT);
+        itemTag.setTag(FIREWORKS.NBT, fireworks);
 
         if (hasEffects()) {
             NBTTagList effects = new NBTTagList();
             for (FireworkEffect effect : this.effects) {
-                effects.add(getExplosion(effect));
+                effects.appendTag(getExplosion(effect));
             }
 
-            if (effects.size() > 0) {
-                fireworks.set(EXPLOSIONS.NBT, effects);
+            if (effects.tagCount() > 0) {
+                fireworks.setTag(EXPLOSIONS.NBT, effects);
             }
         }
 

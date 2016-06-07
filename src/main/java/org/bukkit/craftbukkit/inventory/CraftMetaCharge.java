@@ -2,8 +2,6 @@ package org.bukkit.craftbukkit.inventory;
 
 import java.util.Map;
 
-import net.minecraft.server.NBTTagCompound;
-
 import org.bukkit.FireworkEffect;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
@@ -11,6 +9,8 @@ import org.bukkit.craftbukkit.inventory.CraftMetaItem.SerializableMeta;
 import org.bukkit.inventory.meta.FireworkEffectMeta;
 
 import com.google.common.collect.ImmutableMap.Builder;
+
+import net.minecraft.nbt.NBTTagCompound;
 
 @DelegateDeserialization(SerializableMeta.class)
 class CraftMetaCharge extends CraftMetaItem implements FireworkEffectMeta {
@@ -36,7 +36,7 @@ class CraftMetaCharge extends CraftMetaItem implements FireworkEffectMeta {
         super(tag);
 
         if (tag.hasKey(EXPLOSION.NBT)) {
-            effect = CraftMetaFirework.getEffect(tag.getCompound(EXPLOSION.NBT));
+            effect = CraftMetaFirework.getEffect(tag.getCompoundTag(EXPLOSION.NBT));
         }
     }
 

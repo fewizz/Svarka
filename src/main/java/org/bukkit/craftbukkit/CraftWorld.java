@@ -103,6 +103,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldProviderHell;
@@ -235,7 +236,7 @@ public class CraftWorld implements World {
     }
 
     public Chunk getChunkAt(int x, int z) {
-        return this.world.getChunkProvider()provideChunk(x, z).bukkitChunk;
+        return this.world.getChunkProvider().provideChunk(x, z).bukkitChunk;
     }
 
     public Chunk getChunkAt(Block block) {
@@ -322,7 +323,7 @@ public class CraftWorld implements World {
                     continue;
                 }
 
-                net.minecraft.world.chunk.Chunk neighbor = world.getChunkProvider().getLoadedChunkAt(chunk.xPosition + x, chunk.zPosition + z);
+                net.minecraft.world.chunk.Chunk neighbor = world.getChunkProvider().getChunkIfLoaded(chunk.xPosition + x, chunk.zPosition + z);
                 if (neighbor != null) {
                     neighbor.setNeighborUnloaded(-xx, -zz);
                     chunk.setNeighborUnloaded(xx, zz);
@@ -995,12 +996,12 @@ public class CraftWorld implements World {
         radius *= radius;
 
         for (Player player : getPlayers()) {
-            if (((CraftPlayer) player).getHandle().playerConnection == null) continue;
+            if (((CraftPlayer) player).getHandle().connection == null) continue;
             if (!location.getWorld().equals(player.getWorld())) continue;
 
             distance = (int) player.getLocation().distanceSquared(location);
             if (distance <= radius) {
-                ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+                ((CraftPlayer) player).getHandle().connection.sendPacket(packet);
             }
         }
     }

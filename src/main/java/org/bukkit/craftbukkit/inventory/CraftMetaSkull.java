@@ -2,10 +2,6 @@ package org.bukkit.craftbukkit.inventory;
 
 import java.util.Map;
 
-import net.minecraft.server.GameProfileSerializer;
-import net.minecraft.server.NBTBase;
-import net.minecraft.server.NBTTagCompound;
-
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.craftbukkit.inventory.CraftMetaItem.SerializableMeta;
@@ -13,6 +9,10 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import com.google.common.collect.ImmutableMap.Builder;
 import com.mojang.authlib.GameProfile;
+
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTUtil;
 
 @DelegateDeserialization(SerializableMeta.class)
 class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
@@ -37,9 +37,9 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
     CraftMetaSkull(NBTTagCompound tag) {
         super(tag);
 
-        if (tag.hasKeyOfType(SKULL_OWNER.NBT, 10)) {
-            profile = GameProfileSerializer.deserialize(tag.getCompound(SKULL_OWNER.NBT));
-        } else if (tag.hasKeyOfType(SKULL_OWNER.NBT, 8) && !tag.getString(SKULL_OWNER.NBT).isEmpty()) {
+        if (tag.hasKey(SKULL_OWNER.NBT, 10)) {
+            profile = NBTUtil.readGameProfileFromNBT(tag.getCompoundTag(SKULL_OWNER.NBT));
+        } else if (tag.hasKey(SKULL_OWNER.NBT, 8) && !tag.getString(SKULL_OWNER.NBT).isEmpty()) {
             profile = new GameProfile(null, tag.getString(SKULL_OWNER.NBT));
         }
     }
@@ -53,8 +53,8 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
 
     @Override
     void deserializeInternal(NBTTagCompound tag) {
-        if (tag.hasKeyOfType(SKULL_PROFILE.NBT, 10)) {
-            profile = GameProfileSerializer.deserialize(tag.getCompound(SKULL_PROFILE.NBT));
+        if (tag.hasKey(SKULL_PROFILE.NBT, 10)) {
+            profile = NBTUtil.readGameProfileFromNBT(tag.getCompoundTag(SKULL_PROFILE.NBT));
         }
     }
 
@@ -62,7 +62,7 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
     void serializeInternal(final Map<String, NBTBase> internalTags) {
         if (profile != null) {
             NBTTagCompound nbtData = new NBTTagCompound();
-            GameProfileSerializer.serialize(nbtData, profile);
+            NBTUtil.writeGameProfile(nbtData, profile);
             internalTags.put(SKULL_PROFILE.NBT, nbtData);
         }
     }
@@ -73,8 +73,8 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
 
         if (profile != null) {
             NBTTagCompound owner = new NBTTagCompound();
-            GameProfileSerializer.serialize(owner, profile);
-            tag.set(SKULL_OWNER.NBT, owner);
+            NBTUtil.writeGameProfile(owner, profile);
+            tag.setTag(SKULL_OWNER.NBT, owner);
         }
     }
 

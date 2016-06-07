@@ -54,10 +54,10 @@ public class CraftJukebox extends CraftBlockState implements Jukebox {
         jukebox.markDirty();
         
         if (record == Material.AIR) {
-            world.getHandle().setTypeAndData(new BlockPos(getX(), getY(), getZ()),
+            world.getHandle().setBlockState(new BlockPos(getX(), getY(), getZ()),
                 Blocks.JUKEBOX.getDefaultState().withProperty(BlockJukebox.HAS_RECORD, false), 3);
         } else {
-            world.getHandle().setTypeAndData(new BlockPos(getX(), getY(), getZ()),
+            world.getHandle().setBlockState(new BlockPos(getX(), getY(), getZ()),
                 Blocks.JUKEBOX.getDefaultState().withProperty(BlockJukebox.HAS_RECORD, true), 3);
         }
         world.playEffect(getLocation(), Effect.RECORD_PLAY, record.getId());

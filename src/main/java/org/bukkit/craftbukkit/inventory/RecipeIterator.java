@@ -4,20 +4,21 @@ import java.util.Iterator;
 
 import org.bukkit.inventory.Recipe;
 
-import net.minecraft.server.CraftingManager;
-import net.minecraft.server.IRecipe;
-import net.minecraft.server.RecipesFurnace;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.crafting.FurnaceRecipes;
+import net.minecraft.item.crafting.IRecipe;
 
 public class RecipeIterator implements Iterator<Recipe> {
     private final Iterator<IRecipe> recipes;
-    private final Iterator<net.minecraft.server.ItemStack> smeltingCustom;
-    private final Iterator<net.minecraft.server.ItemStack> smeltingVanilla;
+    private final Iterator<ItemStack> smeltingCustom;
+    private final Iterator<ItemStack> smeltingVanilla;
     private Iterator<?> removeFrom = null;
 
     public RecipeIterator() {
-        this.recipes = CraftingManager.getInstance().getRecipes().iterator();
-        this.smeltingCustom = RecipesFurnace.getInstance().customRecipes.keySet().iterator();
-        this.smeltingVanilla = RecipesFurnace.getInstance().recipes.keySet().iterator();
+        this.recipes = CraftingManager.getInstance().getRecipeList().iterator();
+        this.smeltingCustom = FurnaceRecipes.instance().customRecipes.keySet().iterator();
+        this.smeltingVanilla = FurnaceRecipes.instance().smeltingList.keySet().iterator();
     }
 
     public boolean hasNext() {
@@ -29,7 +30,7 @@ public class RecipeIterator implements Iterator<Recipe> {
             removeFrom = recipes;
             return recipes.next().toBukkitRecipe();
         } else {
-            net.minecraft.server.ItemStack item;
+            ItemStack item;
             if (smeltingCustom.hasNext()) {
                 removeFrom = smeltingCustom;
                 item = smeltingCustom.next();
@@ -38,7 +39,7 @@ public class RecipeIterator implements Iterator<Recipe> {
                 item = smeltingVanilla.next();
             }
 
-            CraftItemStack stack = CraftItemStack.asCraftMirror(RecipesFurnace.getInstance().getResult(item));
+            CraftItemStack stack = CraftItemStack.asCraftMirror(FurnaceRecipes.instance().getSmeltingResult(item));
 
             return new CraftFurnaceRecipe(stack, CraftItemStack.asCraftMirror(item));
         }

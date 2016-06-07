@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.NBTTagList;
-
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.craftbukkit.inventory.CraftMetaItem.SerializableMeta;
 import org.bukkit.inventory.meta.BookMeta;
 
 import com.google.common.collect.ImmutableMap.Builder;
-import net.minecraft.server.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.IChatBaseComponent;
-import net.minecraft.server.NBTTagString;
+
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
+import net.minecraft.util.text.ITextComponent;
+
 import org.bukkit.craftbukkit.util.CraftChatMessage;
 
 @DelegateDeserialization(SerializableMeta.class)
@@ -34,13 +34,13 @@ class CraftMetaBookSigned extends CraftMetaBook implements BookMeta {
         }
 
         if (tag.hasKey(BOOK_PAGES.NBT)) {
-            NBTTagList pages = tag.getList(BOOK_PAGES.NBT, 8);
+            NBTTagList pages = tag.getTagList(BOOK_PAGES.NBT, 8);
 
-            for (int i = 0; i < pages.size(); i++) {
-                String page = pages.getString(i);
+            for (int i = 0; i < pages.tagCount(); i++) {
+                String page = pages.getStringTagAt(i);
                 if (resolved) {
                     try {
-                        this.pages.add(ChatSerializer.a(page));
+                        this.pages.add(ITextComponent.Serializer.jsonToComponent(page));
                         continue;
                     } catch (Exception e) {
                         // Ignore and treat as an old book
@@ -73,19 +73,19 @@ class CraftMetaBookSigned extends CraftMetaBook implements BookMeta {
 
         if (hasPages()) {
             NBTTagList list = new NBTTagList();
-            for (IChatBaseComponent page : pages) {
-                list.add(new NBTTagString(
-                    ChatSerializer.a(page)
+            for (ITextComponent page : pages) {
+                list.appendTag(new NBTTagString(
+                	ITextComponent.Serializer.componentToJson(page)
                 ));
             }
-            itemData.set(BOOK_PAGES.NBT, list);
+            itemData.setTag(BOOK_PAGES.NBT, list);
         }        
         itemData.setBoolean(RESOLVED.NBT, true);
 
         if (generation != null) {
-            itemData.setInt(GENERATION.NBT, generation);
+            itemData.setInteger(GENERATION.NBT, generation);
         } else {
-            itemData.setInt(GENERATION.NBT, 0);
+            itemData.setInteger(GENERATION.NBT, 0);
         }
     }
 

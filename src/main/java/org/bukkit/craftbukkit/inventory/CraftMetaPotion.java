@@ -5,9 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.server.NBTTagCompound;
-import net.minecraft.server.NBTTagList;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
@@ -21,6 +18,9 @@ import org.bukkit.craftbukkit.potion.CraftPotionUtil;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap.Builder;
+
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 
 @DelegateDeserialization(SerializableMeta.class)
 class CraftMetaPotion extends CraftMetaItem implements PotionMeta {
@@ -55,15 +55,15 @@ class CraftMetaPotion extends CraftMetaItem implements PotionMeta {
             type = CraftPotionUtil.toBukkit(tag.getString(DEFAULT_POTION.NBT));
         }
         if (tag.hasKey(POTION_EFFECTS.NBT)) {
-            NBTTagList list = tag.getList(POTION_EFFECTS.NBT, 10);
-            int length = list.size();
+            NBTTagList list = tag.getTagList(POTION_EFFECTS.NBT, 10);
+            int length = list.tagCount();
             customEffects = new ArrayList<PotionEffect>(length);
 
             for (int i = 0; i < length; i++) {
-                NBTTagCompound effect = list.get(i);
+                NBTTagCompound effect = list.getCompoundTagAt(i);
                 PotionEffectType type = PotionEffectType.getById(effect.getByte(ID.NBT));
                 int amp = effect.getByte(AMPLIFIER.NBT);
-                int duration = effect.getInt(DURATION.NBT);
+                int duration = effect.getInteger(DURATION.NBT);
                 boolean ambient = effect.getBoolean(AMBIENT.NBT);
                 boolean particles = effect.getBoolean(SHOW_PARTICLES.NBT);
                 customEffects.add(new PotionEffect(type, duration, amp, ambient, particles));
@@ -94,16 +94,16 @@ class CraftMetaPotion extends CraftMetaItem implements PotionMeta {
         tag.setString(DEFAULT_POTION.NBT, CraftPotionUtil.fromBukkit(type));
         if (customEffects != null) {
             NBTTagList effectList = new NBTTagList();
-            tag.set(POTION_EFFECTS.NBT, effectList);
+            tag.setTag(POTION_EFFECTS.NBT, effectList);
 
             for (PotionEffect effect : customEffects) {
                 NBTTagCompound effectData = new NBTTagCompound();
                 effectData.setByte(ID.NBT, (byte) effect.getType().getId());
                 effectData.setByte(AMPLIFIER.NBT, (byte) effect.getAmplifier());
-                effectData.setInt(DURATION.NBT, effect.getDuration());
+                effectData.setInteger(DURATION.NBT, effect.getDuration());
                 effectData.setBoolean(AMBIENT.NBT, effect.isAmbient());
                 effectData.setBoolean(SHOW_PARTICLES.NBT, effect.hasParticles());
-                effectList.add(effectData);
+                effectList.appendTag(effectData);
             }
         }
     }

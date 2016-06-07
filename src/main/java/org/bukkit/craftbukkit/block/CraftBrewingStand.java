@@ -39,11 +39,11 @@ public class CraftBrewingStand extends CraftBlockState implements BrewingStand {
     }
 
     public int getBrewingTime() {
-        return brewingStand.getProperty(0);
+        return brewingStand.getField(0);
     }
 
     public void setBrewingTime(int brewTime) {
-        brewingStand.setProperty(0, brewTime);
+        brewingStand.setField(0, brewTime);
     }
 
     @Override
@@ -53,11 +53,11 @@ public class CraftBrewingStand extends CraftBlockState implements BrewingStand {
 
     @Override
     public int getFuelLevel() {
-        return brewingStand.getProperty(1);
+        return brewingStand.getField(1);
     }
 
     @Override
     public void setFuelLevel(int level) {
-        brewingStand.setProperty(1, level);
+        brewingStand.setField(1, level);
     }
 }

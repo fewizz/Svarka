@@ -37,16 +37,16 @@ public final class VanillaCommandWrapper extends VanillaCommand {
     protected final CommandBase vanillaCommand;
 
     public VanillaCommandWrapper(CommandBase vanillaCommand) {
-        super(vanillaCommand.getCommand());
+        super(vanillaCommand.getCommandName());
         this.vanillaCommand = vanillaCommand;
     }
 
     public VanillaCommandWrapper(CommandBase vanillaCommand, String usage) {
-        super(vanillaCommand.getCommand());
+        super(vanillaCommand.getCommandName());
         this.vanillaCommand = vanillaCommand;
         this.description = "A Mojang provided command.";
         this.usageMessage = usage;
-        this.setPermission("minecraft.command." + vanillaCommand.getCommand());
+        this.setPermission("minecraft.command." + vanillaCommand.getCommandName());
     }
 
     @Override
@@ -63,7 +63,7 @@ public final class VanillaCommandWrapper extends VanillaCommand {
         Validate.notNull(sender, "Sender cannot be null");
         Validate.notNull(args, "Arguments cannot be null");
         Validate.notNull(alias, "Alias cannot be null");
-        return (List<String>) vanillaCommand.tabComplete(MinecraftServer.getServer(), getListener(sender), args, new BlockPos(0, 0, 0));
+        return (List<String>) vanillaCommand.tabComplete(MinecraftServer.getServerStatic(), getListener(sender), args, new BlockPos(0, 0, 0));
     }
 
     public static CommandSender lastSender = null; // Nasty :(
@@ -74,10 +74,10 @@ public final class VanillaCommandWrapper extends VanillaCommand {
         int j = 0;
         // Some commands use the worldserver variable but we leave it full of null values,
         // so we must temporarily populate it with the world of the commandsender
-        WorldServer[] prev = MinecraftServer.getServer().worldServer;
-        MinecraftServer server = MinecraftServer.getServer();
+        WorldServer[] prev = MinecraftServer.getServerStatic().worldServer;
+        MinecraftServer server = MinecraftServer.getServerStatic();
         server.worldServer = new WorldServer[server.worlds.size()];
-        server.worldServer[0] = (WorldServer) icommandlistener.getWorld();
+        server.worldServer[0] = (WorldServer) icommandlistener.getEntityWorld();
         int bpos = 0;
         for (int pos = 1; pos < server.worldServer.length; pos++) {
             WorldServer world = server.worlds.get(bpos++);
@@ -108,7 +108,7 @@ public final class VanillaCommandWrapper extends VanillaCommand {
                             j++;
                         } catch (WrongUsageException exceptionusage) {
                         	TextComponentTranslation chatmessage = new TextComponentTranslation("commands.generic.usage", new Object[] { new TextComponentTranslation(exceptionusage.getMessage(), exceptionusage.getArgs())});
-                            chatmessage.getChatModifier().setColor(TextFormatting.RED);
+                            chatmessage.getStyle().setColor(TextFormatting.RED);
                             icommandlistener.addChatMessage(chatmessage);
                         } catch (CommandException commandexception) {
                         	CommandBase.notifyCommandListener(icommandlistener, vanillaCommand, 0, commandexception.getMessage(), commandexception.getErrorObjects());
@@ -124,18 +124,18 @@ public final class VanillaCommandWrapper extends VanillaCommand {
                 }
             } else {
             	TextComponentTranslation chatmessage = new TextComponentTranslation("commands.generic.permission", new Object[0]);
-                chatmessage.getChatModifier().setColor(TextFormatting.RED);
+                chatmessage.getStyle().setColor(TextFormatting.RED);
                 icommandlistener.addChatMessage(chatmessage);
             }
         } catch (WrongUsageException exceptionusage) {
         	TextComponentTranslation chatmessage1 = new TextComponentTranslation("commands.generic.usage", new Object[] { new TextComponentTranslation(exceptionusage.getMessage(), exceptionusage.getArgs()) });
-            chatmessage1.getChatModifier().setColor(TextFormatting.RED);
+            chatmessage1.getStyle().setColor(TextFormatting.RED);
             icommandlistener.addChatMessage(chatmessage1);
         } catch (CommandException commandexception) {
         	CommandBase.notifyCommandListener(icommandlistener, vanillaCommand, 0, commandexception.getMessage(), commandexception.getArgs());
         } catch (Throwable throwable) {
         	TextComponentTranslation chatmessage3 = new TextComponentTranslation("commands.generic.exception", new Object[0]);
-            chatmessage3.getChatModifier().setColor(TextFormatting.RED);
+            chatmessage3.getStyle().setColor(TextFormatting.RED);
             icommandlistener.addChatMessage(chatmessage3);
             if (icommandlistener.getCommandSenderEntity() instanceof EntityMinecartCommandBlock) {
                 MinecraftServer.LOGGER.log(Level.WARN, String.format("MinecartCommandBlock at (%d,%d,%d) failed to handle command", icommandlistener.getPosition().getX(), icommandlistener.getPosition().getY(), icommandlistener.getPosition().getZ()), throwable);
@@ -146,7 +146,7 @@ public final class VanillaCommandWrapper extends VanillaCommand {
                 MinecraftServer.LOGGER.log(Level.WARN, String.format("Unknown CommandBlock failed to handle command"), throwable);
             }
         } finally {
-            MinecraftServer.getServer().worldServer = prev;
+            MinecraftServer.getServerStatic().worldServer = prev;
         }
         icommandlistener.setCommandStat(Type.SUCCESS_COUNT, j);
         return j;
@@ -163,7 +163,7 @@ public final class VanillaCommandWrapper extends VanillaCommand {
             return ((EntityMinecartCommandBlock) ((CraftMinecartCommand) sender).getHandle()).getCommandBlockLogic();
         }
         if (sender instanceof RemoteConsoleCommandSender) {
-            return ((DedicatedServer)MinecraftServer.getServer()).rconConsoleSource;
+            return ((DedicatedServer)MinecraftServer.getServerStatic()).rconConsoleSource;
         }
         if (sender instanceof ConsoleCommandSender) {
             return ((CraftServer) sender.getServer()).getServer();
