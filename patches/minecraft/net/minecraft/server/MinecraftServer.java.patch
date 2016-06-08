@@ -26,16 +26,18 @@
  import net.minecraft.server.management.PlayerList;
  import net.minecraft.server.management.PlayerProfileCache;
  import net.minecraft.util.IProgressUpdate;
-@@ -85,13 +90,21 @@
+@@ -85,13 +90,23 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
 +import org.bukkit.Bukkit;
 +import org.bukkit.craftbukkit.CraftServer;
++import org.bukkit.craftbukkit.Main;
 +
 +// CraftBukkit start
 +import org.bukkit.Bukkit;
 +import org.bukkit.craftbukkit.CraftServer;
++import org.bukkit.craftbukkit.Main;
 +// CraftBukkit end
 +
  public abstract class MinecraftServer implements Runnable, ICommandSender, IThreadListener, ISnooperInfo
@@ -43,14 +45,15 @@
 -    private static final Logger field_147145_h = LogManager.getLogger();
 +    public static final Logger field_147145_h = LogManager.getLogger();
      public static final File field_152367_a = new File("usercache.json");
-     private final ISaveFormat field_71310_m;
+-    private final ISaveFormat field_71310_m;
++    protected ISaveFormat field_71310_m;
      private final Snooper field_71307_n = new Snooper("server", this, func_130071_aq());
 -    private final File field_71308_o;
-+    public final File field_71308_o;
++    public File field_71308_o;
      private final List<ITickable> field_71322_p = Lists.<ITickable>newArrayList();
      protected final ICommandManager field_71321_q;
      public final Profiler field_71304_b = new Profiler();
-@@ -143,6 +156,20 @@
+@@ -143,9 +158,64 @@
      protected final Queue < FutureTask<? >> field_175589_i = Queues. < FutureTask<? >> newArrayDeque();
      private Thread field_175590_aa;
      private long field_175591_ab = func_130071_aq();
@@ -71,7 +74,51 @@
      @SideOnly(Side.CLIENT)
      private boolean field_184111_ab;
  
-@@ -159,6 +186,9 @@
++    // CraftBukkit edition
++    public MinecraftServer(OptionSet options, Proxy proxyIn, DataFixer dataFixerIn, YggdrasilAuthenticationService authServiceIn, MinecraftSessionService sessionServiceIn, GameProfileRepository profileRepoIn, PlayerProfileCache profileCacheIn) {
++    	this.field_110456_c = proxyIn;
++        this.field_152364_T = authServiceIn;
++        this.field_147143_S = sessionServiceIn;
++        this.field_152365_W = profileRepoIn;
++        this.field_152366_X = profileCacheIn;
++        //this.anvilFile = anvilFileIn; // CraftBukkit
++        this.field_147144_o = new NetworkSystem(this);
++        this.field_71321_q = this.func_175582_h();
++        //this.anvilConverterForAnvilFile = new AnvilSaveConverter(anvilFileIn, dataFixerIn); // CraftBukkit - moved to DedicatedServer.init
++        this.field_184112_s = dataFixerIn;
++        
++        this.options = options;
++        
++        // Try to see if we're actually running in a terminal, disable jline if not
++        if (System.console() == null && System.getProperty("jline.terminal") == null) {
++            System.setProperty("jline.terminal", "jline.UnsupportedTerminal");
++            Main.useJline = false;
++        }
++
++        try {
++            reader = new ConsoleReader(System.in, System.out);
++            reader.setExpandEvents(false); // Avoid parsing exceptions for uncommonly used event designators
++        } catch (Throwable e) {
++            try {
++                // Try again with jline disabled for Windows users without C++ 2008 Redistributable
++                System.setProperty("jline.terminal", "jline.UnsupportedTerminal");
++                System.setProperty("user.language", "en");
++                Main.useJline = false;
++                reader = new ConsoleReader(System.in, System.out);
++                reader.setExpandEvents(false);
++            } catch (IOException ex) {
++                field_147145_h.warn((String) null, ex);
++            }
++        }
++        Runtime.getRuntime().addShutdownHook(new org.bukkit.craftbukkit.util.ServerShutdownThread(this));
++
++        this.field_175590_aa = primaryThread = new Thread(this, "Server thread"); // Moved from main
++    }
++    
+     public MinecraftServer(File p_i47054_1_, Proxy p_i47054_2_, DataFixer p_i47054_3_, YggdrasilAuthenticationService p_i47054_4_, MinecraftSessionService p_i47054_5_, GameProfileRepository p_i47054_6_, PlayerProfileCache p_i47054_7_)
+     {
+         this.field_110456_c = p_i47054_2_;
+@@ -159,6 +229,9 @@
          this.field_71310_m = new AnvilSaveConverter(p_i47054_1_, p_i47054_3_);
          this.field_184112_s = p_i47054_3_;
      }
@@ -81,7 +128,7 @@
  
      protected ServerCommandManager func_175582_h()
      {
-@@ -361,6 +391,11 @@
+@@ -361,6 +434,11 @@
          }
      }
  
@@ -93,7 +140,117 @@
      public void func_71260_j()
      {
          field_147145_h.info("Stopping server");
-@@ -1582,4 +1617,11 @@
+@@ -747,9 +825,11 @@
+ 
+     public void func_71256_s()
+     {
++    	/* CraftBukkit start - prevent abuse
+         net.minecraftforge.fml.common.StartupQuery.reset();
+-        this.field_175590_aa = new Thread(this, "Server thread");
+-        this.field_175590_aa.start();
++        this.serverThread = new Thread(this, "Server thread");
++        this.serverThread.start();
++        // CraftBukkit end */
+     }
+ 
+     public File func_71209_f(String p_71209_1_)
+@@ -1401,10 +1481,12 @@
+     @SideOnly(Side.SERVER)
+     public static void main(String[] p_main_0_)
+     {
++    	OptionSet options = Main.main(p_main_0_);
+         Bootstrap.func_151354_b();
+ 
+         try
+         {
++        	/* CraftBukkit start - Replace everything
+             boolean flag = true;
+             String s = null;
+             String s1 = ".";
+@@ -1468,51 +1550,73 @@
+                     ++j;
+                 }
+             }
++            */ // CraftBukkit end
++        	String s1 = "."; // PAIL?
+ 
+             YggdrasilAuthenticationService yggdrasilauthenticationservice = new YggdrasilAuthenticationService(Proxy.NO_PROXY, UUID.randomUUID().toString());
+             MinecraftSessionService minecraftsessionservice = yggdrasilauthenticationservice.createMinecraftSessionService();
+             GameProfileRepository gameprofilerepository = yggdrasilauthenticationservice.createProfileRepository();
+             PlayerProfileCache playerprofilecache = new PlayerProfileCache(gameprofilerepository, new File(s1, field_152367_a.getName()));
+-            final DedicatedServer dedicatedserver = new DedicatedServer(new File(s1), DataFixesManager.func_188279_a(), yggdrasilauthenticationservice, minecraftsessionservice, gameprofilerepository, playerprofilecache);
++            final DedicatedServer dedicatedserver = new DedicatedServer(options, DataFixesManager.func_188279_a(), yggdrasilauthenticationservice, minecraftsessionservice, gameprofilerepository, playerprofilecache);
+ 
++            /* CraftBukkit start
+             if (s != null)
+             {
+-                dedicatedserver.func_71224_l(s);
++                dedicatedserver.setServerOwner(s);
+             }
+ 
+             if (s2 != null)
+             {
+-                dedicatedserver.func_71261_m(s2);
++                dedicatedserver.setFolderName(s2);
+             }
+ 
+             if (i >= 0)
+             {
+-                dedicatedserver.func_71208_b(i);
++                dedicatedserver.setServerPort(i);
+             }
+ 
+             if (flag1)
+             {
+-                dedicatedserver.func_71204_b(true);
++                dedicatedserver.setDemo(true);
+             }
+ 
+             if (flag2)
+             {
+-                dedicatedserver.func_71194_c(true);
++                dedicatedserver.canCreateBonusChest(true);
+             }
+ 
+             if (flag && !GraphicsEnvironment.isHeadless())
+             {
+-                dedicatedserver.func_120011_ar();
++                dedicatedserver.setGuiEnabled();
+             }
+ 
+-            dedicatedserver.func_71256_s();
++            dedicatedserver.startServerThread();
+             Runtime.getRuntime().addShutdownHook(new Thread("Server Shutdown Thread")
+             {
+                 public void run()
+                 {
+-                    dedicatedserver.func_71260_j();
++                    dedicatedserver.stopServer();
+                 }
+             });
++            */
++            
++            if (options.has("port")) {
++            	int port = (Integer) options.valueOf("port");
++            	if (port > 0) {
++            		dedicatedserver.func_71208_b(port);
++            		}
++            }
++            	
++            if (options.has("universe")) {
++            	dedicatedserver.field_71308_o = (File) options.valueOf("universe");
++            }
++            
++            if (options.has("world")) {
++            	dedicatedserver.func_71246_n((String) options.valueOf("world"));
++            }
++            	
++            dedicatedserver.primaryThread.start();
++            // CraftBukkit end
+         }
+         catch (Exception exception)
+         {
+@@ -1582,4 +1686,11 @@
      {
          return this.field_175590_aa;
      }

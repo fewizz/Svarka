@@ -1,11 +1,40 @@
 --- ../src-base/minecraft/net/minecraft/server/management/PlayerList.java
 +++ ../src-work/minecraft/net/minecraft/server/management/PlayerList.java
-@@ -74,14 +74,14 @@
+@@ -65,6 +65,28 @@
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
++import org.bukkit.craftbukkit.CraftServer;
++
++// CraftBukkit start
++import org.bukkit.craftbukkit.CraftServer;
++import org.bukkit.craftbukkit.CraftWorld;
++import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
++
++import org.bukkit.Bukkit;
++import org.bukkit.Location;
++import org.bukkit.TravelAgent;
++import org.bukkit.craftbukkit.util.CraftChatMessage;
++import org.bukkit.entity.Player;
++import org.bukkit.event.player.PlayerChangedWorldEvent;
++import org.bukkit.event.player.PlayerPortalEvent;
++import org.bukkit.event.player.PlayerJoinEvent;
++import org.bukkit.event.player.PlayerLoginEvent;
++import org.bukkit.event.player.PlayerQuitEvent;
++import org.bukkit.event.player.PlayerRespawnEvent;
++import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
++import org.bukkit.util.Vector;
++// CraftBukkit end
++
+ public abstract class PlayerList
+ {
+     public static final File field_152613_a = new File("banned-players.json");
+@@ -74,14 +96,14 @@
      private static final Logger field_148546_d = LogManager.getLogger();
      private static final SimpleDateFormat field_72403_e = new SimpleDateFormat("yyyy-MM-dd \'at\' HH:mm:ss z");
      private final MinecraftServer field_72400_f;
 -    private final List<EntityPlayerMP> field_72404_b = Lists.<EntityPlayerMP>newArrayList();
-+    public final List<EntityPlayerMP> field_72404_b = Lists.<EntityPlayerMP>newArrayList();
++    public final List<EntityPlayerMP> field_72404_b = new java.util.concurrent.CopyOnWriteArrayList(); // CraftBukkit - ArrayList -> CopyOnWriteArrayList: Iterator safety
      private final Map<UUID, EntityPlayerMP> field_177454_f = Maps.<UUID, EntityPlayerMP>newHashMap();
      private final UserListBans field_72401_g;
      private final UserListIPBans field_72413_h;
@@ -17,3 +46,19 @@
      private boolean field_72409_l;
      protected int field_72405_c;
      private int field_72402_d;
+@@ -89,8 +111,15 @@
+     private boolean field_72407_n;
+     private int field_72408_o;
+ 
++    // CraftBukkit start
++    private CraftServer cserver;
++    
+     public PlayerList(MinecraftServer p_i1500_1_)
+     {
++    	this.cserver = p_i1500_1_.server = new CraftServer(p_i1500_1_, this);
++    	p_i1500_1_.console = org.bukkit.craftbukkit.command.ColouredConsoleSender.getInstance();
++    	p_i1500_1_.reader.addCompleter(new org.bukkit.craftbukkit.command.ConsoleCommandCompleter(p_i1500_1_.server));
++    	// CraftBukkit end
+         this.field_72401_g = new UserListBans(field_152613_a);
+         this.field_72413_h = new UserListIPBans(field_152614_b);
+         this.field_72414_i = new UserListOps(field_152615_c);
