@@ -269,6 +269,16 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
 
         throw new AssertionError("Unknown entity " + (entity == null ? null : entity.getClass()));
     }
+    
+    @Override
+    public boolean hasGravity() {
+        return false;//!getHandle().isNoGravity(); //TODO!!!
+    }
+
+    @Override
+    public void setGravity(boolean gravity) {
+        //getHandle().setNoGravity(!gravity); //TODO!!!
+    }
 
     public Location getLocation() {
         return new Location(getWorld(), entity.posX, entity.posY, entity.posZ, entity.rotationYaw, entity.rotationPitch);

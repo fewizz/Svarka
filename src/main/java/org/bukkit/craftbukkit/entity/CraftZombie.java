@@ -52,13 +52,13 @@ public class CraftZombie extends CraftMonster implements Zombie {
         if (profession == null) {
             getHandle().setToNotVillager();
         } else {
-            getHandle().setVillagerType(profession.getId());
+            getHandle().setVillagerType(profession.ordinal());
         }
     }
 
     @Override
     public Villager.Profession getVillagerProfession() {
         if (!isVillager()) return null;
-        return Villager.Profession.getProfession(getHandle().getVillagerType());
+        return Villager.Profession.values()[getHandle().getVillagerType()];
     }
 }

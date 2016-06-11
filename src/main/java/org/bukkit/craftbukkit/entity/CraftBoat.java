@@ -108,4 +108,5 @@ public class CraftBoat extends CraftVehicle implements Boat {
                 return EntityBoat.Type.OAK;
         }
     }
+
 }

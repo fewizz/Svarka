@@ -28,11 +28,11 @@ public class CraftSkeleton extends CraftMonster implements Skeleton {
     }
 
     public SkeletonType getSkeletonType() {
-        return SkeletonType.getType(getHandle().getSkeletonType());
+        return SkeletonType.values()[(getHandle().getSkeletonType())];
     }
 
     public void setSkeletonType(SkeletonType type) {
         Validate.notNull(type);
-        getHandle().setSkeletonType(type.getId());
+        getHandle().setSkeletonType(type.ordinal()); //TODO!!??
     }
 }
