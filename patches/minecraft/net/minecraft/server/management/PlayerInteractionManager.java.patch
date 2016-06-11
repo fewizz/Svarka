@@ -1,0 +1,167 @@
+--- ../src-base/minecraft/net/minecraft/server/management/PlayerInteractionManager.java
++++ ../src-work/minecraft/net/minecraft/server/management/PlayerInteractionManager.java
+@@ -1,13 +1,18 @@
+ package net.minecraft.server.management;
+ 
+ import javax.annotation.Nullable;
++
+ import net.minecraft.block.Block;
+ import net.minecraft.block.BlockChest;
+ import net.minecraft.block.BlockCommandBlock;
+ import net.minecraft.block.material.Material;
+ import net.minecraft.block.state.IBlockState;
++import net.minecraft.enchantment.EnchantmentHelper;
+ import net.minecraft.entity.player.EntityPlayer;
+ import net.minecraft.entity.player.EntityPlayerMP;
++import net.minecraft.init.Blocks;
++import net.minecraft.init.Enchantments;
++import net.minecraft.inventory.EntityEquipmentSlot;
+ import net.minecraft.inventory.IInventory;
+ import net.minecraft.item.ItemBlock;
+ import net.minecraft.item.ItemStack;
+@@ -26,6 +31,19 @@
+ import net.minecraft.world.WorldServer;
+ import net.minecraft.world.WorldSettings;
+ 
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.block.Action;
++import org.bukkit.event.block.BlockBreakEvent;
++import org.bukkit.event.player.PlayerInteractEvent;
++
++//CraftBukkit start
++import org.bukkit.event.block.BlockBreakEvent;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.Event;
++import org.bukkit.event.block.Action;
++import org.bukkit.event.player.PlayerInteractEvent;
++// CraftBukkit end
++
+ public class PlayerInteractionManager
+ {
+     /** Forge reach distance */
+@@ -41,6 +59,11 @@
+     private BlockPos field_180241_i = BlockPos.field_177992_a;
+     private int field_73093_n;
+     private int field_73094_o = -1;
++    
++    // CraftBukkit start
++    public boolean interactResult = false;
++    public boolean firedInteract = false;
++    // CraftBukkit end
+ 
+     public PlayerInteractionManager(World p_i1524_1_)
+     {
+@@ -141,8 +164,21 @@
+ 
+     public void func_180784_a(BlockPos p_180784_1_, EnumFacing p_180784_2_)
+     {
++    	// CraftBukkit start
++    	PlayerInteractEvent bukkitEvent = CraftEventFactory.callPlayerInteractEvent(this.field_73090_b, Action.LEFT_CLICK_BLOCK, p_180784_1_, p_180784_2_, this.field_73090_b.field_71071_by.func_70448_g(), EnumHand.MAIN_HAND);
++    	/*if (bukkitEvent.isCancelled()) {
++    		// Let the client know the block still exists
++    		((EntityPlayerMP) this.thisPlayerMP).connection.sendPacket(new SPacketBlockChange(this.theWorld, pos));
++    		// Update any tile entity data for this block
++    		TileEntity tileentity = this.theWorld.getTileEntity(pos);
++    		if (tileentity != null) {
++    			this.thisPlayerMP.connection.sendPacket(tileentity.getUpdatePacket());
++    		}
++    		return;
++    	}*/ // Svarka - just no =P
++    	// CraftBukkit end
+         net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock event = net.minecraftforge.common.ForgeHooks.onLeftClickBlock(field_73090_b, p_180784_1_, p_180784_2_, net.minecraftforge.common.ForgeHooks.rayTraceEyeHitVec(field_73090_b, getBlockReachDistance() + 1));
+-        if (event.isCanceled())
++        if (event.isCanceled() || bukkitEvent.isCancelled())
+         {
+             // Restore block and te data
+             field_73090_b.field_71135_a.func_147359_a(new SPacketBlockChange(field_73092_a, p_180784_1_));
+@@ -283,6 +319,59 @@
+ 
+     public boolean func_180237_b(BlockPos p_180237_1_)
+     {
++    	BlockBreakEvent event = null;
++    	if (this.field_73090_b instanceof EntityPlayer) {
++    		org.bukkit.block.Block block = this.field_73092_a.getWorld().getBlockAt(p_180237_1_.func_177958_n(), p_180237_1_.func_177956_o(), p_180237_1_.func_177952_p());
++    			
++    		// Sword + Creative mode pre-cancel
++    		boolean isSwordNoBreak = this.field_73091_c.func_77145_d() && this.field_73090_b.func_184614_ca() != null && this.field_73090_b.func_184614_ca().func_77973_b() instanceof ItemSword;
++    		
++    		// Tell client the block is gone immediately then process events
++    		// Don't tell the client if its a creative sword break because its not broken!
++    		if (field_73092_a.func_175625_s(p_180237_1_) == null && !isSwordNoBreak) {
++    			SPacketBlockChange packet = new SPacketBlockChange(this.field_73092_a, p_180237_1_);
++    			packet.field_148883_d = Blocks.field_150350_a.func_176223_P();
++    			((EntityPlayerMP) this.field_73090_b).field_71135_a.func_147359_a(packet);
++    		}
++    		
++    		event = new BlockBreakEvent(block, this.field_73090_b.getBukkitEntity());
++    		
++    		// Sword + Creative mode pre-cancel
++    		event.setCancelled(isSwordNoBreak);
++    		
++    		// Calculate default block experience
++    		IBlockState nmsData = this.field_73092_a.func_180495_p(p_180237_1_);
++    		Block nmsBlock = nmsData.func_177230_c();
++    			
++    		ItemStack itemstack = this.field_73090_b.func_184582_a(EntityEquipmentSlot.MAINHAND);
++    		            
++    		if (nmsBlock != null && !event.isCancelled() && !this.func_73083_d() && this.field_73090_b.func_184823_b(nmsBlock.func_176223_P())) {
++    			// Copied from block.a(World world, EntityHuman entityhuman, BlockPosition blockposition, IBlockData iblockdata, TileEntity tileentity)
++    			// PAIL: checkme each update
++    			if (!(nmsBlock.func_149652_G() && EnchantmentHelper.func_77506_a(Enchantments.field_185306_r, itemstack) > 0)) {
++    				int data = block.getData();
++    				int bonusLevel = EnchantmentHelper.func_77506_a(Enchantments.field_185308_t, itemstack);
++    		                    
++    				//event.setExpToDrop(nmsBlock.getExpDrop(this.theWorld, nmsData, bonusLevel)); TODO!!!
++    			}
++    		}
++    			
++    		this.field_73092_a.getServer().getPluginManager().callEvent(event);
++    			
++    		if (event.isCancelled()) {
++    			if (isSwordNoBreak) {
++    				return false;
++    			}
++    			// Let the client know the block still exists
++    			((EntityPlayerMP) this.field_73090_b).field_71135_a.func_147359_a(new SPacketBlockChange(this.field_73092_a, p_180237_1_));
++    			// Update any tile entity data for this block
++    			TileEntity tileentity = this.field_73092_a.func_175625_s(p_180237_1_);
++    			if (tileentity != null) {
++    				this.field_73090_b.field_71135_a.func_147359_a(tileentity.func_189518_D_());
++    			}
++    			return false;
++    		}
++    	}
+         int exp = net.minecraftforge.common.ForgeHooks.onBlockBreakEvent(field_73092_a, field_73091_c, field_73090_b, p_180237_1_);
+         if (exp == -1)
+         {
+@@ -399,13 +488,19 @@
+ 
+     public EnumActionResult func_187251_a(EntityPlayer p_187251_1_, World p_187251_2_, @Nullable ItemStack p_187251_3_, EnumHand p_187251_4_, BlockPos p_187251_5_, EnumFacing p_187251_6_, float p_187251_7_, float p_187251_8_, float p_187251_9_)
+     {
++    	IBlockState state = p_187251_2_.func_180495_p(p_187251_5_);
++    	if(state.func_177230_c() == Blocks.field_150350_a) {
++    		return EnumActionResult.FAIL;
++    	}
++    	
++    	/*PlayerInteractEvent bukkitEvent = //TODO!!! */CraftEventFactory.callPlayerInteractEvent(p_187251_1_, Action.RIGHT_CLICK_BLOCK, p_187251_5_, p_187251_6_, p_187251_3_, false, p_187251_4_);
+         if (this.field_73091_c == WorldSettings.GameType.SPECTATOR)
+         {
+             TileEntity tileentity = p_187251_2_.func_175625_s(p_187251_5_);
+ 
+             if (tileentity instanceof ILockableContainer)
+             {
+-                Block block = p_187251_2_.func_180495_p(p_187251_5_).func_177230_c();
++                Block block = state.func_177230_c();
+                 ILockableContainer ilockablecontainer = (ILockableContainer)tileentity;
+ 
+                 if (ilockablecontainer instanceof TileEntityChest && block instanceof BlockChest)
+@@ -429,8 +524,7 @@
+         }
+         else
+         {
+-            net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock event = net.minecraftforge.common.ForgeHooks
+-                    .onRightClickBlock(p_187251_1_, p_187251_4_, p_187251_3_, p_187251_5_, p_187251_6_, net.minecraftforge.common.ForgeHooks.rayTraceEyeHitVec(field_73090_b, getBlockReachDistance() + 1));
++            net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock event = net.minecraftforge.common.ForgeHooks.onRightClickBlock(p_187251_1_, p_187251_4_, p_187251_3_, p_187251_5_, p_187251_6_, net.minecraftforge.common.ForgeHooks.rayTraceEyeHitVec(field_73090_b, getBlockReachDistance() + 1));
+             if (event.isCanceled()) return EnumActionResult.PASS;
+ 
+             net.minecraft.item.Item item = p_187251_3_ == null ? null : p_187251_3_.func_77973_b();

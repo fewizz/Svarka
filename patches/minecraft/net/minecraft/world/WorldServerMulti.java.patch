@@ -1,0 +1,16 @@
+--- ../src-base/minecraft/net/minecraft/world/WorldServerMulti.java
++++ ../src-work/minecraft/net/minecraft/world/WorldServerMulti.java
+@@ -13,10 +13,10 @@
+     private WorldServer field_175743_a;
+     private IBorderListener borderListener;
+ 
+-    public WorldServerMulti(MinecraftServer p_i45923_1_, ISaveHandler p_i45923_2_, int p_i45923_3_, WorldServer p_i45923_4_, Profiler p_i45923_5_)
++    public WorldServerMulti(MinecraftServer server, ISaveHandler saveHandlerIn, int dimensionId, WorldServer delegate, Profiler profilerIn, org.bukkit.World.Environment env, org.bukkit.generator.ChunkGenerator gen)
+     {
+-        super(p_i45923_1_, p_i45923_2_, new DerivedWorldInfo(p_i45923_4_.func_72912_H()), p_i45923_3_, p_i45923_5_);
+-        this.field_175743_a = p_i45923_4_;
++        super(server, saveHandlerIn, new DerivedWorldInfo(delegate.func_72912_H()), dimensionId, profilerIn, env, gen);
++        this.field_175743_a = delegate;
+         this.borderListener = new IBorderListener()
+         {
+             public void func_177694_a(WorldBorder p_177694_1_, double p_177694_2_)
