@@ -74,19 +74,19 @@ public final class VanillaCommandWrapper extends VanillaCommand {
         int j = 0;
         // Some commands use the worldserver variable but we leave it full of null values,
         // so we must temporarily populate it with the world of the commandsender
-        WorldServer[] prev = MinecraftServer.getServerStatic().worldServers;
+        //WorldServer[] prev = MinecraftServer.getServerStatic().worldServers;
         MinecraftServer server = MinecraftServer.getServerStatic();
-        server.worldServers = new WorldServer[server.worlds.size()];
-        server.worldServers[0] = (WorldServer) icommandlistener.getEntityWorld();
-        int bpos = 0;
-        for (int pos = 1; pos < server.worldServers.length; pos++) {
-            WorldServer world = server.worlds.get(bpos++);
-            if (server.worldServers[0] == world) {
-                pos--;
-                continue;
-            }
-            server.worldServers[pos] = world;
-        }
+        //server.worldServers = new WorldServer[server.worldServers.length];
+        //server.worldServers[0] = (WorldServer) icommandlistener.getEntityWorld();
+        //int bpos = 0;
+        //for (int pos = 1; pos < server.worldServers.length; pos++) {
+        //    WorldServer world = server.worldServers[bpos++];
+        //    if (server.worldServers[0] == world) {
+        //        pos--;
+        //        continue;
+        //    }
+        //    server.worldServers[pos] = world;
+        //}
 
         try {
             if (vanillaCommand.checkPermission(server, icommandlistener)) {
@@ -146,7 +146,7 @@ public final class VanillaCommandWrapper extends VanillaCommand {
                 MinecraftServer.LOG.log(Level.WARN, String.format("Unknown CommandBlock failed to handle command"), throwable);
             }
         } finally {
-            MinecraftServer.getServerStatic().worldServers = prev;
+            //MinecraftServer.getServerStatic().worldServers = prev;
         }
         icommandlistener.setCommandStat(Type.SUCCESS_COUNT, j);
         return j;

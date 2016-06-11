@@ -1,0 +1,57 @@
+--- ../src-base/minecraft/net/minecraft/tileentity/TileEntityDispenser.java
++++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityDispenser.java
+@@ -1,7 +1,14 @@
+ package net.minecraft.tileentity;
+ 
++import java.util.ArrayList;
++import java.util.List;
+ import java.util.Random;
++
+ import javax.annotation.Nullable;
++
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++
++import fewizz.svarka.inventory.IBukkitInventory;
+ import net.minecraft.entity.player.EntityPlayer;
+ import net.minecraft.entity.player.InventoryPlayer;
+ import net.minecraft.inventory.Container;
+@@ -12,12 +19,38 @@
+ import net.minecraft.nbt.NBTTagCompound;
+ import net.minecraft.nbt.NBTTagList;
+ 
+-public class TileEntityDispenser extends TileEntityLockableLoot implements IInventory
++public class TileEntityDispenser extends TileEntityLockableLoot implements IBukkitInventory
+ {
+     private static final Random field_174913_f = new Random();
+     private ItemStack[] field_146022_i = new ItemStack[9];
+     protected String field_146020_a;
+ 
++    // Craftbukkit start
++    public List transaction = new ArrayList();
++    private int maxStack = 64;
++
++
++    public ItemStack[] getContents() {
++       return this.field_146022_i;
++    }
++
++    public void onOpen(CraftHumanEntity who) {
++       this.transaction.add(who);
++    }
++
++    public void onClose(CraftHumanEntity who) {
++       this.transaction.remove(who);
++    }
++
++    public List getViewers() {
++       return this.transaction;
++    }
++
++    public void setMaxStackSize(int size) {
++       this.maxStack = size;
++    }
++    // Craftbukkit end
++    
+     public int func_70302_i_()
+     {
+         return 9;

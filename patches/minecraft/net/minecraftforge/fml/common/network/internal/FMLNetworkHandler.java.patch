@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraftforge/fml/common/network/internal/FMLNetworkHandler.java
++++ ../src-work/minecraft/net/minecraftforge/fml/common/network/internal/FMLNetworkHandler.java
+@@ -80,7 +80,7 @@
+             Container remoteGuiContainer = NetworkRegistry.INSTANCE.getRemoteGuiContainer(mc, entityPlayerMP, modGuiId, world, x, y, z);
+             if (remoteGuiContainer != null)
+             {
+-                entityPlayerMP.func_71117_bO();
++                entityPlayerMP.getNextWindowId();
+                 entityPlayerMP.func_71128_l();
+                 int windowId = entityPlayerMP.field_71139_cq;
+                 FMLMessage.OpenGui openGui = new FMLMessage.OpenGui(windowId, mc.getModId(), modGuiId, x, y, z);

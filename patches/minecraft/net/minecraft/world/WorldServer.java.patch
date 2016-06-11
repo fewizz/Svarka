@@ -33,12 +33,11 @@
      public List<Teleporter> customTeleporters = new ArrayList<Teleporter>();
 +    
 +    // CraftBukkit start
-+    public int dimension;
++    public int dimension; // Svarka - now other use.
  
 +    public WorldServer(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn, org.bukkit.World.Environment env, org.bukkit.generator.ChunkGenerator gen)
 +    {
 +    	this(server, saveHandlerIn, info, dimensionId, profilerIn);
-+    	this.dimension = dimensionId;
 +    	this.generator = gen;
 +    	this.world = new CraftWorld((WorldServer) this, gen, env);
 +    }
@@ -47,6 +46,7 @@
          super(p_i45921_2_, p_i45921_3_, net.minecraftforge.common.DimensionManager.createProviderFor(p_i45921_4_), p_i45921_5_, false);
 +    	//this.pvpMode = server.getPVP(); //TODO
 +    	//info.world = this;//TODO
++        this.dimension = p_i45921_4_;
 +    	// CraftBukkit end
 +        
          this.field_73061_a = p_i45921_1_;

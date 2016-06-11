@@ -30,7 +30,7 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
     protected CraftOfflinePlayer(CraftServer server, GameProfile profile) {
         this.server = server;
         this.profile = profile;
-        this.storage = (SaveHandler) (server.console.worlds.get(0).getSaveHandler());
+        this.storage = (SaveHandler) (server.console.worldServers[0].getSaveHandler());
 
     }
 

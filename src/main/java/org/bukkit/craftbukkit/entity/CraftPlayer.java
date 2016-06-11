@@ -268,7 +268,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public void chat(String msg) {
         if (getHandle().connection == null) return;
 
-        //getHandle().connection.chat(msg, false); //TODO!!!
+        getHandle().connection.chat(msg, false);
     }
 
     @Override

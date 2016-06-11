@@ -59,7 +59,7 @@
      private long field_175591_ab = func_130071_aq();
 +    
 +    // CraftBukkit start
-+    public List<WorldServer> worlds = new ArrayList<WorldServer>();
++    // public List<WorldServer> worlds = new ArrayList<WorldServer>(); // Svarka - NO!
 +    public org.bukkit.craftbukkit.CraftServer server;
 +    public OptionSet options;
 +    public org.bukkit.command.ConsoleCommandSender console;
@@ -128,7 +128,15 @@
  
      protected ServerCommandManager func_175582_h()
      {
-@@ -361,6 +434,11 @@
+@@ -336,6 +409,7 @@
+     {
+         this.field_71302_d = null;
+         this.field_71303_e = 0;
++        this.server.enablePlugins(org.bukkit.plugin.PluginLoadOrder.POSTWORLD); // CraftBukkit
+     }
+ 
+     public void func_71267_a(boolean p_71267_1_)
+@@ -361,6 +435,11 @@
          }
      }
  
@@ -140,7 +148,7 @@
      public void func_71260_j()
      {
          field_147145_h.info("Stopping server");
-@@ -747,9 +825,11 @@
+@@ -747,9 +826,11 @@
  
      public void func_71256_s()
      {
@@ -154,7 +162,7 @@
      }
  
      public File func_71209_f(String p_71209_1_)
-@@ -1401,10 +1481,12 @@
+@@ -1401,10 +1482,12 @@
      @SideOnly(Side.SERVER)
      public static void main(String[] p_main_0_)
      {
@@ -167,7 +175,7 @@
              boolean flag = true;
              String s = null;
              String s1 = ".";
-@@ -1468,51 +1550,73 @@
+@@ -1468,51 +1551,73 @@
                      ++j;
                  }
              }
@@ -250,7 +258,7 @@
          }
          catch (Exception exception)
          {
-@@ -1582,4 +1686,11 @@
+@@ -1582,4 +1687,11 @@
      {
          return this.field_175590_aa;
      }

@@ -82,9 +82,9 @@
 -                BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(System.in));
 +                //BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(System.in));
 +                // CraftBukkit start
-+                if (!org.bukkit.craftbukkit.Main.useConsole) {
-+                	return;
-+                }
++                //if (!org.bukkit.craftbukkit.Main.useConsole) {
++                //	return;
++                //}
 +                // CraftBukkit end
 +                
 +                jline.console.ConsoleReader bufferedreader = reader; // CraftBukkit

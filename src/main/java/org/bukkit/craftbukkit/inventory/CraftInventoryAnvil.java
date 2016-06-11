@@ -1,17 +1,17 @@
 package org.bukkit.craftbukkit.inventory;
 
 import org.bukkit.Location;
-
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 
+import fewizz.svarka.inventory.IBukkitInventory;
 import net.minecraft.inventory.IInventory;
 
 public class CraftInventoryAnvil extends CraftInventory implements AnvilInventory {
     private final Location location;
     private final IInventory resultInventory;
 
-    public CraftInventoryAnvil(Location location, IInventory inventory, IInventory resultInventory) {
+    public CraftInventoryAnvil(Location location, IBukkitInventory inventory, IInventory resultInventory) {
         super(inventory);
         this.location = location;
         this.resultInventory = resultInventory;

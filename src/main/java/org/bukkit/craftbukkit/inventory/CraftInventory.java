@@ -34,9 +34,9 @@ public class CraftInventory implements Inventory {
         this.inventory = inventory;
     }
     
-    public CraftInventory(IInventory inventory) {
-        this.inventory = (IBukkitInventory) inventory;
-    }
+    //public CraftInventory(IInventory inventory) {
+    //    this.inventory = (IBukkitInventory) inventory;
+    //}
 
     public IInventory getInventory() {
         return inventory;

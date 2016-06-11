@@ -1,0 +1,65 @@
+--- ../src-base/minecraft/net/minecraft/tileentity/TileEntityBrewingStand.java
++++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityBrewingStand.java
+@@ -1,7 +1,13 @@
+ package net.minecraft.tileentity;
+ 
++import java.util.ArrayList;
+ import java.util.Arrays;
++import java.util.List;
++
+ import javax.annotation.Nullable;
++
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++
+ import net.minecraft.block.BlockBrewingStand;
+ import net.minecraft.block.state.IBlockState;
+ import net.minecraft.entity.player.EntityPlayer;
+@@ -17,6 +23,7 @@
+ import net.minecraft.nbt.NBTTagCompound;
+ import net.minecraft.nbt.NBTTagList;
+ import net.minecraft.potion.PotionHelper;
++import net.minecraft.server.MinecraftServer;
+ import net.minecraft.util.EnumFacing;
+ import net.minecraft.util.ITickable;
+ import net.minecraft.util.math.BlockPos;
+@@ -32,7 +39,40 @@
+     private Item field_145944_m;
+     private String field_145942_n;
+     private int field_184278_m;
++    
++    // Craftbukkit start
++    private int lastTick;
++    public List transaction;
++    private int maxStack;
+ 
++
++    public TileEntityBrewingStand() {
++       this.lastTick = MinecraftServer.currentTick;
++       this.transaction = new ArrayList();
++       this.maxStack = 64;
++    }
++
++    public void onOpen(CraftHumanEntity who) {
++       this.transaction.add(who);
++    }
++
++    public void onClose(CraftHumanEntity who) {
++       this.transaction.remove(who);
++    }
++
++    public List getViewers() {
++       return this.transaction;
++    }
++
++    public ItemStack[] getContents() {
++       return this.field_145945_j;
++    }
++
++    public void setMaxStackSize(int size) {
++       this.maxStack = size;
++    }
++    // Craftbukkit end
++
+     public String func_70005_c_()
+     {
+         return this.func_145818_k_() ? this.field_145942_n : "container.brewing";

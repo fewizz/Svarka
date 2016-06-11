@@ -45,6 +45,7 @@ import net.minecraft.server.management.UserListEntry;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.ServerWorldEventHandler;
@@ -57,6 +58,7 @@ import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
+import net.minecraftforge.common.DimensionManager;
 
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
@@ -159,6 +161,7 @@ import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.base64.Base64;
 import jline.console.ConsoleReader;
+
 import org.bukkit.event.server.TabCompleteEvent;
 
 public final class CraftServer implements Server {
@@ -628,7 +631,8 @@ public final class CraftServer implements Server {
     public DedicatedPlayerList getHandle() {
         return playerList;
     }
-
+    
+    private PendingCommand curCommand; // Svarka - very hacky =(
     // NOTE: Should only be called from DedicatedServer.ah()
     public boolean dispatchServerCommand(CommandSender sender, PendingCommand serverCommand) {
         if (sender instanceof Conversable) {
@@ -641,6 +645,7 @@ public final class CraftServer implements Server {
         }
         try {
             this.playerCommandState = true;
+            curCommand = serverCommand;
             return dispatchCommand(sender, serverCommand.command);
         } catch (Exception ex) {
             getLogger().log(Level.WARNING, "Unexpected exception while parsing console command \"" + serverCommand.command + '"', ex);
@@ -658,14 +663,24 @@ public final class CraftServer implements Server {
         if (commandMap.dispatch(sender, commandLine)) {
             return true;
         }
-
-        if (sender instanceof Player) {
-            sender.sendMessage("Unknown command. Type \"/help\" for help.");
-        } else {
-            sender.sendMessage("Unknown command. Type \"help\" for help.");
+        
+        int commandState = 0;
+        if(curCommand != null) {
+        	commandState = MinecraftServer.getServerStatic().getCommandManager().executeCommand(curCommand.sender, commandLine);
+        	curCommand = null;
         }
 
-        return false;
+
+        if(commandState == 0) {
+        	if (sender instanceof Player) {
+            	sender.sendMessage("Unknown command. Type \"/help\" for help.");
+        	} else {
+            	sender.sendMessage("Unknown command. Type \"help\" for help.");
+        	}
+        	return false;
+        }
+        
+        return true;
     }
 
     @Override
@@ -678,8 +693,8 @@ public final class CraftServer implements Server {
         ((DedicatedServer) console).settings = config;
 
         boolean animals = config.getBooleanProperty("spawn-animals", console.getCanSpawnAnimals());
-        boolean monsters = config.getBooleanProperty("spawn-monsters", console.worlds.get(0).getDifficulty() != EnumDifficulty.PEACEFUL);
-        EnumDifficulty difficulty = EnumDifficulty.getDifficultyEnum(config.getIntProperty("difficulty", console.worlds.get(0).getDifficulty().ordinal()));
+        boolean monsters = config.getBooleanProperty("spawn-monsters", console.worldServers[0].getDifficulty() != EnumDifficulty.PEACEFUL);
+        EnumDifficulty difficulty = EnumDifficulty.getDifficultyEnum(config.getIntProperty("difficulty", console.worldServers[0].getDifficulty().ordinal()));
 
         online.value = config.getBooleanProperty("online-mode", console.isServerInOnlineMode());
         console.setCanSpawnAnimals(config.getBooleanProperty("spawn-animals", console.getCanSpawnAnimals()));
@@ -708,7 +723,7 @@ public final class CraftServer implements Server {
             logger.log(Level.WARNING, "Failed to load banned-players.json, " + ex.getMessage());
         }
 
-        for (WorldServer world : console.worlds) {
+        for (WorldServer world : console.worldServers) {
             world.worldInfo.setDifficulty(difficulty);
             world.setAllowedSpawnTypes(monsters, animals);
             if (this.getTicksPerAnimalSpawns() < 0) {
@@ -890,17 +905,17 @@ public final class CraftServer implements Server {
             });
         }
 
-        int dimension = CraftWorld.CUSTOM_DIMENSION_OFFSET + console.worlds.size();
-        boolean used = false;
-        do {
-            for (WorldServer server : console.worlds) {
-                used = server.dimension == dimension;
-                if (used) {
-                    dimension++;
-                    break;
-                }
-            }
-        } while(used);
+        //int dimension = CraftWorld.CUSTOM_DIMENSION_OFFSET + console.worldServers.length;
+        //boolean used = false;
+        //do {
+        //    for (WorldServer server : console.worldServers) {
+        //        used = server.dimension == dimension;
+        //        if (used) {
+        //            dimension++;
+        //            break;
+        //        }
+        //    }
+        //} while(used);
         boolean hardcore = false;
 
         AnvilSaveHandler sdm = new AnvilSaveHandler(getWorldContainer(), name, true, getHandle().getServerInstance().getDataFixer());
@@ -912,29 +927,33 @@ public final class CraftServer implements Server {
             worlddata = new WorldInfo(worldSettings, name);
         }
         worlddata.checkName(name); // CraftBukkit - Migration did not rewrite the level.dat; This forces 1.8 to take the last loaded world as respawn (in this case the end)
-        WorldServer internal = (WorldServer) new WorldServer(console, sdm, worlddata, dimension, console.theProfiler, creator.environment(), generator).init();
 
         if (!(worlds.containsKey(name.toLowerCase()))) {
             return null;
         }
-
+        
+        int dimID = DimensionManager.getNextFreeDimId();
+        DimensionManager.registerDimension(dimID, DimensionType.OVERWORLD);
+        WorldServer internal = (WorldServer) new WorldServer(console, sdm, worlddata, dimID, console.theProfiler, creator.environment(), generator).init();
+        
         if (worldSettings != null) {
             internal.initialize(worldSettings);
         }
+        
         internal.worldScoreboard = getScoreboardManager().getMainScoreboard().getHandle();
 
         internal.theEntityTracker = new EntityTracker(internal);
         internal.addEventListener(new ServerWorldEventHandler(console, internal));
         internal.worldInfo.setDifficulty(EnumDifficulty.EASY);
         internal.setAllowedSpawnTypes(true, true);
-        console.worlds.add(internal);
+        //console.worlds.add(internal);
 
         if (generator != null) {
             internal.getWorld().getPopulators().addAll(generator.getDefaultPopulators(internal.getWorld()));
         }
 
         pluginManager.callEvent(new WorldInitEvent(internal.getWorld()));
-        System.out.print("Preparing start region for level " + (console.worlds.size() - 1) + " (Seed: " + internal.getSeed() + ")");
+        System.out.print("Preparing start region for level " + (console.worldServers.length - 1) + " (Seed: " + internal.getSeed() + ")");
 
         if (internal.getWorld().getKeepSpawnInMemory()) {
             short short1 = 196;
@@ -977,10 +996,21 @@ public final class CraftServer implements Server {
 
         WorldServer handle = ((CraftWorld) world).getHandle();
 
-        if (!(console.worlds.contains(handle))) {
-            return false;
+        // Svarka start
+        //if (!(console.worlds.contains(handle))) {
+        //    return false;
+        //}
+        boolean fnd = false;
+        for(WorldServer wrld : console.worldServers) {
+        	if(wrld == world) {
+        		fnd = true;
+        		break;
+        	}
         }
-
+        if(!fnd)
+        	return false;
+        // Svarka end
+        
         if (!(handle.dimension > 1)) {
             return false;
         }
@@ -1006,7 +1036,8 @@ public final class CraftServer implements Server {
         }
 
         worlds.remove(world.getName().toLowerCase());
-        console.worlds.remove(console.worlds.indexOf(handle));
+        //console.worlds.remove(console.worlds.indexOf(handle));
+        DimensionManager.unloadWorld(((WorldServer)world).dimension);
         return true;
     }
 
@@ -1252,7 +1283,7 @@ public final class CraftServer implements Server {
     @Override
     @Deprecated
     public CraftMapView getMap(short id) {
-    	MapStorage collection = console.worlds.get(0).mapStorage;
+    	MapStorage collection = console.worldServers[0].mapStorage;
     	MapData worldmap = (MapData) collection.getOrLoadData(MapData.class, "map_" + id);
         if (worldmap == null) {
             return null;
@@ -1421,7 +1452,7 @@ public final class CraftServer implements Server {
 
     @Override
     public GameMode getDefaultGameMode() {
-        return GameMode.getByValue(console.worlds.get(0).getWorldInfo().getGameType().getID());
+        return GameMode.getByValue(console.worldServers[0].getWorldInfo().getGameType().getID());
     }
 
     @Override
@@ -1465,7 +1496,7 @@ public final class CraftServer implements Server {
 
     @Override
     public OfflinePlayer[] getOfflinePlayers() {
-    	SaveHandler storage = (SaveHandler) console.worlds.get(0).getSaveHandler();
+    	SaveHandler storage = (SaveHandler) console.worldServers[0].getSaveHandler();
         String[] files = storage.getPlayerDir().list(new DatFileFilter());
         Set<OfflinePlayer> players = new HashSet<OfflinePlayer>();
 

@@ -1,0 +1,64 @@
+--- ../src-base/minecraft/net/minecraft/tileentity/TileEntityChest.java
++++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityChest.java
+@@ -1,6 +1,14 @@
+ package net.minecraft.tileentity;
+ 
++import java.util.ArrayList;
++import java.util.List;
++
+ import javax.annotation.Nullable;
++
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++
++import fewizz.svarka.inventory.IBukkitInventory;
+ import net.minecraft.block.Block;
+ import net.minecraft.block.BlockChest;
+ import net.minecraft.entity.player.EntityPlayer;
+@@ -20,7 +28,7 @@
+ import net.minecraft.util.math.AxisAlignedBB;
+ import net.minecraft.util.math.BlockPos;
+ 
+-public class TileEntityChest extends TileEntityLockableLoot implements ITickable, IInventory
++public class TileEntityChest extends TileEntityLockableLoot implements ITickable, IBukkitInventory
+ {
+     private ItemStack[] field_145985_p = new ItemStack[27];
+     public boolean field_145984_a;
+@@ -35,6 +43,31 @@
+     private BlockChest.Type field_145982_r;
+     private String field_145981_s;
+ 
++    // Craftbukkit start
++    public List transaction = new ArrayList();
++    private int maxStack = 64;
++
++    public ItemStack[] getContents() {
++       return this.field_145985_p;
++    }
++
++    public void onOpen(CraftHumanEntity who) {
++       this.transaction.add(who);
++    }
++
++    public void onClose(CraftHumanEntity who) {
++       this.transaction.remove(who);
++    }
++
++    public List getViewers() {
++       return this.transaction;
++    }
++
++    public void setMaxStackSize(int size) {
++       this.maxStack = size;
++    }
++    // Craftbukkit end
++    
+     public TileEntityChest()
+     {
+     }
+@@ -484,5 +517,4 @@
+     {
+         return super.getCapability(net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+     }
+-
+ }

@@ -5,6 +5,7 @@
 /plugin
 /eclipse
 /.gradle
+/spigot
 
 # Mac filesystem dust
 .DS_Store

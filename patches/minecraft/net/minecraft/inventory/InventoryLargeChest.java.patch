@@ -1,6 +1,21 @@
 --- ../src-base/minecraft/net/minecraft/inventory/InventoryLargeChest.java
 +++ ../src-work/minecraft/net/minecraft/inventory/InventoryLargeChest.java
-@@ -13,8 +13,8 @@
+@@ -1,6 +1,14 @@
+ package net.minecraft.inventory;
+ 
++import java.util.ArrayList;
++import java.util.List;
++
+ import javax.annotation.Nullable;
++
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.inventory.InventoryHolder;
++
+ import net.minecraft.entity.player.EntityPlayer;
+ import net.minecraft.entity.player.InventoryPlayer;
+ import net.minecraft.item.ItemStack;
+@@ -13,9 +21,52 @@
  public class InventoryLargeChest implements ILockableContainer
  {
      private String field_70479_a;
@@ -9,5 +24,49 @@
 +    public ILockableContainer field_70477_b;
 +    public ILockableContainer field_70478_c;
  
++    // Craftbukkit start
++    public List transaction = new ArrayList();
++
++
++    public ItemStack[] getContents() {
++       ItemStack[] result = new ItemStack[this.func_70302_i_()];
++
++       for(int i = 0; i < result.length; ++i) {
++          result[i] = this.func_70301_a(i);
++       }
++
++       return result;
++    }
++
++    public void onOpen(CraftHumanEntity who) {
++       this.field_70477_b.onOpen(who);
++       this.field_70478_c.onOpen(who);
++       this.transaction.add(who);
++    }
++
++    public void onClose(CraftHumanEntity who) {
++       this.field_70477_b.onClose(who);
++       this.field_70478_c.onClose(who);
++       this.transaction.remove(who);
++    }
++
++    public List getViewers() {
++       return this.transaction;
++    }
++
++    public InventoryHolder getOwner() {
++       return null;
++    }
++
++    public void setMaxStackSize(int size) {
++       this.field_70477_b.setMaxStackSize(size);
++       this.field_70478_c.setMaxStackSize(size);
++    }
++
++    public Location getLocation() {
++       return this.field_70477_b.getLocation();
++    }
++    // Craftbukkit end
      public InventoryLargeChest(String p_i45905_1_, ILockableContainer p_i45905_2_, ILockableContainer p_i45905_3_)
      {
+         this.field_70479_a = p_i45905_1_;

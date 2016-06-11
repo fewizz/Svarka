@@ -1,0 +1,62 @@
+--- ../src-base/minecraft/net/minecraft/tileentity/TileEntityFurnace.java
++++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityFurnace.java
+@@ -1,6 +1,12 @@
+ package net.minecraft.tileentity;
+ 
++import java.util.ArrayList;
++import java.util.List;
++
+ import javax.annotation.Nullable;
++
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++
+ import net.minecraft.block.Block;
+ import net.minecraft.block.BlockFurnace;
+ import net.minecraft.block.material.Material;
+@@ -23,6 +29,7 @@
+ import net.minecraft.item.crafting.FurnaceRecipes;
+ import net.minecraft.nbt.NBTTagCompound;
+ import net.minecraft.nbt.NBTTagList;
++import net.minecraft.server.MinecraftServer;
+ import net.minecraft.util.EnumFacing;
+ import net.minecraft.util.ITickable;
+ import net.minecraft.util.math.MathHelper;
+@@ -41,6 +48,38 @@
+     private int field_174905_l;
+     private String field_145958_o;
+ 
++    // Craftbukkit start
++    private int lastTick;
++    private int maxStack;
++    public List transaction;
++
++
++    public ItemStack[] getContents() {
++       return this.field_145957_n;
++    }
++
++    public void onOpen(CraftHumanEntity who) {
++       this.transaction.add(who);
++    }
++
++    public void onClose(CraftHumanEntity who) {
++       this.transaction.remove(who);
++    }
++
++    public List getViewers() {
++       return this.transaction;
++    }
++
++    public void setMaxStackSize(int size) {
++       this.maxStack = size;
++    }
++
++    public TileEntityFurnace() {
++       this.lastTick = MinecraftServer.currentTick;
++       this.maxStack = 64;
++       this.transaction = new ArrayList();
++    }
++    // Craftbukkit end
+     public int func_70302_i_()
+     {
+         return this.field_145957_n.length;
