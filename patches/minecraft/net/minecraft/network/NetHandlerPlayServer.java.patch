@@ -155,14 +155,20 @@
      public void func_73660_a()
      {
          this.func_184342_d();
-@@ -535,30 +638,116 @@
-         double d0 = p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.X) ? this.field_147369_b.field_70165_t : 0.0D;
-         double d1 = p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.Y) ? this.field_147369_b.field_70163_u : 0.0D;
-         double d2 = p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.Z) ? this.field_147369_b.field_70161_v : 0.0D;
+@@ -532,33 +635,119 @@
+ 
+     public void func_175089_a(double p_175089_1_, double p_175089_3_, double p_175089_5_, float p_175089_7_, float p_175089_8_, Set<SPacketPlayerPosLook.EnumFlags> p_175089_9_)
+     {
+-        double d0 = p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.X) ? this.field_147369_b.field_70165_t : 0.0D;
+-        double d1 = p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.Y) ? this.field_147369_b.field_70163_u : 0.0D;
+-        double d2 = p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.Z) ? this.field_147369_b.field_70161_v : 0.0D;
 -        this.field_184362_y = new Vec3d(p_175089_1_ + d0, p_175089_3_ + d1, p_175089_5_ + d2);
 -        float f = p_175089_7_;
 -        float f1 = p_175089_8_;
-+        /*this.targetPos = new Vec3d(x + d0, y + d1, z + d2); // Craftbukkit =_=
++    	/*double d0 = relativeSet.contains(SPacketPlayerPosLook.EnumFlags.X) ? this.playerEntity.posX : 0.0D; // Craftbukkit =_=
++        double d1 = relativeSet.contains(SPacketPlayerPosLook.EnumFlags.Y) ? this.playerEntity.posY : 0.0D;
++        double d2 = relativeSet.contains(SPacketPlayerPosLook.EnumFlags.Z) ? this.playerEntity.posZ : 0.0D;
++        this.targetPos = new Vec3d(x + d0, y + d1, z + d2);
 +        float f = yaw;
 +        float f1 = pitch;
  
@@ -194,29 +200,29 @@
 +        this.playerEntity.setPositionAndRotation(this.targetPos.xCoord, this.targetPos.yCoord, this.targetPos.zCoord, f, f1);
 +        this.playerEntity.connection.sendPacket(new SPacketPlayerPosLook(x, y, z, yaw, pitch, relativeSet, this.teleportId));*/
 +        // CraftBukkit start - Delegate to teleport(Location)
-+		Player player = this.getPlayer();
++		CraftPlayer player = this.getPlayer();
 +		Location from = player.getLocation();
 +
-+		double x = d0;
-+		double y = d1;
-+		double z = d2;
++		double x = p_175089_1_;
++		double y = p_175089_3_;
++		double z = p_175089_5_;
 +		float yaw = p_175089_7_;
 +		float pitch = p_175089_8_;
-+		if (p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.X)) {
-+			x += from.getX();
-+		}
-+		if (p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.Y)) {
-+			y += from.getY();
-+		}
-+		if (p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.Z)) {
-+			z += from.getZ();
-+		}
-+		if (p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.Y_ROT)) {
-+			yaw += from.getYaw();
-+		}
-+		if (p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.X_ROT)) {
-+			pitch += from.getPitch();
-+		}
++		//if (relativeSet.contains(SPacketPlayerPosLook.EnumFlags.X)) {
++		//	x += from.getX();
++		//}
++		//if (relativeSet.contains(SPacketPlayerPosLook.EnumFlags.Y)) {
++		//	y += from.getY();
++		//}
++		//if (relativeSet.contains(SPacketPlayerPosLook.EnumFlags.Z)) {
++		//	z += from.getZ();
++		//}
++		//if (relativeSet.contains(SPacketPlayerPosLook.EnumFlags.Y_ROT)) {
++		//	yaw += from.getYaw();
++		//}
++		//if (relativeSet.contains(SPacketPlayerPosLook.EnumFlags.X_ROT)) {
++		//	pitch += from.getPitch();
++		//}
 +
 +		Location to = new Location(this.getPlayer().getWorld(), x, y, z, yaw, pitch);
 +		PlayerTeleportEvent event = new PlayerTeleportEvent(player, from.clone(), to.clone(), PlayerTeleportEvent.TeleportCause.UNKNOWN);
@@ -225,14 +231,14 @@
 +		if (event.isCancelled() || !to.equals(event.getTo())) {
 +			p_175089_9_.clear(); // Can't relative teleport
 +			to = event.isCancelled() ? event.getFrom() : event.getTo();
-+			d0 = to.getX();
-+			d1 = to.getY();
-+			d2 = to.getZ();
++			p_175089_1_ = to.getX();
++			p_175089_3_ = to.getY();
++			p_175089_5_ = to.getZ();
 +			p_175089_7_ = to.getYaw();
 +			p_175089_8_ = to.getPitch();
 +		}
 +
-+		this.internalTeleport(d0, d1, d2, p_175089_7_, p_175089_8_, p_175089_9_);
++		this.internalTeleport(p_175089_1_, p_175089_3_, p_175089_5_, p_175089_7_, p_175089_8_, p_175089_9_);
      }
 +    
 +	public void teleport(Location dest) {
@@ -515,3 +521,13 @@
      }
  
      public void func_175087_a(CPacketAnimation p_175087_1_)
+@@ -1705,4 +2066,9 @@
+             }
+         }
+     }
++    
++    // CraftBukkit start - Add "isDisconnected" method
++    public final boolean isDisconnected() {
++        return !this.field_147369_b.joining && !this.field_147371_a.func_150724_d();
++    }
+ }

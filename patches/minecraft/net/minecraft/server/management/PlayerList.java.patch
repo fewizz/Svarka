@@ -36,7 +36,7 @@
      private static final SimpleDateFormat field_72403_e = new SimpleDateFormat("yyyy-MM-dd \'at\' HH:mm:ss z");
      private final MinecraftServer field_72400_f;
 -    private final List<EntityPlayerMP> field_72404_b = Lists.<EntityPlayerMP>newArrayList();
-+    public final List<EntityPlayerMP> field_72404_b = new java.util.concurrent.CopyOnWriteArrayList(); // CraftBukkit - ArrayList -> CopyOnWriteArrayList: Iterator safety
++    public final List<EntityPlayerMP> field_72404_b = new java.util.concurrent.CopyOnWriteArrayList<EntityPlayerMP>(); // CraftBukkit - ArrayList -> CopyOnWriteArrayList: Iterator safety
      private final Map<UUID, EntityPlayerMP> field_177454_f = Maps.<UUID, EntityPlayerMP>newHashMap();
      private final UserListBans field_72401_g;
      private final UserListIPBans field_72413_h;
@@ -64,7 +64,100 @@
          this.field_72401_g = new UserListBans(field_152613_a);
          this.field_72413_h = new UserListIPBans(field_152614_b);
          this.field_72414_i = new UserListOps(field_152615_c);
-@@ -495,54 +526,139 @@
+@@ -110,9 +141,10 @@
+         String s = gameprofile1 == null ? gameprofile.getName() : gameprofile1.getName();
+         playerprofilecache.func_152649_a(gameprofile);
+         NBTTagCompound nbttagcompound = this.func_72380_a(p_72355_2_);
+-        p_72355_2_.func_70029_a(this.field_72400_f.func_71218_a(p_72355_2_.field_71093_bK));
+-
+-        World playerWorld = this.field_72400_f.func_71218_a(p_72355_2_.field_71093_bK);
++        
++        WorldServer playerWorld = this.field_72400_f.func_71218_a(p_72355_2_.field_71093_bK);
++        //playerIn.setWorld(playerWorld);
++        
+         if (playerWorld == null)
+         {
+             p_72355_2_.field_71093_bK = 0;
+@@ -122,7 +154,7 @@
+         }
+ 
+         p_72355_2_.func_70029_a(playerWorld);
+-        p_72355_2_.field_71134_c.func_73080_a((WorldServer)p_72355_2_.field_70170_p);
++        //playerIn.interactionManager.setWorld((WorldServer)playerIn.worldObj); // Svarka - already sets in setWorld()
+         String s1 = "local";
+ 
+         if (p_72355_1_.func_74430_c() != null)
+@@ -131,12 +163,15 @@
+         }
+ 
+         field_148546_d.info(p_72355_2_.func_70005_c_() + "[" + s1 + "] logged in with entity id " + p_72355_2_.func_145782_y() + " at (" + p_72355_2_.field_70165_t + ", " + p_72355_2_.field_70163_u + ", " + p_72355_2_.field_70161_v + ")");
+-        WorldServer worldserver = this.field_72400_f.func_71218_a(p_72355_2_.field_71093_bK);
+-        WorldInfo worldinfo = worldserver.func_72912_H();
+-        BlockPos blockpos = worldserver.func_175694_M();
+-        this.func_72381_a(p_72355_2_, (EntityPlayerMP)null, worldserver);
++        //WorldServer worldserver = this.mcServer.worldServerForDimension(playerIn.dimension); // Why?
++        WorldInfo worldinfo = playerWorld.func_72912_H();
++        BlockPos blockpos = playerWorld.func_175694_M();
++        // Svarka start
++        //this.setPlayerGameTypeBasedOnOther(playerIn, (EntityPlayerMP)null, playerWorld);
++        p_72355_2_.field_71134_c.func_73076_a(playerWorld.field_72986_A.func_76077_q());
++        // Svarka end
+         p_72355_2_.field_71135_a = nethandlerplayserver;
+-        nethandlerplayserver.func_147359_a(new SPacketJoinGame(p_72355_2_.func_145782_y(), p_72355_2_.field_71134_c.func_73081_b(), worldinfo.func_76093_s(), worldserver.field_73011_w.getDimension(), worldserver.func_175659_aa(), this.func_72352_l(), worldinfo.func_76067_t(), worldserver.func_82736_K().func_82766_b("reducedDebugInfo")));
++        nethandlerplayserver.func_147359_a(new SPacketJoinGame(p_72355_2_.func_145782_y(), p_72355_2_.field_71134_c.func_73081_b(), worldinfo.func_76093_s(), playerWorld.field_73011_w.getDimension(), playerWorld.func_175659_aa(), this.func_72352_l(), worldinfo.func_76067_t(), playerWorld.func_82736_K().func_82766_b("reducedDebugInfo")));
+         nethandlerplayserver.func_147359_a(new SPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).func_180714_a(this.func_72365_p().getServerModName())));
+         nethandlerplayserver.func_147359_a(new SPacketServerDifficulty(worldinfo.func_176130_y(), worldinfo.func_176123_z()));
+         nethandlerplayserver.func_147359_a(new SPacketSpawnPosition(blockpos));
+@@ -145,7 +180,7 @@
+         this.func_187243_f(p_72355_2_);
+         p_72355_2_.func_147099_x().func_150877_d();
+         p_72355_2_.func_147099_x().func_150884_b(p_72355_2_);
+-        this.func_96456_a((ServerScoreboard)worldserver.func_96441_U(), p_72355_2_);
++        this.func_96456_a((ServerScoreboard)playerWorld.func_96441_U(), p_72355_2_);
+         this.field_72400_f.func_147132_au();
+         TextComponentTranslation textcomponenttranslation;
+ 
+@@ -162,7 +197,7 @@
+         this.func_148539_a(textcomponenttranslation);
+         this.func_72377_c(p_72355_2_);
+         nethandlerplayserver.func_147364_a(p_72355_2_.field_70165_t, p_72355_2_.field_70163_u, p_72355_2_.field_70161_v, p_72355_2_.field_70177_z, p_72355_2_.field_70125_A);
+-        this.func_72354_b(p_72355_2_, worldserver);
++        this.func_72354_b(p_72355_2_, playerWorld);
+ 
+         if (!this.field_72400_f.func_147133_T().isEmpty())
+         {
+@@ -179,7 +214,7 @@
+             if (nbttagcompound.func_150297_b("RootVehicle", 10))
+             {
+                 NBTTagCompound nbttagcompound1 = nbttagcompound.func_74775_l("RootVehicle");
+-                Entity entity2 = AnvilChunkLoader.func_186051_a(nbttagcompound1.func_74775_l("Entity"), worldserver, true);
++                Entity entity2 = AnvilChunkLoader.func_186051_a(nbttagcompound1.func_74775_l("Entity"), playerWorld, true);
+ 
+                 if (entity2 != null)
+                 {
+@@ -204,18 +239,18 @@
+                     if (!p_72355_2_.func_184218_aH())
+                     {
+                         field_148546_d.warn("Couldn\'t reattach entity to player");
+-                        worldserver.func_72973_f(entity2);
++                        playerWorld.func_72973_f(entity2);
+ 
+                         for (Entity entity3 : entity2.func_184182_bu())
+                         {
+-                            worldserver.func_72973_f(entity3);
++                        	playerWorld.func_72973_f(entity3);
+                         }
+                     }
+                 }
+             }
+             else if (nbttagcompound.func_150297_b("Riding", 10))
+             {
+-                Entity entity1 = AnvilChunkLoader.func_186051_a(nbttagcompound.func_74775_l("Riding"), worldserver, true);
++                Entity entity1 = AnvilChunkLoader.func_186051_a(nbttagcompound.func_74775_l("Riding"), playerWorld, true);
+ 
+                 if (entity1 != null)
+                 {
+@@ -495,54 +530,139 @@
  
      public EntityPlayerMP func_72368_a(EntityPlayerMP p_72368_1_, int p_72368_2_, boolean p_72368_3_)
      {
@@ -228,3 +321,12 @@
  
              if (blockpos1 != null)
              {
+@@ -583,7 +703,7 @@
+     {
+         GameProfile gameprofile = p_187243_1_.func_146103_bH();
+         int i = this.func_152596_g(gameprofile) ? this.field_72414_i.func_187452_a(gameprofile) : 0;
+-        i = this.field_72400_f.func_71264_H() && this.field_72400_f.field_71305_c[0].func_72912_H().func_76086_u() ? 4 : i;
++        //i = this.mcServer.isSinglePlayer() && this.mcServer.worldServers[0].getWorldInfo().areCommandsAllowed() ? 4 : i; // Svarka - no singleplayer =_=
+         i = this.field_72407_n ? 4 : i;
+         this.func_187245_a(p_187243_1_, i);
+     }
