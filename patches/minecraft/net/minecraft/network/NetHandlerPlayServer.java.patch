@@ -19,7 +19,7 @@
  import net.minecraft.block.BlockCommandBlock;
  import net.minecraft.block.material.Material;
  import net.minecraft.block.state.IBlockState;
-@@ -108,10 +112,78 @@
+@@ -108,10 +112,81 @@
  import net.minecraft.util.text.TextFormatting;
  import net.minecraft.world.WorldServer;
  import net.minecraft.world.WorldSettings;
@@ -47,6 +47,9 @@
 +import org.bukkit.event.player.AsyncPlayerChatEvent;
 +import org.bukkit.event.player.PlayerChatEvent;
 +import org.bukkit.event.player.PlayerCommandPreprocessEvent;
++
++import org.bukkit.Location;
++import org.bukkit.event.player.PlayerTeleportEvent;
 +
 +//CraftBukkit start
 +import java.util.HashSet;
@@ -98,7 +101,7 @@
  public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable
  {
      private static final Logger field_147370_c = LogManager.getLogger();
-@@ -122,7 +194,11 @@
+@@ -122,7 +197,11 @@
      private int field_147378_h;
      private long field_147379_i;
      private long field_147377_k;
@@ -111,7 +114,7 @@
      private int field_147375_m;
      private final IntHashMap<Short> field_147372_n = new IntHashMap();
      private double field_184349_l;
-@@ -147,6 +223,7 @@
+@@ -147,6 +226,7 @@
      private int field_184346_E;
      private int field_184347_F;
      private int field_184348_G;
@@ -119,7 +122,7 @@
  
      public NetHandlerPlayServer(MinecraftServer p_i1530_1_, NetworkManager p_i1530_2_, EntityPlayerMP p_i1530_3_)
      {
-@@ -155,8 +232,23 @@
+@@ -155,8 +235,31 @@
          p_i1530_2_.func_150719_a(this);
          this.field_147369_b = p_i1530_3_;
          p_i1530_3_.field_71135_a = this;
@@ -127,6 +130,7 @@
 +        // CraftBukkit start - add fields and methods
 +        this.server = p_i1530_1_.server;
      }
+-
 +    
 +    private final org.bukkit.craftbukkit.CraftServer server;
 +    private int lastTick = MinecraftServer.currentTick;
@@ -135,7 +139,15 @@
 +    private int dropCount = 0;
 +    private static final int SURVIVAL_PLACE_DISTANCE_SQUARED = 6 * 6;
 +    private static final int CREATIVE_PLACE_DISTANCE_SQUARED = 7 * 7;
- 
++    
++    // Get position of last block hit for BlockDamageLevel.STOPPED
++    private double lastPosX = Double.MAX_VALUE;
++    private double lastPosY = Double.MAX_VALUE;
++    private double lastPosZ = Double.MAX_VALUE;
++    private float lastPitch = Float.MAX_VALUE;
++    private float lastYaw = Float.MAX_VALUE;
++    private boolean justTeleported = false;
++        
 +    public CraftPlayer getPlayer() {
 +    	return (this.field_147369_b == null) ? null : (CraftPlayer) this.field_147369_b.getBukkitEntity();
 +    }
@@ -143,7 +155,136 @@
      public void func_73660_a()
      {
          this.func_184342_d();
-@@ -866,9 +958,14 @@
+@@ -535,30 +638,116 @@
+         double d0 = p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.X) ? this.field_147369_b.field_70165_t : 0.0D;
+         double d1 = p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.Y) ? this.field_147369_b.field_70163_u : 0.0D;
+         double d2 = p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.Z) ? this.field_147369_b.field_70161_v : 0.0D;
+-        this.field_184362_y = new Vec3d(p_175089_1_ + d0, p_175089_3_ + d1, p_175089_5_ + d2);
+-        float f = p_175089_7_;
+-        float f1 = p_175089_8_;
++        /*this.targetPos = new Vec3d(x + d0, y + d1, z + d2); // Craftbukkit =_=
++        float f = yaw;
++        float f1 = pitch;
+ 
+-        if (p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.Y_ROT))
++        if (relativeSet.contains(SPacketPlayerPosLook.EnumFlags.Y_ROT))
+         {
+-            f = p_175089_7_ + this.field_147369_b.field_70177_z;
++            f = yaw + this.playerEntity.rotationYaw;
+         }
+ 
+-        if (p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.X_ROT))
++        if (relativeSet.contains(SPacketPlayerPosLook.EnumFlags.X_ROT))
+         {
+-            f1 = p_175089_8_ + this.field_147369_b.field_70125_A;
++            f1 = pitch + this.playerEntity.rotationPitch;
+         }
+ 
+-        if (++this.field_184363_z == Integer.MAX_VALUE)
++        if (++this.teleportId == Integer.MAX_VALUE)
+         {
+-            this.field_184363_z = 0;
++            this.teleportId = 0;
+         }
+ 
+-        this.field_184343_A = this.field_147368_e;
+-        this.field_147369_b.func_70080_a(this.field_184362_y.field_72450_a, this.field_184362_y.field_72448_b, this.field_184362_y.field_72449_c, f, f1);
+-        this.field_147369_b.field_71135_a.func_147359_a(new SPacketPlayerPosLook(p_175089_1_, p_175089_3_, p_175089_5_, p_175089_7_, p_175089_8_, p_175089_9_, this.field_184363_z));
++        this.lastPositionUpdate = this.networkTickCount;
++        this.playerEntity.setPositionAndRotation(this.targetPos.xCoord, this.targetPos.yCoord, this.targetPos.zCoord, f, f1);
++        this.playerEntity.connection.sendPacket(new SPacketPlayerPosLook(x, y, z, yaw, pitch, relativeSet, this.teleportId));*/
++        // CraftBukkit start - Delegate to teleport(Location)
++		Player player = this.getPlayer();
++		Location from = player.getLocation();
++
++		double x = d0;
++		double y = d1;
++		double z = d2;
++		float yaw = p_175089_7_;
++		float pitch = p_175089_8_;
++		if (p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.X)) {
++			x += from.getX();
++		}
++		if (p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.Y)) {
++			y += from.getY();
++		}
++		if (p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.Z)) {
++			z += from.getZ();
++		}
++		if (p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.Y_ROT)) {
++			yaw += from.getYaw();
++		}
++		if (p_175089_9_.contains(SPacketPlayerPosLook.EnumFlags.X_ROT)) {
++			pitch += from.getPitch();
++		}
++
++		Location to = new Location(this.getPlayer().getWorld(), x, y, z, yaw, pitch);
++		PlayerTeleportEvent event = new PlayerTeleportEvent(player, from.clone(), to.clone(), PlayerTeleportEvent.TeleportCause.UNKNOWN);
++		this.server.getPluginManager().callEvent(event);
++
++		if (event.isCancelled() || !to.equals(event.getTo())) {
++			p_175089_9_.clear(); // Can't relative teleport
++			to = event.isCancelled() ? event.getFrom() : event.getTo();
++			d0 = to.getX();
++			d1 = to.getY();
++			d2 = to.getZ();
++			p_175089_7_ = to.getYaw();
++			p_175089_8_ = to.getPitch();
++		}
++
++		this.internalTeleport(d0, d1, d2, p_175089_7_, p_175089_8_, p_175089_9_);
+     }
++    
++	public void teleport(Location dest) {
++		internalTeleport(dest.getX(), dest.getY(), dest.getZ(), dest.getYaw(), dest.getPitch(), Collections.emptySet());
++	}
+ 
++	private void internalTeleport(double d0, double d1, double d2, float yaw, float pitch, Set relativeSet) {
++		if (Float.isNaN(yaw)) {
++			yaw = 0;
++		}
++
++		if (Float.isNaN(pitch)) {
++			pitch = 0;
++		}
++		this.justTeleported = true;
++		this.field_184362_y = new Vec3d(d0, d1, d2);
++		if (relativeSet.contains(SPacketPlayerPosLook.EnumFlags.X)) {
++			this.field_184362_y = this.field_184362_y.func_72441_c(this.field_147369_b.field_70165_t, 0.0D, 0.0D);
++		}
++
++		if (relativeSet.contains(SPacketPlayerPosLook.EnumFlags.Y)) {
++			this.field_184362_y = this.field_184362_y.func_72441_c(0.0D, this.field_147369_b.field_70163_u, 0.0D);
++		}
++
++		if (relativeSet.contains(SPacketPlayerPosLook.EnumFlags.Z)) {
++			this.field_184362_y = this.field_184362_y.func_72441_c(0.0D, 0.0D, this.field_147369_b.field_70161_v);
++		}
++		// CraftBukkit end
++		float f = yaw;
++		float f1 = pitch;
++
++		if (relativeSet.contains(SPacketPlayerPosLook.EnumFlags.Y_ROT)) {
++			f = yaw + this.field_147369_b.field_70177_z;
++		}
++
++		if (relativeSet.contains(SPacketPlayerPosLook.EnumFlags.X_ROT)) {
++			f1 = pitch + this.field_147369_b.field_70125_A;
++		}
++
++		if (++this.field_184363_z == Integer.MAX_VALUE) {
++			this.field_184363_z = 0;
++		}
++
++		this.field_184343_A = this.field_147368_e;
++		this.field_147369_b.func_70080_a(this.field_184362_y.field_72450_a, this.field_184362_y.field_72448_b, this.field_184362_y.field_72449_c, f, f1);
++		this.field_147369_b.field_71135_a.func_147359_a(new SPacketPlayerPosLook(d0, d1, d2, yaw, pitch, relativeSet, this.field_184363_z));
++	}
++
+     public void func_147345_a(CPacketPlayerDigging p_147345_1_)
+     {
+         PacketThreadUtil.func_180031_a(p_147345_1_, this, this.field_147369_b.func_71121_q());
+@@ -866,9 +1055,15 @@
  
      public void func_147354_a(CPacketChatMessage p_147354_1_)
      {
@@ -151,8 +292,9 @@
 +    	// CraftBukkit start - async chat
 +    	boolean isSync = p_147354_1_.func_149439_c().startsWith("/");
 +    	
-+    	if(isSync)
++    	if(isSync) {
 +    		PacketThreadUtil.func_180031_a(p_147354_1_, this, this.field_147369_b.func_71121_q());
++    	}
 +    	// CraftBukkit end
  
 -        if (this.field_147369_b.func_147096_v() == EntityPlayer.EnumChatVisibility.HIDDEN)
@@ -160,7 +302,7 @@
          {
              TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("chat.cannotSend", new Object[0]);
              textcomponenttranslation.func_150256_b().func_150238_a(TextFormatting.RED);
-@@ -884,35 +981,201 @@
+@@ -884,35 +1079,201 @@
              {
                  if (!ChatAllowedCharacters.func_71566_a(s.charAt(i)))
                  {

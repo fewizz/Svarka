@@ -1,9 +1,7 @@
 --- ../src-base/minecraft/net/minecraftforge/fml/repackage/com/nothome/delta/GDiffWriter.java
 +++ ../src-work/minecraft/net/minecraftforge/fml/repackage/com/nothome/delta/GDiffWriter.java
-@@ -173,6 +173,4 @@
-         output.write(EOF);
-         output.close();
+@@ -175,4 +175,3 @@
      }
--
+ 
  }
 -

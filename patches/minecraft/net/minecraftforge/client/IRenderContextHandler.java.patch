@@ -1,11 +1,6 @@
 --- ../src-base/minecraft/net/minecraftforge/client/IRenderContextHandler.java
 +++ ../src-work/minecraft/net/minecraftforge/client/IRenderContextHandler.java
-@@ -9,9 +9,7 @@
-     /** Run before the specified rendering context.
-      */
-     public void beforeRenderContext();
--
-     /** Run after the specified rendering context.
+@@ -14,4 +14,3 @@
       */
      public void afterRenderContext();
  }

@@ -1,10 +1,12 @@
 --- ../src-base/minecraft/net/minecraft/server/management/PlayerList.java
 +++ ../src-work/minecraft/net/minecraft/server/management/PlayerList.java
-@@ -65,6 +65,28 @@
+@@ -65,6 +65,30 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
 +import org.bukkit.craftbukkit.CraftServer;
++
++import org.bukkit.Location;
 +
 +// CraftBukkit start
 +import org.bukkit.craftbukkit.CraftServer;
@@ -29,7 +31,7 @@
  public abstract class PlayerList
  {
      public static final File field_152613_a = new File("banned-players.json");
-@@ -74,14 +96,14 @@
+@@ -74,14 +98,14 @@
      private static final Logger field_148546_d = LogManager.getLogger();
      private static final SimpleDateFormat field_72403_e = new SimpleDateFormat("yyyy-MM-dd \'at\' HH:mm:ss z");
      private final MinecraftServer field_72400_f;
@@ -46,7 +48,7 @@
      private boolean field_72409_l;
      protected int field_72405_c;
      private int field_72402_d;
-@@ -89,8 +111,15 @@
+@@ -89,8 +113,15 @@
      private boolean field_72407_n;
      private int field_72408_o;
  
@@ -62,3 +64,167 @@
          this.field_72401_g = new UserListBans(field_152613_a);
          this.field_72413_h = new UserListIPBans(field_152614_b);
          this.field_72414_i = new UserListOps(field_152615_c);
+@@ -495,54 +526,139 @@
+ 
+     public EntityPlayerMP func_72368_a(EntityPlayerMP p_72368_1_, int p_72368_2_, boolean p_72368_3_)
+     {
+-        World world = field_72400_f.func_71218_a(p_72368_2_);
++    	return this.moveToWorld(p_72368_1_, p_72368_2_, p_72368_3_, null, true);
++        /*World world = mcServer.worldServerForDimension(dimension); // Craftbukkit =_=
+         if (world == null)
+         {
+-            p_72368_2_ = 0;
++            dimension = 0;
+         }
++        else if (!world.provider.canRespawnHere())
++        {
++            dimension = world.provider.getRespawnDimension(playerIn);
++        }
++
++        playerIn.getServerWorld().getEntityTracker().removePlayerFromTrackers(playerIn);
++        playerIn.getServerWorld().getEntityTracker().untrackEntity(playerIn);
++        playerIn.getServerWorld().getPlayerChunkMap().removePlayer(playerIn);
++        this.playerEntityList.remove(playerIn);
++        this.mcServer.worldServerForDimension(playerIn.dimension).removeEntityDangerously(playerIn);
++        BlockPos blockpos = playerIn.getBedLocation(dimension);
++        boolean flag = playerIn.isSpawnForced(dimension);
++        playerIn.dimension = dimension;
++        PlayerInteractionManager playerinteractionmanager;
++
++        if (this.mcServer.isDemo())
++        {
++            playerinteractionmanager = new DemoWorldManager(this.mcServer.worldServerForDimension(playerIn.dimension));
++        }
++        else
++        {
++            playerinteractionmanager = new PlayerInteractionManager(this.mcServer.worldServerForDimension(playerIn.dimension));
++        }
++
++        EntityPlayerMP entityplayermp = new EntityPlayerMP(this.mcServer, this.mcServer.worldServerForDimension(playerIn.dimension), playerIn.getGameProfile(), playerinteractionmanager);
++        entityplayermp.connection = playerIn.connection;
++        entityplayermp.clonePlayer(playerIn, conqueredEnd);
++        entityplayermp.dimension = dimension;
++        entityplayermp.setEntityId(playerIn.getEntityId());
++        entityplayermp.setCommandStats(playerIn);
++        entityplayermp.setPrimaryHand(playerIn.getPrimaryHand());
++
++        for (String s : playerIn.getTags())
++        {
++            entityplayermp.addTag(s);
++        }
++
++        WorldServer worldserver = this.mcServer.worldServerForDimension(playerIn.dimension);
++        this.setPlayerGameTypeBasedOnOther(entityplayermp, playerIn, worldserver);
++
++        if (blockpos != null)
++        {
++            BlockPos blockpos1 = EntityPlayer.getBedSpawnLocation(this.mcServer.worldServerForDimension(playerIn.dimension), blockpos, flag);
++
++            if (blockpos1 != null)
++            {
++                entityplayermp.setLocationAndAngles((double)((float)blockpos1.getX() + 0.5F), (double)((float)blockpos1.getY() + 0.1F), (double)((float)blockpos1.getZ() + 0.5F), 0.0F, 0.0F);
++                entityplayermp.setSpawnPoint(blockpos, flag);
++            }
++            else
++            {
++                entityplayermp.connection.sendPacket(new SPacketChangeGameState(0, 0.0F));
++            }
++        }
++
++        worldserver.getChunkProvider().provideChunk((int)entityplayermp.posX >> 4, (int)entityplayermp.posZ >> 4);
++
++        while (!worldserver.getCollisionBoxes(entityplayermp, entityplayermp.getEntityBoundingBox()).isEmpty() && entityplayermp.posY < 256.0D)
++        {
++            entityplayermp.setPosition(entityplayermp.posX, entityplayermp.posY + 1.0D, entityplayermp.posZ);
++        }
++
++        entityplayermp.connection.sendPacket(new SPacketRespawn(entityplayermp.dimension, entityplayermp.worldObj.getDifficulty(), entityplayermp.worldObj.getWorldInfo().getTerrainType(), entityplayermp.interactionManager.getGameType()));
++        BlockPos blockpos2 = worldserver.getSpawnPoint();
++        entityplayermp.connection.setPlayerLocation(entityplayermp.posX, entityplayermp.posY, entityplayermp.posZ, entityplayermp.rotationYaw, entityplayermp.rotationPitch);
++        entityplayermp.connection.sendPacket(new SPacketSpawnPosition(blockpos2));
++        entityplayermp.connection.sendPacket(new SPacketSetExperience(entityplayermp.experience, entityplayermp.experienceTotal, entityplayermp.experienceLevel));
++        this.updateTimeAndWeatherForPlayer(entityplayermp, worldserver);
++        this.updatePermissionLevel(entityplayermp);
++        worldserver.getPlayerChunkMap().addPlayer(entityplayermp);
++        worldserver.spawnEntityInWorld(entityplayermp);
++        this.playerEntityList.add(entityplayermp);
++        this.uuidToPlayerMap.put(entityplayermp.getUniqueID(), entityplayermp);
++        entityplayermp.addSelfToInternalCraftingInventory();
++        entityplayermp.setHealth(entityplayermp.getHealth());
++        net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerRespawnEvent(entityplayermp);
++        return entityplayermp;*/
++    }
++    public EntityPlayerMP moveToWorld(EntityPlayerMP playerIn, int dimension, boolean conqueredEnd, Location location, boolean avoidSuffocation) {
++    	World world = field_72400_f.func_71218_a(dimension); // Craftbukkit =_=
++        if (world == null)
++        {
++            dimension = 0;
++        }
+         else if (!world.field_73011_w.func_76567_e())
+         {
+-            p_72368_2_ = world.field_73011_w.getRespawnDimension(p_72368_1_);
++            dimension = world.field_73011_w.getRespawnDimension(playerIn);
+         }
+ 
+-        p_72368_1_.func_71121_q().func_73039_n().func_72787_a(p_72368_1_);
+-        p_72368_1_.func_71121_q().func_73039_n().func_72790_b(p_72368_1_);
+-        p_72368_1_.func_71121_q().func_184164_w().func_72695_c(p_72368_1_);
+-        this.field_72404_b.remove(p_72368_1_);
+-        this.field_72400_f.func_71218_a(p_72368_1_.field_71093_bK).func_72973_f(p_72368_1_);
+-        BlockPos blockpos = p_72368_1_.getBedLocation(p_72368_2_);
+-        boolean flag = p_72368_1_.isSpawnForced(p_72368_2_);
+-        p_72368_1_.field_71093_bK = p_72368_2_;
++        playerIn.func_71121_q().func_73039_n().func_72787_a(playerIn);
++        playerIn.func_71121_q().func_73039_n().func_72790_b(playerIn);
++        playerIn.func_71121_q().func_184164_w().func_72695_c(playerIn);
++        this.field_72404_b.remove(playerIn);
++        this.field_72400_f.func_71218_a(playerIn.field_71093_bK).func_72973_f(playerIn);
++        BlockPos blockpos = playerIn.getBedLocation(dimension);
++        boolean flag = playerIn.isSpawnForced(dimension);
++        playerIn.field_71093_bK = dimension;
+         PlayerInteractionManager playerinteractionmanager;
+ 
+         if (this.field_72400_f.func_71242_L())
+         {
+-            playerinteractionmanager = new DemoWorldManager(this.field_72400_f.func_71218_a(p_72368_1_.field_71093_bK));
++            playerinteractionmanager = new DemoWorldManager(this.field_72400_f.func_71218_a(playerIn.field_71093_bK));
+         }
+         else
+         {
+-            playerinteractionmanager = new PlayerInteractionManager(this.field_72400_f.func_71218_a(p_72368_1_.field_71093_bK));
++            playerinteractionmanager = new PlayerInteractionManager(this.field_72400_f.func_71218_a(playerIn.field_71093_bK));
+         }
+ 
+-        EntityPlayerMP entityplayermp = new EntityPlayerMP(this.field_72400_f, this.field_72400_f.func_71218_a(p_72368_1_.field_71093_bK), p_72368_1_.func_146103_bH(), playerinteractionmanager);
+-        entityplayermp.field_71135_a = p_72368_1_.field_71135_a;
+-        entityplayermp.func_71049_a(p_72368_1_, p_72368_3_);
+-        entityplayermp.field_71093_bK = p_72368_2_;
+-       entityplayermp.func_145769_d(p_72368_1_.func_145782_y());
+-        entityplayermp.func_174817_o(p_72368_1_);
+-        entityplayermp.func_184819_a(p_72368_1_.func_184591_cq());
++        EntityPlayerMP entityplayermp = new EntityPlayerMP(this.field_72400_f, this.field_72400_f.func_71218_a(playerIn.field_71093_bK), playerIn.func_146103_bH(), playerinteractionmanager);
++        entityplayermp.field_71135_a = playerIn.field_71135_a;
++        entityplayermp.func_71049_a(playerIn, conqueredEnd);
++        entityplayermp.field_71093_bK = dimension;
++        entityplayermp.func_145769_d(playerIn.func_145782_y());
++        entityplayermp.func_174817_o(playerIn);
++        entityplayermp.func_184819_a(playerIn.func_184591_cq());
+ 
+-        for (String s : p_72368_1_.func_184216_O())
++        for (String s : playerIn.func_184216_O())
+         {
+             entityplayermp.func_184211_a(s);
+         }
+ 
+-        WorldServer worldserver = this.field_72400_f.func_71218_a(p_72368_1_.field_71093_bK);
+-        this.func_72381_a(entityplayermp, p_72368_1_, worldserver);
++        WorldServer worldserver = this.field_72400_f.func_71218_a(playerIn.field_71093_bK);
++        this.func_72381_a(entityplayermp, playerIn, worldserver);
+ 
+         if (blockpos != null)
+         {
+-            BlockPos blockpos1 = EntityPlayer.func_180467_a(this.field_72400_f.func_71218_a(p_72368_1_.field_71093_bK), blockpos, flag);
++            BlockPos blockpos1 = EntityPlayer.func_180467_a(this.field_72400_f.func_71218_a(playerIn.field_71093_bK), blockpos, flag);
+ 
+             if (blockpos1 != null)
+             {
