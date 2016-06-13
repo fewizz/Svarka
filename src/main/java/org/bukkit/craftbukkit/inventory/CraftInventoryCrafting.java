@@ -11,19 +11,23 @@ import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.crafting.IRecipe;
 
 public class CraftInventoryCrafting extends CraftInventory implements CraftingInventory {
-    private final IBukkitInventory resultInventory;
+    private final IInventory resultInventory;
 
-    public CraftInventoryCrafting(InventoryCrafting inventory, IBukkitInventory resultInventory) {
+    public CraftInventoryCrafting(InventoryCrafting inventory, IInventory resultInventory) {
         super(inventory);
         this.resultInventory = resultInventory;
     }
 
-    public IBukkitInventory getResultInventory() {
+    public IInventory getResultInventory() {
         return resultInventory;
     }
 
     public IBukkitInventory getMatrixInventory() {
         return inventory;
+    }
+    
+    public IBukkitInventory getBukkitResultInventory() {
+        return (IBukkitInventory) resultInventory;
     }
 
     @Override
@@ -33,7 +37,7 @@ public class CraftInventoryCrafting extends CraftInventory implements CraftingIn
 
     @Override
     public void setContents(ItemStack[] items) {
-        int resultLen = getResultInventory().getContents().length;
+        int resultLen = getBukkitResultInventory().getContents().length;
         int len = getMatrixInventory().getContents().length + resultLen;
         if (len > items.length) {
             throw new IllegalArgumentException("Invalid inventory size; expected " + len + " or less");
@@ -44,7 +48,7 @@ public class CraftInventoryCrafting extends CraftInventory implements CraftingIn
     @Override
     public ItemStack[] getContents() {
         ItemStack[] items = new ItemStack[getSize()];
-        net.minecraft.item.ItemStack[] mcResultItems = getResultInventory().getContents();
+        net.minecraft.item.ItemStack[] mcResultItems = getBukkitResultInventory().getContents();
 
         int i = 0;
         for (i = 0; i < mcResultItems.length; i++ ) {
@@ -124,7 +128,7 @@ public class CraftInventoryCrafting extends CraftInventory implements CraftingIn
     }
 
     public void setResult(ItemStack item) {
-    	net.minecraft.item.ItemStack[] contents = getResultInventory().getContents();
+    	net.minecraft.item.ItemStack[] contents = getBukkitResultInventory().getContents();
         if (item == null || item.getTypeId() <= 0) {
             contents[0] = null;
         } else {

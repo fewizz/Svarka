@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/inventory/Container.java
 +++ ../src-work/minecraft/net/minecraft/inventory/Container.java
-@@ -14,6 +14,20 @@
+@@ -14,18 +14,45 @@
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
  
@@ -21,7 +21,13 @@
  public abstract class Container
  {
      public List<ItemStack> field_75153_a = Lists.<ItemStack>newArrayList();
-@@ -26,6 +40,19 @@
+     public List<Slot> field_75151_b = Lists.<Slot>newArrayList();
+     public int field_75152_c;
+     @SideOnly(Side.CLIENT)
+-    private short field_75150_e;
++    private short field_75150_e;	
+     private int field_94535_f = -1;
+     private int field_94536_g;
      private final Set<Slot> field_94537_h = Sets.<Slot>newHashSet();
      protected List<IContainerListener> field_75149_d = Lists.<IContainerListener>newArrayList();
      private Set<EntityPlayer> field_75148_f = Sets.<EntityPlayer>newHashSet();

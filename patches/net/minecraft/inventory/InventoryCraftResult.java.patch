@@ -1,0 +1,67 @@
+--- ../src-base/minecraft/net/minecraft/inventory/InventoryCraftResult.java
++++ ../src-work/minecraft/net/minecraft/inventory/InventoryCraftResult.java
+@@ -1,16 +1,54 @@
+ package net.minecraft.inventory;
+ 
+ import javax.annotation.Nullable;
++
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.entity.HumanEntity;
++
++import fewizz.svarka.inventory.IBukkitInventory;
+ import net.minecraft.entity.player.EntityPlayer;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.util.text.ITextComponent;
+ import net.minecraft.util.text.TextComponentString;
+ import net.minecraft.util.text.TextComponentTranslation;
+ 
+-public class InventoryCraftResult implements IInventory
++public class InventoryCraftResult implements IBukkitInventory
+ {
+     private ItemStack[] field_70467_a = new ItemStack[1];
++    
++	// CraftBukkit start
++	private int maxStack = MAX_STACK;
+ 
++	public ItemStack[] getContents() {
++		return this.field_70467_a;
++	}
++
++	public org.bukkit.inventory.InventoryHolder getOwner() {
++		return null; // Result slots don't get an owner
++	}
++
++	// Don't need a transaction; the InventoryCrafting keeps track of it for us
++	public void onOpen(CraftHumanEntity who) {
++	}
++
++	public void onClose(CraftHumanEntity who) {
++	}
++
++	public java.util.List getViewers() {
++		return new java.util.ArrayList();
++	}
++
++	public void setMaxStackSize(int size) {
++		maxStack = size;
++	}
++
++	@Override
++	public Location getLocation() {
++		return null;
++	}
++	// CraftBukkit end
++
+     public int func_70302_i_()
+     {
+         return 1;
+@@ -56,7 +94,7 @@
+ 
+     public int func_70297_j_()
+     {
+-        return 64;
++        return maxStack;
+     }
+ 
+     public void func_70296_d()

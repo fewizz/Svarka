@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/inventory/InventoryCrafting.java
 +++ ../src-work/minecraft/net/minecraft/inventory/InventoryCrafting.java
-@@ -1,19 +1,70 @@
+@@ -1,19 +1,77 @@
  package net.minecraft.inventory;
  
 +import java.util.List;
@@ -9,6 +9,7 @@
 +
 +import org.bukkit.Location;
 +import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.entity.HumanEntity;
 +import org.bukkit.event.inventory.InventoryType;
 +import org.bukkit.inventory.InventoryHolder;
 +
@@ -29,9 +30,9 @@
      private final Container field_70465_c;
  
 +    // Craftbukkit start
-+    public List transaction;
++    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();;
 +    public IRecipe currentRecipe;
-+    public IBukkitInventory resultInventory;
++    public IInventory resultInventory;
 +    private EntityPlayer owner;
 +    private int maxStack;
 +
@@ -52,7 +53,7 @@
 +       this.transaction.remove(who);
 +    }
 +
-+    public List getViewers() {
++    public List<HumanEntity> getViewers() {
 +       return this.transaction;
 +    }
 +
@@ -62,12 +63,18 @@
 +
 +    public void setMaxStackSize(int size) {
 +       this.maxStack = size;
-+       this.resultInventory.setMaxStackSize(size);
++       ((IBukkitInventory)resultInventory).setMaxStackSize(size);
 +    }
 +
 +    public Location getLocation() {
 +       return this.owner.getBukkitEntity().getLocation();
 +    }
++    
++    public InventoryCrafting(Container container, int i, int j, EntityPlayer player) {
++    	this(container, i, j);
++    	this.owner = player;
++    }
++    // CraftBukkit end
 +    // Craftbukkit end
      public InventoryCrafting(Container p_i1807_1_, int p_i1807_2_, int p_i1807_3_)
      {

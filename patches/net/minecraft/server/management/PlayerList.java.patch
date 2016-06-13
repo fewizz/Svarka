@@ -1,18 +1,51 @@
 --- ../src-base/minecraft/net/minecraft/server/management/PlayerList.java
 +++ ../src-work/minecraft/net/minecraft/server/management/PlayerList.java
-@@ -65,6 +65,30 @@
+@@ -4,7 +4,9 @@
+ import com.google.common.collect.Maps;
+ import com.google.common.collect.Sets;
+ import com.mojang.authlib.GameProfile;
++
+ import io.netty.buffer.Unpooled;
++
+ import java.io.File;
+ import java.net.SocketAddress;
+ import java.text.SimpleDateFormat;
+@@ -12,7 +14,9 @@
+ import java.util.Map;
+ import java.util.Set;
+ import java.util.UUID;
++
+ import javax.annotation.Nullable;
++
+ import net.minecraft.entity.Entity;
+ import net.minecraft.entity.player.EntityPlayer;
+ import net.minecraft.entity.player.EntityPlayerMP;
+@@ -51,6 +55,7 @@
+ import net.minecraft.util.text.ITextComponent;
+ import net.minecraft.util.text.TextComponentTranslation;
+ import net.minecraft.util.text.TextFormatting;
++import net.minecraft.util.text.translation.I18n;
+ import net.minecraft.world.World;
+ import net.minecraft.world.WorldServer;
+ import net.minecraft.world.WorldSettings;
+@@ -62,9 +67,35 @@
+ import net.minecraft.world.storage.WorldInfo;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
- 
 +import org.bukkit.craftbukkit.CraftServer;
-+
+ 
 +import org.bukkit.Location;
++import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
++import org.bukkit.event.player.PlayerJoinEvent;
++import org.bukkit.event.player.PlayerQuitEvent;
 +
 +// CraftBukkit start
 +import org.bukkit.craftbukkit.CraftServer;
 +import org.bukkit.craftbukkit.CraftWorld;
 +import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
-+
 +import org.bukkit.Bukkit;
 +import org.bukkit.Location;
 +import org.bukkit.TravelAgent;
@@ -31,7 +64,7 @@
  public abstract class PlayerList
  {
      public static final File field_152613_a = new File("banned-players.json");
-@@ -74,14 +98,14 @@
+@@ -74,14 +105,14 @@
      private static final Logger field_148546_d = LogManager.getLogger();
      private static final SimpleDateFormat field_72403_e = new SimpleDateFormat("yyyy-MM-dd \'at\' HH:mm:ss z");
      private final MinecraftServer field_72400_f;
@@ -48,7 +81,7 @@
      private boolean field_72409_l;
      protected int field_72405_c;
      private int field_72402_d;
-@@ -89,8 +113,15 @@
+@@ -89,8 +120,15 @@
      private boolean field_72407_n;
      private int field_72408_o;
  
@@ -64,7 +97,7 @@
          this.field_72401_g = new UserListBans(field_152613_a);
          this.field_72413_h = new UserListIPBans(field_152614_b);
          this.field_72414_i = new UserListOps(field_152615_c);
-@@ -110,9 +141,10 @@
+@@ -110,9 +148,17 @@
          String s = gameprofile1 == null ? gameprofile.getName() : gameprofile1.getName();
          playerprofilecache.func_152649_a(gameprofile);
          NBTTagCompound nbttagcompound = this.func_72380_a(p_72355_2_);
@@ -72,13 +105,20 @@
 -
 -        World playerWorld = this.field_72400_f.func_71218_a(p_72355_2_.field_71093_bK);
 +        
++        // CraftBukkit start - Better rename detection
++        if (nbttagcompound != null && nbttagcompound.func_74764_b("bukkit")) {
++        	NBTTagCompound bukkit = nbttagcompound.func_74775_l("bukkit");
++        	s = bukkit.func_150297_b("lastKnownName", 8) ? bukkit.func_74779_i("lastKnownName") : s;
++        }
++        // CraftBukkit end
++        
 +        WorldServer playerWorld = this.field_72400_f.func_71218_a(p_72355_2_.field_71093_bK);
 +        //playerIn.setWorld(playerWorld);
 +        
          if (playerWorld == null)
          {
              p_72355_2_.field_71093_bK = 0;
-@@ -122,7 +154,7 @@
+@@ -122,7 +168,7 @@
          }
  
          p_72355_2_.func_70029_a(playerWorld);
@@ -87,14 +127,17 @@
          String s1 = "local";
  
          if (p_72355_1_.func_74430_c() != null)
-@@ -131,12 +163,15 @@
+@@ -130,13 +176,18 @@
+             s1 = p_72355_1_.func_74430_c().toString();
          }
  
-         field_148546_d.info(p_72355_2_.func_70005_c_() + "[" + s1 + "] logged in with entity id " + p_72355_2_.func_145782_y() + " at (" + p_72355_2_.field_70165_t + ", " + p_72355_2_.field_70163_u + ", " + p_72355_2_.field_70161_v + ")");
+-        field_148546_d.info(p_72355_2_.func_70005_c_() + "[" + s1 + "] logged in with entity id " + p_72355_2_.func_145782_y() + " at (" + p_72355_2_.field_70165_t + ", " + p_72355_2_.field_70163_u + ", " + p_72355_2_.field_70161_v + ")");
 -        WorldServer worldserver = this.field_72400_f.func_71218_a(p_72355_2_.field_71093_bK);
 -        WorldInfo worldinfo = worldserver.func_72912_H();
 -        BlockPos blockpos = worldserver.func_175694_M();
 -        this.func_72381_a(p_72355_2_, (EntityPlayerMP)null, worldserver);
++        // CraftBukkit - Moved message to after join
++        //LOG.info(playerIn.getName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " at (" + playerIn.posX + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
 +        //WorldServer worldserver = this.mcServer.worldServerForDimension(playerIn.dimension); // Why?
 +        WorldInfo worldinfo = playerWorld.func_72912_H();
 +        BlockPos blockpos = playerWorld.func_175694_M();
@@ -105,28 +148,49 @@
          p_72355_2_.field_71135_a = nethandlerplayserver;
 -        nethandlerplayserver.func_147359_a(new SPacketJoinGame(p_72355_2_.func_145782_y(), p_72355_2_.field_71134_c.func_73081_b(), worldinfo.func_76093_s(), worldserver.field_73011_w.getDimension(), worldserver.func_175659_aa(), this.func_72352_l(), worldinfo.func_76067_t(), worldserver.func_82736_K().func_82766_b("reducedDebugInfo")));
 +        nethandlerplayserver.func_147359_a(new SPacketJoinGame(p_72355_2_.func_145782_y(), p_72355_2_.field_71134_c.func_73081_b(), worldinfo.func_76093_s(), playerWorld.field_73011_w.getDimension(), playerWorld.func_175659_aa(), this.func_72352_l(), worldinfo.func_76067_t(), playerWorld.func_82736_K().func_82766_b("reducedDebugInfo")));
++        p_72355_2_.getBukkitEntity().sendSupportedChannels(); // CraftBukkit
          nethandlerplayserver.func_147359_a(new SPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).func_180714_a(this.func_72365_p().getServerModName())));
          nethandlerplayserver.func_147359_a(new SPacketServerDifficulty(worldinfo.func_176130_y(), worldinfo.func_176123_z()));
          nethandlerplayserver.func_147359_a(new SPacketSpawnPosition(blockpos));
-@@ -145,7 +180,7 @@
+@@ -145,24 +196,29 @@
          this.func_187243_f(p_72355_2_);
          p_72355_2_.func_147099_x().func_150877_d();
          p_72355_2_.func_147099_x().func_150884_b(p_72355_2_);
 -        this.func_96456_a((ServerScoreboard)worldserver.func_96441_U(), p_72355_2_);
 +        this.func_96456_a((ServerScoreboard)playerWorld.func_96441_U(), p_72355_2_);
          this.field_72400_f.func_147132_au();
-         TextComponentTranslation textcomponenttranslation;
+-        TextComponentTranslation textcomponenttranslation;
++        // CraftBukkit start - login message is handled in the event
++        //TextComponentTranslation textcomponenttranslation;
  
-@@ -162,7 +197,7 @@
-         this.func_148539_a(textcomponenttranslation);
-         this.func_72377_c(p_72355_2_);
++        String joinMessage;
+         if (!p_72355_2_.func_70005_c_().equalsIgnoreCase(s))
+         {
+-            textcomponenttranslation = new TextComponentTranslation("multiplayer.player.joined.renamed", new Object[] {p_72355_2_.func_145748_c_(), s});
++            //textcomponenttranslation = new TextComponentTranslation("multiplayer.player.joined.renamed", new Object[] {playerIn.getDisplayName(), s});
++        	joinMessage = "\u00A7e" + I18n.func_74837_a("multiplayer.player.joined", p_72355_2_.func_70005_c_());
+         }
+         else
+         {
+-            textcomponenttranslation = new TextComponentTranslation("multiplayer.player.joined", new Object[] {p_72355_2_.func_145748_c_()});
++            //textcomponenttranslation = new TextComponentTranslation("multiplayer.player.joined", new Object[] {playerIn.getDisplayName()});
++        	joinMessage = "\u00A7e" + I18n.func_74837_a("multiplayer.player.joined.renamed", p_72355_2_.func_70005_c_(), s);
+         }
+ 
+-        textcomponenttranslation.func_150256_b().func_150238_a(TextFormatting.YELLOW);
+-        this.func_148539_a(textcomponenttranslation);
+-        this.func_72377_c(p_72355_2_);
++        //textcomponenttranslation.getStyle().setColor(TextFormatting.YELLOW);
++        //this.sendChatMsg(textcomponenttranslation);
++        this.playerLoggedIn(p_72355_2_, joinMessage);
++        playerWorld = field_72400_f.func_71218_a(p_72355_2_.field_71093_bK); // CraftBukkit - Update in case join event changed it
          nethandlerplayserver.func_147364_a(p_72355_2_.field_70165_t, p_72355_2_.field_70163_u, p_72355_2_.field_70161_v, p_72355_2_.field_70177_z, p_72355_2_.field_70125_A);
 -        this.func_72354_b(p_72355_2_, worldserver);
 +        this.func_72354_b(p_72355_2_, playerWorld);
  
          if (!this.field_72400_f.func_147133_T().isEmpty())
          {
-@@ -179,7 +214,7 @@
+@@ -179,7 +235,7 @@
              if (nbttagcompound.func_150297_b("RootVehicle", 10))
              {
                  NBTTagCompound nbttagcompound1 = nbttagcompound.func_74775_l("RootVehicle");
@@ -135,7 +199,7 @@
  
                  if (entity2 != null)
                  {
-@@ -204,18 +239,18 @@
+@@ -204,18 +260,18 @@
                      if (!p_72355_2_.func_184218_aH())
                      {
                          field_148546_d.warn("Couldn\'t reattach entity to player");
@@ -157,7 +221,161 @@
  
                  if (entity1 != null)
                  {
-@@ -495,54 +530,139 @@
+@@ -225,6 +281,8 @@
+         }
+ 
+         p_72355_2_.func_71116_b();
++        // CraftBukkit - Moved from above, added world
++        field_148546_d.info(p_72355_2_.func_70005_c_() + "[" + s1 + "] logged in with entity id " + p_72355_2_.func_145782_y() + " at ([" + p_72355_2_.field_70170_p.field_72986_A.func_76065_j() + "]" + p_72355_2_.field_70165_t + ", " + p_72355_2_.field_70163_u + ", " + p_72355_2_.field_70161_v + ")");
+         net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerLoggedIn(p_72355_2_);
+     }
+ 
+@@ -352,21 +410,47 @@
+         }
+     }
+ 
+-    public void func_72377_c(EntityPlayerMP p_72377_1_)
++    public void playerLoggedIn(EntityPlayerMP playerIn, String joinMessage) // CraftBukkit added param
+     {
+-        this.field_72404_b.add(p_72377_1_);
+-        this.field_177454_f.put(p_72377_1_.func_110124_au(), p_72377_1_);
+-        this.func_148540_a(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, new EntityPlayerMP[] {p_72377_1_}));
+-        WorldServer worldserver = this.field_72400_f.func_71218_a(p_72377_1_.field_71093_bK);
++        this.field_72404_b.add(playerIn);
++        this.field_177454_f.put(playerIn.func_110124_au(), playerIn);
++        // this.sendPacketToAllPlayers(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, new EntityPlayerMP[] {playerIn})); // CraftBukkit - replaced with loop below
++        WorldServer worldserver = this.field_72400_f.func_71218_a(playerIn.field_71093_bK);
++        
++        // CraftBukkit start
++        PlayerJoinEvent playerJoinEvent = new PlayerJoinEvent(cserver.getPlayer(playerIn), joinMessage);
++        cserver.getPluginManager().callEvent(playerJoinEvent);
++        
++        joinMessage = playerJoinEvent.getJoinMessage();
++        	
++        if (joinMessage != null && joinMessage.length() > 0) {
++        	for (ITextComponent line : org.bukkit.craftbukkit.util.CraftChatMessage.fromString(joinMessage)) {
++        		field_72400_f.func_184103_al().func_148540_a(new SPacketChat(line));
++        	}
++        }
++        
++        ChunkIOExecutor.adjustPoolSize(func_72394_k());
++        // CraftBukkit end
+ 
++        // CraftBukkit start - sendAll above replaced with this loop
++        SPacketPlayerListItem packet = new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, new EntityPlayerMP[]{playerIn});
+         for (int i = 0; i < this.field_72404_b.size(); ++i)
+         {
+-            p_72377_1_.field_71135_a.func_147359_a(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, new EntityPlayerMP[] {(EntityPlayerMP)this.field_72404_b.get(i)}));
++        	EntityPlayerMP otherPlayer = (EntityPlayerMP) this.field_72404_b.get(i);
++        	if (otherPlayer.getBukkitEntity().canSee(playerIn.getBukkitEntity())) {
++        		otherPlayer.field_71135_a.func_147359_a(packet);
++        	}
++        		
++        	if (playerIn.getBukkitEntity().canSee(otherPlayer.getBukkitEntity())) {
++        		// continue; // Svarka - small refactoring
++        		playerIn.field_71135_a.func_147359_a(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, new EntityPlayerMP[] { otherPlayer }));
++        	}
++            //playerIn.connection.sendPacket(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, new EntityPlayerMP[] {(EntityPlayerMP)this.playerEntityList.get(i)}));
+         }
+ 
+         net.minecraftforge.common.chunkio.ChunkIOExecutor.adjustPoolSize(this.func_72394_k());
+-        worldserver.func_72838_d(p_72377_1_);
+-        this.func_72375_a(p_72377_1_, (WorldServer)null);
++        worldserver.func_72838_d(playerIn);
++        this.func_72375_a(playerIn, (WorldServer)null);
+     }
+ 
+     public void func_72358_d(EntityPlayerMP p_72358_1_)
+@@ -374,21 +458,30 @@
+         p_72358_1_.func_71121_q().func_184164_w().func_72685_d(p_72358_1_);
+     }
+ 
+-    public void func_72367_e(EntityPlayerMP p_72367_1_)
++    public String playerLoggedOut(EntityPlayerMP playerIn)
+     {
+-        net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerLoggedOut(p_72367_1_);
+-        WorldServer worldserver = p_72367_1_.func_71121_q();
+-        p_72367_1_.func_71029_a(StatList.field_75947_j);
+-        this.func_72391_b(p_72367_1_);
++        net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerLoggedOut(playerIn);
++        WorldServer worldserver = playerIn.func_71121_q();
++        playerIn.func_71029_a(StatList.field_75947_j);
++        
++        // CraftBukkit start - Quitting must be before we do final save of data, in case plugins need to modify it
++        org.bukkit.craftbukkit.event.CraftEventFactory.handleInventoryCloseEvent(playerIn);
++        
++        PlayerQuitEvent playerQuitEvent = new PlayerQuitEvent(cserver.getPlayer(playerIn), "\u00A7e" + playerIn.func_70005_c_() + " left the game.");
++        cserver.getPluginManager().callEvent(playerQuitEvent);
++        playerIn.getBukkitEntity().disconnect(playerQuitEvent.getQuitMessage());
++        // CraftBukkit end
++        
++        this.func_72391_b(playerIn);
+ 
+-        if (p_72367_1_.func_184218_aH())
++        if (playerIn.func_184218_aH())
+         {
+-            Entity entity = p_72367_1_.func_184208_bv();
++            Entity entity = playerIn.func_184208_bv();
+ 
+             if (entity.func_184180_b(EntityPlayerMP.class).size() == 1)
+             {
+                 field_148546_d.debug("Removing player mount");
+-                p_72367_1_.func_184210_p();
++                playerIn.func_184210_p();
+                 worldserver.func_72973_f(entity);
+ 
+                 for (Entity entity1 : entity.func_184182_bu())
+@@ -396,24 +489,42 @@
+                     worldserver.func_72973_f(entity1);
+                 }
+ 
+-                worldserver.func_72964_e(p_72367_1_.field_70176_ah, p_72367_1_.field_70164_aj).func_76630_e();
++                worldserver.func_72964_e(playerIn.field_70176_ah, playerIn.field_70164_aj).func_76630_e();
+             }
+         }
+ 
+-        worldserver.func_72900_e(p_72367_1_);
+-        worldserver.func_184164_w().func_72695_c(p_72367_1_);
+-        this.field_72404_b.remove(p_72367_1_);
+-        UUID uuid = p_72367_1_.func_110124_au();
++        worldserver.func_72900_e(playerIn);
++        worldserver.func_184164_w().func_72695_c(playerIn);
++        this.field_72404_b.remove(playerIn);
++        UUID uuid = playerIn.func_110124_au();
+         EntityPlayerMP entityplayermp = (EntityPlayerMP)this.field_177454_f.get(uuid);
+ 
+-        if (entityplayermp == p_72367_1_)
++        if (entityplayermp == playerIn)
+         {
+             this.field_177454_f.remove(uuid);
+             this.field_148547_k.remove(uuid);
+         }
+         net.minecraftforge.common.chunkio.ChunkIOExecutor.adjustPoolSize(this.func_72394_k());
+ 
+-        this.func_148540_a(new SPacketPlayerListItem(SPacketPlayerListItem.Action.REMOVE_PLAYER, new EntityPlayerMP[] {p_72367_1_}));
++        // CraftBukkit start
++        //this.sendPacketToAllPlayers(new SPacketPlayerListItem(SPacketPlayerListItem.Action.REMOVE_PLAYER, new EntityPlayerMP[] {playerIn}));
++        SPacketPlayerListItem packet = new SPacketPlayerListItem(SPacketPlayerListItem.Action.REMOVE_PLAYER, playerIn);
++        for (int i = 0; i < field_72404_b.size(); i++) {
++        	EntityPlayerMP entityplayer2 = (EntityPlayerMP) this.field_72404_b.get(i);
++        
++        	if (entityplayer2.getBukkitEntity().canSee(playerIn.getBukkitEntity())) {
++        		entityplayer2.field_71135_a.func_147359_a(packet);
++        	} else {
++        		entityplayer2.getBukkitEntity().removeDisconnectingPlayer(playerIn.getBukkitEntity());
++        	}
++        }
++        // This removes the scoreboard (and player reference) for the specific player in the manager
++        cserver.getScoreboardManager().removePlayer(playerIn.getBukkitEntity());
++        // CraftBukkit end
++        
++        ChunkIOExecutor.adjustPoolSize(this.func_72394_k()); // CraftBukkit
++        
++        return playerQuitEvent.getQuitMessage(); // CraftBukkit
+     }
+ 
+     public String func_148542_a(SocketAddress p_148542_1_, GameProfile p_148542_2_)
+@@ -495,54 +606,139 @@
  
      public EntityPlayerMP func_72368_a(EntityPlayerMP p_72368_1_, int p_72368_2_, boolean p_72368_3_)
      {
@@ -321,7 +539,7 @@
  
              if (blockpos1 != null)
              {
-@@ -583,7 +703,7 @@
+@@ -583,7 +779,7 @@
      {
          GameProfile gameprofile = p_187243_1_.func_146103_bH();
          int i = this.func_152596_g(gameprofile) ? this.field_72414_i.func_187452_a(gameprofile) : 0;
@@ -330,3 +548,18 @@
          i = this.field_72407_n ? 4 : i;
          this.func_187245_a(p_187243_1_, i);
      }
+@@ -1058,6 +1254,14 @@
+         }
+     }
+ 
++    // CraftBukkit start
++    public void sendMessage(ITextComponent[] iChatBaseComponents) {
++    	for (ITextComponent component : iChatBaseComponents) {
++    		func_148544_a(component, true);
++    	}
++    }
++    // CraftBukkit end
++    
+     public void func_148544_a(ITextComponent p_148544_1_, boolean p_148544_2_)
+     {
+         this.field_72400_f.func_145747_a(p_148544_1_);

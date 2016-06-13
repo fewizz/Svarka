@@ -1,0 +1,12 @@
+--- ../src-base/minecraft/net/minecraftforge/fml/common/FMLCommonHandler.java
++++ ../src-work/minecraft/net/minecraftforge/fml/common/FMLCommonHandler.java
+@@ -503,7 +503,8 @@
+ 
+     public String getModName()
+     {
+-        List<String> modNames = Lists.newArrayListWithExpectedSize(3);
++        List<String> modNames = Lists.newArrayListWithExpectedSize(4);
++        modNames.add("svarka");
+         modNames.add("fml");
+         if (!noForge)
+         {

@@ -290,7 +290,55 @@
      public void func_147345_a(CPacketPlayerDigging p_147345_1_)
      {
          PacketThreadUtil.func_180031_a(p_147345_1_, this, this.field_147369_b.func_71121_q());
-@@ -866,9 +1055,15 @@
+@@ -797,19 +986,35 @@
+ 
+     public void func_147231_a(ITextComponent p_147231_1_)
+     {
+-        field_147370_c.info(this.field_147369_b.func_70005_c_() + " lost connection: " + p_147231_1_);
+-        this.field_147367_d.func_147132_au();
+-        TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("multiplayer.player.left", new Object[] {this.field_147369_b.func_145748_c_()});
+-        textcomponenttranslation.func_150256_b().func_150238_a(TextFormatting.YELLOW);
+-        this.field_147367_d.func_184103_al().func_148539_a(textcomponenttranslation);
+-        this.field_147369_b.func_71123_m();
+-        this.field_147367_d.func_184103_al().func_72367_e(this.field_147369_b);
++    	// CraftBukkit start - Rarely it would send a disconnect line twice
++    	if (this.processedDisconnect) {
++    		return;
++    	} else {
++    		this.processedDisconnect = true;
++    	}
++    	// CraftBukkit end
++    	field_147370_c.info(this.field_147369_b.func_70005_c_() + " lost connection: " + p_147231_1_.func_150260_c());
++    	// CraftBukkit start - Replace vanilla quit message handling with our own.
++    	/*
++    	this.serverController.refreshStatusNextTick();
++    	TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("multiplayer.player.left", new Object[] {this.playerEntity.getDisplayName()}); // Craftbukkit - Don't toString().
++    	textcomponenttranslation.getStyle().setColor(TextFormatting.YELLOW);
++    	this.serverController.getPlayerList().sendChatMsg(textcomponenttranslation);
++    	this.playerEntity.mountEntityAndWakeUp();
++    	this.serverController.getPlayerList().playerLoggedOut(this.playerEntity);
++    	*/
+ 
+-        if (this.field_147367_d.func_71264_H() && this.field_147369_b.func_70005_c_().equals(this.field_147367_d.func_71214_G()))
+-        {
+-            field_147370_c.info("Stopping singleplayer server as player logged out");
+-            this.field_147367_d.func_71263_m();
+-        }
++    	String quitMessage = this.field_147367_d.func_184103_al().playerLoggedOut(this.field_147369_b);
++    	if ((quitMessage != null) && (quitMessage.length() > 0)) {
++    		this.field_147367_d.func_184103_al().sendMessage(CraftChatMessage.fromString(quitMessage));
++    	}
++    	// CraftBukkit end
++    	
++    	if (this.field_147367_d.func_71264_H() && this.field_147369_b.func_70005_c_().equals(this.field_147367_d.func_71214_G()))
++    	{
++    		field_147370_c.info("Stopping singleplayer server as player logged out");
++    		this.field_147367_d.func_71263_m();
++    	}
+     }
+ 
+     public void func_147359_a(final Packet<?> p_147359_1_)
+@@ -866,9 +1071,15 @@
  
      public void func_147354_a(CPacketChatMessage p_147354_1_)
      {
@@ -308,7 +356,7 @@
          {
              TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("chat.cannotSend", new Object[0]);
              textcomponenttranslation.func_150256_b().func_150238_a(TextFormatting.RED);
-@@ -884,35 +1079,201 @@
+@@ -884,35 +1095,201 @@
              {
                  if (!ChatAllowedCharacters.func_71566_a(s.charAt(i)))
                  {
@@ -521,7 +569,7 @@
      }
  
      public void func_175087_a(CPacketAnimation p_175087_1_)
-@@ -1705,4 +2066,9 @@
+@@ -1705,4 +2082,9 @@
              }
          }
      }

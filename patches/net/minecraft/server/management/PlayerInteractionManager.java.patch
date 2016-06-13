@@ -90,10 +90,9 @@
                      // Restore block and te data
                      field_73090_b.field_71135_a.func_147359_a(new SPacketBlockChange(field_73092_a, p_180784_1_));
                      field_73092_a.func_184138_a(p_180784_1_, field_73092_a.func_180495_p(p_180784_1_), field_73092_a.func_180495_p(p_180784_1_), 3);
-+                    f = iblockstate.func_185903_a(this.field_73090_b, this.field_73090_b.field_70170_p, p_180784_1_); // Svarka
++                    //f = iblockstate.getPlayerRelativeBlockHardness(this.thisPlayerMP, this.thisPlayerMP.worldObj, pos); // Svarka
                  }
--                f = iblockstate.func_185903_a(this.field_73090_b, this.field_73090_b.field_70170_p, p_180784_1_);
-+                // f = iblockstate.getPlayerRelativeBlockHardness(this.thisPlayerMP, this.thisPlayerMP.worldObj, pos); // Craftbukkit - moving up /\
+                 f = iblockstate.func_185903_a(this.field_73090_b, this.field_73090_b.field_70170_p, p_180784_1_);
              }
 -            if (event.getUseItem() == net.minecraftforge.fml.common.eventhandler.Event.Result.DENY)
 +            if (event.getUseItem() == net.minecraftforge.fml.common.eventhandler.Event.Result.DENY || bukkitEvent.useItemInHand() == Event.Result.DENY)
