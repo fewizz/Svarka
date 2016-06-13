@@ -1,0 +1,23 @@
+--- ../src-base/minecraft/net/minecraftforge/common/WorldSpecificSaveHandler.java
++++ ../src-work/minecraft/net/minecraftforge/common/WorldSpecificSaveHandler.java
+@@ -2,8 +2,10 @@
+ 
+ import java.io.File;
+ import java.io.IOException;
++import java.util.UUID;
+ 
+ import net.minecraft.world.gen.structure.template.TemplateManager;
++
+ import org.apache.logging.log4j.Level;
+ 
+ import com.google.common.io.Files;
+@@ -87,4 +89,9 @@
+         return parent.func_186340_h();
+     }
+ 
++	@Override
++	public UUID getUUID() {
++		return null;
++	}
++
+ }

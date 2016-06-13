@@ -1036,7 +1036,7 @@ public final class CraftServer implements Server {
         }
 
         worlds.remove(world.getName().toLowerCase());
-        //console.worlds.remove(console.worlds.indexOf(handle));
+        //console.worlds.remove(console.worlds.indexOf(handle)); // Svarka - already removes in DimMangr?
         DimensionManager.unloadWorld(((WorldServer)world).dimension);
         return true;
     }

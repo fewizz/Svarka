@@ -633,8 +633,7 @@ public class CraftWorld implements World {
     }
 
     public UUID getUID() {
-        //return world.getSaveHandler().getUUID();
-    	return null; //TODO!!!!!!!!!!!!!!!!!!!!!!
+        return world.getSaveHandler().getUUID();
     }
 
     @Override

@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/world/demo/DemoWorldServer.java
++++ ../src-work/minecraft/net/minecraft/world/demo/DemoWorldServer.java
+@@ -15,7 +15,7 @@
+ 
+     public DemoWorldServer(MinecraftServer p_i45924_1_, ISaveHandler p_i45924_2_, WorldInfo p_i45924_3_, int p_i45924_4_, Profiler p_i45924_5_)
+     {
+-        super(p_i45924_1_, p_i45924_2_, p_i45924_3_, p_i45924_4_, p_i45924_5_);
++        super(p_i45924_1_, p_i45924_2_, p_i45924_3_, p_i45924_4_, p_i45924_5_, null, null); // Svarka - No Demo!!!
+         this.field_72986_A.func_176127_a(field_73071_a);
+     }
+ }

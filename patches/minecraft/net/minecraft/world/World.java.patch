@@ -76,10 +76,11 @@
      private boolean field_147481_N;
      private final WorldBorder field_175728_M;
      int[] field_72994_J;
-@@ -113,8 +139,57 @@
+@@ -113,22 +139,89 @@
      public boolean captureBlockSnapshots = false;
      public java.util.ArrayList<net.minecraftforge.common.util.BlockSnapshot> capturedBlockSnapshots = new java.util.ArrayList<net.minecraftforge.common.util.BlockSnapshot>();
  
+-    protected World(ISaveHandler p_i45749_1_, WorldInfo p_i45749_2_, WorldProvider p_i45749_3_, Profiler p_i45749_4_, boolean p_i45749_5_)
 +    // CraftBukkit start Added the following
 +    protected CraftWorld world;
 +    public boolean pvpMode;
@@ -120,21 +121,59 @@
 +    }
 +    
 +    protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client, ChunkGenerator gen, org.bukkit.World.Environment env)
-+    {
-+    	this(saveHandlerIn, info, providerIn, profilerIn, client);
+     {
++    	//this(saveHandlerIn, info, providerIn, profilerIn, client);
 +    	this.generator = gen;
 +    	this.world = new CraftWorld((WorldServer) this, gen, env);
-+    }
-+    
-     protected World(ISaveHandler p_i45749_1_, WorldInfo p_i45749_2_, WorldProvider p_i45749_3_, Profiler p_i45749_4_, boolean p_i45749_5_)
-     {
-+    	//this.ticksPerAnimalSpawns = this.getServer().getTicksPerAnimalSpawns(); // CraftBukkit TODO!!
-+    	//this.ticksPerMonsterSpawns = this.getServer().getTicksPerMonsterSpawns(); // CraftBukkit
++    	//this.ticksPerAnimalSpawns = this.getServer().getTicksPerAnimalSpawns(); // CraftBukkit TODO!!!
++    	//this.ticksPerMonsterSpawns = this.getServer().getTicksPerMonsterSpawns(); // CraftBukkit TODO!!!
 +    	// CraftBukkit end
          this.field_73021_x = Lists.newArrayList(new IWorldEventListener[] {this.field_184152_t});
          this.field_83016_L = Calendar.getInstance();
          this.field_96442_D = new Scoreboard();
-@@ -350,6 +425,21 @@
+         this.field_72985_G = true;
+         this.field_72992_H = true;
+         this.field_72994_J = new int[32768];
+-        this.field_73019_z = p_i45749_1_;
+-        this.field_72984_F = p_i45749_4_;
+-        this.field_72986_A = p_i45749_2_;
+-        this.field_73011_w = p_i45749_3_;
+-        this.field_72995_K = p_i45749_5_;
+-        this.field_175728_M = p_i45749_3_.func_177501_r();
++        this.field_73019_z = saveHandlerIn;
++        this.field_72984_F = profilerIn;
++        this.field_72986_A = info;
++        this.field_73011_w = providerIn;
++        this.field_72995_K = client;
++        this.field_175728_M = providerIn.func_177501_r();
+         perWorldStorage = new MapStorage((ISaveHandler)null);
++        
++        this.getServer().addWorld(this.world); // Craftbukkit
+     }
++    
++    /*protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client) // Svarka
++    {
++    	//this.ticksPerAnimalSpawns = this.getServer().getTicksPerAnimalSpawns(); // CraftBukkit TODO!!
++    	//this.ticksPerMonsterSpawns = this.getServer().getTicksPerMonsterSpawns(); // CraftBukkit
++    	// CraftBukkit end
++        this.eventListeners = Lists.newArrayList(new IWorldEventListener[] {this.pathListener});
++        this.theCalendar = Calendar.getInstance();
++        this.worldScoreboard = new Scoreboard();
++        this.spawnHostileMobs = true;
++        this.spawnPeacefulMobs = true;
++        this.lightUpdateBlockList = new int[32768];
++        this.saveHandler = saveHandlerIn;
++        this.theProfiler = profilerIn;
++        this.worldInfo = info;
++        this.provider = providerIn;
++        this.isRemote = client;
++        this.worldBorder = providerIn.createWorldBorder();
++        perWorldStorage = new MapStorage((ISaveHandler)null);
++    }*/
+ 
+     public World func_175643_b()
+     {
+@@ -350,6 +443,21 @@
              }
          }
      }
@@ -156,7 +195,7 @@
  
      // Split off from original setBlockState(BlockPos, IBlockState, int) method in order to directly send client and physic updates
      public void markAndNotifyBlock(BlockPos p_180501_1_, Chunk chunk, IBlockState iblockstate, IBlockState p_180501_2_, int p_180501_3_)
-@@ -1094,14 +1184,22 @@
+@@ -1094,14 +1202,22 @@
  
      public boolean func_72838_d(Entity p_72838_1_)
      {
@@ -184,7 +223,7 @@
          {
              flag = true;
          }
-@@ -1112,18 +1210,18 @@
+@@ -1112,18 +1228,18 @@
          }
          else
          {
