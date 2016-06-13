@@ -63,7 +63,7 @@ minecraft {
 		
 		svarka {
 			rootDir "."
-			patchDir "patches/minecraft/"
+			patchDir "patches/"
             patchAfter "forge"
             genPatchesFrom "forge"
             genMcpPatches = false
