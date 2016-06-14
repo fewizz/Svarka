@@ -156,6 +156,39 @@
  
      protected ServerCommandManager func_175582_h()
      {
+@@ -172,7 +252,7 @@
+         if (this.func_71254_M().func_75801_b(p_71237_1_))
+         {
+             field_147145_h.info("Converting map!");
+-            this.func_71192_d("menu.convertingLevel");
++            // this.setUserMessage("menu.convertingLevel"); // Svarka - indeed?
+             this.func_71254_M().func_75805_a(p_71237_1_, new IProgressUpdate()
+             {
+                 private long field_96245_b = System.currentTimeMillis();
+@@ -202,13 +282,13 @@
+         }
+     }
+ 
++    @Deprecated
+     protected synchronized void func_71192_d(String p_71192_1_)
+     {
+         this.field_71298_S = p_71192_1_;
+     }
+ 
+     @SideOnly(Side.CLIENT)
+-
+     public synchronized String func_71195_b_()
+     {
+         return this.field_71298_S;
+@@ -217,7 +297,7 @@
+     protected void func_71247_a(String p_71247_1_, String p_71247_2_, long p_71247_3_, WorldType p_71247_5_, String p_71247_6_)
+     {
+         this.func_71237_c(p_71247_1_);
+-        this.func_71192_d("menu.loadingLevel");
++        // this.setUserMessage("menu.loadingLevel"); // Svarka - indeed?
+         ISaveHandler isavehandler = this.field_71310_m.func_75804_a(p_71247_1_, true);
+         this.func_175584_a(this.func_71270_I(), isavehandler);
+         WorldInfo worldinfo = isavehandler.func_75757_d();
 @@ -248,12 +328,16 @@
              worldsettings = new WorldSettings(worldinfo);
          }
@@ -175,6 +208,24 @@
  
              if (!this.func_71264_H())
              {
+@@ -269,12 +353,12 @@
+ 
+     protected void func_71222_d()
+     {
+-        int i = 16;
+-        int j = 4;
+-        int k = 192;
+-        int l = 625;
++        //int i = 16; // Svarka - indeed?
++        //int j = 4; // Svarka - indeed?
++        //int k = 192; // Svarka - indeed?
++        //int l = 625; // Svarka - indeed?
+         int i1 = 0;
+-        this.func_71192_d("menu.generatingTerrain");
++        // this.setUserMessage("menu.generatingTerrain"); // Svarka - indeed?
+         int j1 = 0;
+         field_147145_h.info("Preparing start region for level " + j1);
+         WorldServer worldserver = net.minecraftforge.common.DimensionManager.getWorld(j1);
 @@ -336,6 +420,7 @@
      {
          this.field_71302_d = null;

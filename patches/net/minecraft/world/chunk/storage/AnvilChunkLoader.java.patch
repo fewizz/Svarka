@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/world/chunk/storage/AnvilChunkLoader.java
 +++ ../src-work/minecraft/net/minecraft/world/chunk/storage/AnvilChunkLoader.java
-@@ -47,6 +47,7 @@
+@@ -47,23 +47,19 @@
          this.field_186055_e = p_i46673_2_;
      }
  
@@ -8,7 +8,19 @@
      public boolean chunkExists(World world, int x, int z)
      {
          ChunkPos chunkcoordintpair = new ChunkPos(x, z);
-@@ -64,6 +65,7 @@
+ 
+-        if (this.field_75826_b.contains(chunkcoordintpair))
++        if (this.field_75826_b.contains(chunkcoordintpair) && this.field_75828_a.containsKey(chunkcoordintpair))
+         {
+-            for(ChunkPos pendingChunkCoord : this.field_75828_a.keySet())
+-            {
+-                if (pendingChunkCoord.equals(chunkcoordintpair))
+-                {
+-                    return true;
+-                }
+-            }
++        	return true;    
+         }
  
          return RegionFileCache.func_76550_a(this.field_75825_d, x, z).chunkExists(x & 31, z & 31);
      }

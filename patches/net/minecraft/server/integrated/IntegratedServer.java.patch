@@ -35,3 +35,12 @@
              world.func_72954_a(new ServerWorldEventHandler(this, world));
              if (!this.func_71264_H())
              {
+@@ -341,7 +344,7 @@
+             {
+                 for (EntityPlayerMP entityplayermp : Lists.newArrayList(IntegratedServer.this.func_184103_al().func_181057_v()))
+                 {
+-                    IntegratedServer.this.func_184103_al().func_72367_e(entityplayermp);
++                    IntegratedServer.this.func_184103_al().playerLoggedOut(entityplayermp);
+                 }
+             }
+         }));

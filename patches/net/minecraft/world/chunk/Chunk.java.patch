@@ -63,7 +63,13 @@
  
      public Chunk(World p_i1995_1_, int p_i1995_2_, int p_i1995_3_)
      {
-@@ -90,7 +121,13 @@
+@@ -85,12 +116,18 @@
+ 
+         for (int i = 0; i < this.field_76645_j.length; ++i)
+         {
+-            this.field_76645_j[i] = new ClassInheritanceMultiMap(Entity.class);
++            this.field_76645_j[i] = new ClassInheritanceMultiMap<Entity>(Entity.class);
+         }
  
          Arrays.fill((int[])this.field_76638_b, (int) - 999);
          Arrays.fill(this.field_76651_r, (byte) - 1);
@@ -77,3 +83,11 @@
  
      public Chunk(World p_i45645_1_, ChunkPrimer p_i45645_2_, int p_i45645_3_, int p_i45645_4_)
      {
+@@ -1003,6 +1040,7 @@
+         {
+             this.func_150809_p();
+             p_186034_1_.func_185931_b(this.field_76635_g, this.field_76647_h);
++            this.field_76637_e.getServer().getPluginManager().callEvent(new org.bukkit.event.world.ChunkPopulateEvent(bukkitChunk));
+             net.minecraftforge.fml.common.registry.GameRegistry.generateWorld(this.field_76635_g, this.field_76647_h, this.field_76637_e, p_186034_1_, this.field_76637_e.func_72863_F());
+             this.func_76630_e();
+         }
