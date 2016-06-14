@@ -38,7 +38,7 @@
  
  @SideOnly(Side.SERVER)
  public class DedicatedServer extends MinecraftServer implements IServer
-@@ -48,15 +58,41 @@
+@@ -48,19 +58,24 @@
      private static final Logger field_155771_h = LogManager.getLogger();
      public final List<PendingCommand> field_71341_l = Collections.<PendingCommand>synchronizedList(Lists.<PendingCommand>newArrayList());
      private RConThreadQuery field_71342_m;
@@ -56,33 +56,26 @@
 +    // CraftBukkit edition
 +    public DedicatedServer(OptionSet options, DataFixer dataFixerIn, YggdrasilAuthenticationService authServiceIn, MinecraftSessionService sessionServiceIn, GameProfileRepository profileRepoIn, PlayerProfileCache profileCacheIn) {
 +    	super(options, Proxy.NO_PROXY, dataFixerIn, authServiceIn, sessionServiceIn, profileRepoIn, profileCacheIn);
-+        Thread thread = new Thread("Server Infinisleeper")
-+        {
-+            {
-+                this.setDaemon(true);
-+                this.start();
-+            }
-+            public void run()
-+            {
-+                while (true)
-+                {
-+                    try
-+                    {
-+                        Thread.sleep(2147483647L);
-+                    }
-+                    catch (InterruptedException var2)
-+                    {
-+                        ;
-+                    }
-+                }
-+            }
-+        };
 +    }
 +    
      public DedicatedServer(File p_i47086_1_, DataFixer p_i47086_2_, YggdrasilAuthenticationService p_i47086_3_, MinecraftSessionService p_i47086_4_, GameProfileRepository p_i47086_5_, PlayerProfileCache p_i47086_6_)
      {
          super(p_i47086_1_, Proxy.NO_PROXY, p_i47086_2_, p_i47086_3_, p_i47086_4_, p_i47086_5_, p_i47086_6_);
-@@ -90,15 +126,33 @@
+-        Thread thread = new Thread("Server Infinisleeper")
++        /*Thread thread = new Thread("Server Infinisleeper") // Svarka - indeed?
+         {
+             {
+                 this.setDaemon(true);
+@@ -80,7 +95,7 @@
+                     }
+                 }
+             }
+-        };
++        };*/
+     }
+ 
+     protected boolean func_71197_b() throws IOException
+@@ -90,15 +105,33 @@
              public void run()
              {
                  if (net.minecraftforge.server.console.TerminalHandler.handleCommands(DedicatedServer.this)) return;
@@ -121,7 +114,7 @@
                  }
                  catch (IOException ioexception1)
                  {
-@@ -106,6 +160,28 @@
+@@ -106,6 +139,28 @@
                  }
              }
          };
@@ -150,7 +143,7 @@
          thread.setDaemon(true);
          thread.start();
          field_155771_h.info("Starting minecraft server version 1.9.4");
-@@ -189,6 +265,8 @@
+@@ -189,6 +244,8 @@
                  return false;
              }
  
@@ -159,7 +152,7 @@
              if (!this.func_71266_T())
              {
                  field_155771_h.warn("**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");
-@@ -208,8 +286,9 @@
+@@ -208,8 +265,9 @@
              }
              else
              {
@@ -170,7 +163,7 @@
                  long j = System.nanoTime();
  
                  if (this.func_71270_I() == null)
-@@ -277,7 +356,18 @@
+@@ -277,7 +335,18 @@
                      field_155771_h.info("Starting remote control listener");
                      this.field_71339_n = new RConThreadMain(this);
                      this.field_71339_n.func_72602_a();
@@ -189,7 +182,7 @@
  
                  if (this.func_175593_aQ() > 0L)
                  {
-@@ -418,7 +508,16 @@
+@@ -418,7 +487,16 @@
          while (!this.field_71341_l.isEmpty())
          {
              PendingCommand pendingcommand = (PendingCommand)this.field_71341_l.remove(0);
@@ -207,7 +200,7 @@
          }
      }
  
-@@ -677,7 +776,30 @@
+@@ -677,7 +755,30 @@
  
      public String func_71258_A()
      {
@@ -239,7 +232,7 @@
      }
  
      public String func_71252_i(String p_71252_1_)
-@@ -686,4 +808,11 @@
+@@ -686,4 +787,11 @@
          this.field_71321_q.func_71556_a(this.field_184115_n, p_71252_1_);
          return this.field_184115_n.func_70008_c();
      }

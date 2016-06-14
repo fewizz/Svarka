@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/server/management/PlayerInteractionManager.java
 +++ ../src-work/minecraft/net/minecraft/server/management/PlayerInteractionManager.java
-@@ -1,13 +1,18 @@
+@@ -1,13 +1,17 @@
  package net.minecraft.server.management;
  
  import javax.annotation.Nullable;
@@ -8,7 +8,7 @@
  import net.minecraft.block.Block;
  import net.minecraft.block.BlockChest;
  import net.minecraft.block.BlockCommandBlock;
- import net.minecraft.block.material.Material;
+-import net.minecraft.block.material.Material;
  import net.minecraft.block.state.IBlockState;
 +import net.minecraft.enchantment.EnchantmentHelper;
  import net.minecraft.entity.player.EntityPlayer;
@@ -19,30 +19,56 @@
  import net.minecraft.inventory.IInventory;
  import net.minecraft.item.ItemBlock;
  import net.minecraft.item.ItemStack;
-@@ -26,6 +31,22 @@
+@@ -25,7 +29,48 @@
+ import net.minecraft.world.World;
  import net.minecraft.world.WorldServer;
  import net.minecraft.world.WorldSettings;
- 
 +import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.Event;
 +import org.bukkit.event.block.Action;
 +import org.bukkit.event.block.BlockBreakEvent;
 +import org.bukkit.event.block.BlockDamageEvent;
 +import org.bukkit.event.player.PlayerInteractEvent;
-+
-+import org.bukkit.event.Event;
+ 
++//import net.minecraft.block.material.Material; // Indeed?
++import net.minecraft.block.state.IBlockState;
++import net.minecraft.enchantment.EnchantmentHelper;
++import net.minecraft.entity.player.EntityPlayer;
++import net.minecraft.entity.player.EntityPlayerMP;
++import net.minecraft.init.Blocks;
++import net.minecraft.init.Enchantments;
++import net.minecraft.inventory.EntityEquipmentSlot;
++import net.minecraft.inventory.IInventory;
++import net.minecraft.item.ItemBlock;
++import net.minecraft.item.ItemStack;
++import net.minecraft.item.ItemSword;
++import net.minecraft.network.play.server.SPacketBlockChange;
++import net.minecraft.network.play.server.SPacketPlayerListItem;
++import net.minecraft.tileentity.TileEntity;
++import net.minecraft.tileentity.TileEntityChest;
++import net.minecraft.util.ActionResult;
++import net.minecraft.util.EnumActionResult;
++import net.minecraft.util.EnumFacing;
++import net.minecraft.util.EnumHand;
++import net.minecraft.util.math.BlockPos;
++import net.minecraft.world.ILockableContainer;
++import net.minecraft.world.World;
++import net.minecraft.world.WorldServer;
++import net.minecraft.world.WorldSettings;
 +
 +//CraftBukkit start
-+import org.bukkit.event.block.BlockBreakEvent;
-+import org.bukkit.craftbukkit.event.CraftEventFactory;
 +import org.bukkit.event.Event;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
 +import org.bukkit.event.block.Action;
++import org.bukkit.event.block.BlockBreakEvent;
++import org.bukkit.event.block.BlockDamageEvent;
 +import org.bukkit.event.player.PlayerInteractEvent;
 +// CraftBukkit end
 +
  public class PlayerInteractionManager
  {
      /** Forge reach distance */
-@@ -41,6 +62,11 @@
+@@ -41,6 +86,11 @@
      private BlockPos field_180241_i = BlockPos.field_177992_a;
      private int field_73093_n;
      private int field_73094_o = -1;
@@ -54,7 +80,7 @@
  
      public PlayerInteractionManager(World p_i1524_1_)
      {
-@@ -141,8 +167,21 @@
+@@ -141,8 +191,21 @@
  
      public void func_180784_a(BlockPos p_180784_1_, EnumFacing p_180784_2_)
      {
@@ -77,7 +103,7 @@
          {
              // Restore block and te data
              field_73090_b.field_71135_a.func_147359_a(new SPacketBlockChange(field_73092_a, p_180784_1_));
-@@ -190,7 +229,7 @@
+@@ -190,7 +253,7 @@
  
              if (!iblockstate.func_177230_c().isAir(iblockstate, field_73092_a, p_180784_1_))
              {
@@ -86,7 +112,7 @@
                  {
                      block.func_180649_a(this.field_73092_a, p_180784_1_, this.field_73090_b);
                      this.field_73092_a.func_175719_a((EntityPlayer)null, p_180784_1_, p_180784_2_);
-@@ -200,10 +239,11 @@
+@@ -200,10 +263,11 @@
                      // Restore block and te data
                      field_73090_b.field_71135_a.func_147359_a(new SPacketBlockChange(field_73092_a, p_180784_1_));
                      field_73092_a.func_184138_a(p_180784_1_, field_73092_a.func_180495_p(p_180784_1_), field_73092_a.func_180495_p(p_180784_1_), 3);
@@ -99,7 +125,7 @@
              {
                  if (f >= 1.0F)
                  {
-@@ -213,7 +253,19 @@
+@@ -213,7 +277,19 @@
                  }
                  return;
              }
@@ -119,7 +145,7 @@
              if (!iblockstate.func_177230_c().isAir(iblockstate, field_73092_a, p_180784_1_) && f >= 1.0F)
              {
                  this.func_180237_b(p_180784_1_);
-@@ -255,6 +307,9 @@
+@@ -255,6 +331,9 @@
                  }
              }
          }
@@ -129,7 +155,7 @@
      }
  
      public void func_180238_e()
-@@ -283,6 +338,62 @@
+@@ -283,6 +362,62 @@
  
      public boolean func_180237_b(BlockPos p_180237_1_)
      {
@@ -164,10 +190,10 @@
 +    			// Copied from block.a(World world, EntityHuman entityhuman, BlockPosition blockposition, IBlockData iblockdata, TileEntity tileentity)
 +    			// PAIL: checkme each update
 +    			if (!(nmsBlock.func_149652_G() && EnchantmentHelper.func_77506_a(Enchantments.field_185306_r, itemstack) > 0)) {
-+    				int data = block.getData();
++    				//int data = block.getData(); // Indeed?
 +    				int bonusLevel = EnchantmentHelper.func_77506_a(Enchantments.field_185308_t, itemstack);
 +    		                    
-+    				//event.setExpToDrop(nmsBlock.getExpDrop(this.theWorld, nmsData, bonusLevel)); TODO!!!
++    				event.setExpToDrop(nmsBlock.getExpDrop(this.field_73092_a, nmsData, bonusLevel));
 +    			}
 +    		}
 +    			
@@ -192,7 +218,7 @@
          int exp = net.minecraftforge.common.ForgeHooks.onBlockBreakEvent(field_73092_a, field_73091_c, field_73090_b, p_180237_1_);
          if (exp == -1)
          {
-@@ -291,7 +402,15 @@
+@@ -291,7 +426,15 @@
          else
          {
              IBlockState iblockstate = this.field_73092_a.func_180495_p(p_180237_1_);
@@ -208,7 +234,7 @@
  
              if (iblockstate.func_177230_c() instanceof BlockCommandBlock && !this.field_73090_b.func_70003_b(2, ""))
              {
-@@ -335,10 +454,11 @@
+@@ -335,10 +478,11 @@
                      }
                  }
  
@@ -223,7 +249,7 @@
                  }
                  return flag1;
              }
-@@ -399,13 +519,18 @@
+@@ -399,13 +543,18 @@
  
      public EnumActionResult func_187251_a(EntityPlayer p_187251_1_, World p_187251_2_, @Nullable ItemStack p_187251_3_, EnumHand p_187251_4_, BlockPos p_187251_5_, EnumFacing p_187251_6_, float p_187251_7_, float p_187251_8_, float p_187251_9_)
      {
@@ -243,7 +269,7 @@
                  ILockableContainer ilockablecontainer = (ILockableContainer)tileentity;
  
                  if (ilockablecontainer instanceof TileEntityChest && block instanceof BlockChest)
-@@ -429,9 +554,12 @@
+@@ -429,9 +578,12 @@
          }
          else
          {
@@ -258,7 +284,7 @@
  
              net.minecraft.item.Item item = p_187251_3_ == null ? null : p_187251_3_.func_77973_b();
              EnumActionResult ret = item == null ? EnumActionResult.PASS : item.onItemUseFirst(p_187251_3_, p_187251_1_, p_187251_2_, p_187251_5_, p_187251_6_, p_187251_7_, p_187251_8_, p_187251_9_, p_187251_4_);
-@@ -442,7 +570,7 @@
+@@ -442,7 +594,7 @@
                  bypass = bypass && (s == null || s.func_77973_b().doesSneakBypassUse(s, p_187251_2_, p_187251_5_, p_187251_1_));
              EnumActionResult result = EnumActionResult.PASS;
  
@@ -267,7 +293,7 @@
              {
                  IBlockState iblockstate = p_187251_2_.func_180495_p(p_187251_5_);
                  if(event.getUseBlock() != net.minecraftforge.fml.common.eventhandler.Event.Result.DENY)
-@@ -479,9 +607,8 @@
+@@ -479,9 +631,8 @@
              }
              else
              {

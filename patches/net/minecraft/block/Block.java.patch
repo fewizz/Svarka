@@ -1,0 +1,27 @@
+--- ../src-base/minecraft/net/minecraft/block/Block.java
++++ ../src-work/minecraft/net/minecraft/block/Block.java
+@@ -540,7 +540,8 @@
+ 
+             for (ItemStack item : items)
+             {
+-                if (p_180653_1_.field_73012_v.nextFloat() <= p_180653_4_)
++            	// CraftBukkit - <= to < to allow for plugins to completely disable block drops from explosions
++                if (p_180653_1_.field_73012_v.nextFloat() < p_180653_4_)
+                 {
+                     func_180635_a(p_180653_1_, p_180653_2_, item);
+                 }
+@@ -2320,7 +2321,13 @@
+             }
+         }
+     }
+-
++    
++    // CraftBukkit start
++    public int getExpDrop(World world, IBlockState data, int enchantmentLevel) {
++        return 0;
++    }
++    // CraftBukkit end
++    
+     private static void func_176215_a(int p_176215_0_, ResourceLocation p_176215_1_, Block p_176215_2_)
+     {
+         field_149771_c.func_177775_a(p_176215_0_, p_176215_1_, p_176215_2_);

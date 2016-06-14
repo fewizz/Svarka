@@ -1,6 +1,11 @@
 --- ../src-base/minecraft/net/minecraft/server/MinecraftServer.java
 +++ ../src-work/minecraft/net/minecraft/server/MinecraftServer.java
-@@ -14,6 +14,9 @@
+@@ -10,10 +10,14 @@
+ import com.mojang.authlib.GameProfileRepository;
+ import com.mojang.authlib.minecraft.MinecraftSessionService;
+ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
++
+ import io.netty.buffer.ByteBuf;
  import io.netty.buffer.ByteBufOutputStream;
  import io.netty.buffer.Unpooled;
  import io.netty.handler.codec.base64.Base64;
@@ -10,7 +15,7 @@
  import java.awt.GraphicsEnvironment;
  import java.awt.image.BufferedImage;
  import java.io.File;
-@@ -22,6 +25,7 @@
+@@ -22,6 +26,7 @@
  import java.net.Proxy;
  import java.security.KeyPair;
  import java.text.SimpleDateFormat;
@@ -18,7 +23,18 @@
  import java.util.Arrays;
  import java.util.Collections;
  import java.util.Date;
-@@ -52,6 +56,7 @@
+@@ -32,8 +37,10 @@
+ import java.util.concurrent.Callable;
+ import java.util.concurrent.Executors;
+ import java.util.concurrent.FutureTask;
++
+ import javax.annotation.Nullable;
+ import javax.imageio.ImageIO;
++
+ import net.minecraft.command.CommandBase;
+ import net.minecraft.command.CommandResultStats;
+ import net.minecraft.command.ICommandManager;
+@@ -52,6 +59,7 @@
  import net.minecraft.profiler.Profiler;
  import net.minecraft.profiler.Snooper;
  import net.minecraft.server.dedicated.DedicatedServer;
@@ -26,21 +42,28 @@
  import net.minecraft.server.management.PlayerList;
  import net.minecraft.server.management.PlayerProfileCache;
  import net.minecraft.util.IProgressUpdate;
-@@ -85,13 +90,23 @@
+@@ -81,17 +89,29 @@
+ import net.minecraft.world.storage.WorldInfo;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++
+ import org.apache.commons.lang3.Validate;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
- 
 +import org.bukkit.Bukkit;
 +import org.bukkit.craftbukkit.CraftServer;
 +import org.bukkit.craftbukkit.Main;
-+
+ 
+-public abstract class MinecraftServer implements Runnable, ICommandSender, IThreadListener, ISnooperInfo
 +// CraftBukkit start
 +import org.bukkit.Bukkit;
 +import org.bukkit.craftbukkit.CraftServer;
 +import org.bukkit.craftbukkit.Main;
 +// CraftBukkit end
 +
- public abstract class MinecraftServer implements Runnable, ICommandSender, IThreadListener, ISnooperInfo
++import scala.reflect.internal.Trees.This;
++
++public abstract class MinecraftServer implements ICommandSender, IThreadListener, ISnooperInfo
  {
 -    private static final Logger field_147145_h = LogManager.getLogger();
 +    public static final Logger field_147145_h = LogManager.getLogger();
@@ -53,9 +76,12 @@
      private final List<ITickable> field_71322_p = Lists.<ITickable>newArrayList();
      protected final ICommandManager field_71321_q;
      public final Profiler field_71304_b = new Profiler();
-@@ -143,9 +158,64 @@
+@@ -141,11 +161,68 @@
+     private final PlayerProfileCache field_152366_X;
+     private long field_147142_T = 0L;
      protected final Queue < FutureTask<? >> field_175589_i = Queues. < FutureTask<? >> newArrayDeque();
-     private Thread field_175590_aa;
+-    private Thread field_175590_aa;
++    public Thread field_175590_aa;
      private long field_175591_ab = func_130071_aq();
 +    
 +    // CraftBukkit start
@@ -66,7 +92,7 @@
 +    public org.bukkit.command.RemoteConsoleCommandSender remoteConsole;
 +    public ConsoleReader reader;
 +    public static int currentTick = (int) (System.currentTimeMillis() / 50);
-+    public Thread primaryThread;
++    // public Thread primaryThread; // Svarka - no!
 +    public java.util.Queue<Runnable> processQueue = new java.util.concurrent.ConcurrentLinkedQueue<Runnable>();
 +    public int autosavePeriod;
 +    // CraftBukkit end
@@ -112,13 +138,15 @@
 +        }
 +        Runtime.getRuntime().addShutdownHook(new org.bukkit.craftbukkit.util.ServerShutdownThread(this));
 +
-+        this.field_175590_aa = primaryThread = new Thread(this, "Server thread"); // Moved from main
++        //this.serverThread = primaryThread = new Thread(this, "Server thread"); // Moved from main // Svarka \/
++        this.field_175590_aa = Thread.currentThread();
++        this.field_175590_aa.setName("Server thread");
 +    }
 +    
      public MinecraftServer(File p_i47054_1_, Proxy p_i47054_2_, DataFixer p_i47054_3_, YggdrasilAuthenticationService p_i47054_4_, MinecraftSessionService p_i47054_5_, GameProfileRepository p_i47054_6_, PlayerProfileCache p_i47054_7_)
      {
          this.field_110456_c = p_i47054_2_;
-@@ -159,6 +229,9 @@
+@@ -159,6 +236,9 @@
          this.field_71310_m = new AnvilSaveConverter(p_i47054_1_, p_i47054_3_);
          this.field_184112_s = p_i47054_3_;
      }
@@ -128,7 +156,7 @@
  
      protected ServerCommandManager func_175582_h()
      {
-@@ -248,12 +321,16 @@
+@@ -248,12 +328,16 @@
              worldsettings = new WorldSettings(worldinfo);
          }
  
@@ -141,13 +169,13 @@
 -            WorldServer world = (dim == 0 ? overWorld : (WorldServer)new WorldServerMulti(this, isavehandler, dim, overWorld, field_71304_b).func_175643_b());
 +            WorldServer world = (dim == 0 ? overWorld : (WorldServer)new WorldServerMulti(this, isavehandler, dim, overWorld, field_71304_b, org.bukkit.World.Environment.getEnvironment(dim), this.server.getGenerator(Integer.toString(dim))).func_175643_b());
              world.func_72954_a(new ServerWorldEventHandler(this, world));
-+            if(dim == 0) {
++            if(dim == 0) {	
 +            	this.server.scoreboardManager = new org.bukkit.craftbukkit.scoreboard.CraftScoreboardManager(this, world.func_96441_U());
 +            }
  
              if (!this.func_71264_H())
              {
-@@ -336,6 +413,7 @@
+@@ -336,6 +420,7 @@
      {
          this.field_71302_d = null;
          this.field_71303_e = 0;
@@ -155,7 +183,7 @@
      }
  
      public void func_71267_a(boolean p_71267_1_)
-@@ -361,6 +439,11 @@
+@@ -361,6 +446,11 @@
          }
      }
  
@@ -167,7 +195,7 @@
      public void func_71260_j()
      {
          field_147145_h.info("Stopping server");
-@@ -747,9 +830,11 @@
+@@ -747,9 +837,11 @@
  
      public void func_71256_s()
      {
@@ -181,7 +209,7 @@
      }
  
      public File func_71209_f(String p_71209_1_)
-@@ -1401,10 +1486,12 @@
+@@ -1401,10 +1493,12 @@
      @SideOnly(Side.SERVER)
      public static void main(String[] p_main_0_)
      {
@@ -194,7 +222,7 @@
              boolean flag = true;
              String s = null;
              String s1 = ".";
-@@ -1468,51 +1555,73 @@
+@@ -1468,51 +1562,75 @@
                      ++j;
                  }
              }
@@ -272,12 +300,14 @@
 +            	dedicatedserver.func_71246_n((String) options.valueOf("world"));
 +            }
 +            	
-+            dedicatedserver.primaryThread.start();
++            // dedicatedserver.primaryThread.start(); // Svarka
++            dedicatedserver.run();
++            
 +            // CraftBukkit end
          }
          catch (Exception exception)
          {
-@@ -1582,4 +1691,11 @@
+@@ -1582,4 +1700,11 @@
      {
          return this.field_175590_aa;
      }

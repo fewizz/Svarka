@@ -1592,7 +1592,7 @@ public final class CraftServer implements Server {
 
     @Override
     public boolean isPrimaryThread() {
-        return Thread.currentThread().equals(console.primaryThread);
+        return Thread.currentThread().equals(console.serverThread);
     }
 
     @Override

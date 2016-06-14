@@ -1,0 +1,32 @@
+--- ../src-base/minecraft/net/minecraft/block/BlockCactus.java
++++ ../src-work/minecraft/net/minecraft/block/BlockCactus.java
+@@ -1,6 +1,9 @@
+ package net.minecraft.block;
+ 
+ import java.util.Random;
++
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++
+ import net.minecraft.block.material.Material;
+ import net.minecraft.block.properties.IProperty;
+ import net.minecraft.block.properties.PropertyInteger;
+@@ -51,7 +54,8 @@
+ 
+                 if (j == 15)
+                 {
+-                    p_180650_1_.func_175656_a(blockpos, this.func_176223_P());
++                    // worldIn.setBlockState(blockpos, this.getDefaultState()); // CraftBukkit
++                	CraftEventFactory.handleBlockGrowEvent(p_180650_1_, p_180650_2_.func_177958_n(), p_180650_2_.func_177956_o(), p_180650_2_.func_177952_p(), this, 0); // CraftBukkit
+                     IBlockState iblockstate = p_180650_3_.func_177226_a(field_176587_a, Integer.valueOf(0));
+                     p_180650_1_.func_180501_a(p_180650_2_, iblockstate, 4);
+                     iblockstate.func_189546_a(p_180650_1_, blockpos, this);
+@@ -116,7 +120,9 @@
+ 
+     public void func_180634_a(World p_180634_1_, BlockPos p_180634_2_, IBlockState p_180634_3_, Entity p_180634_4_)
+     {
++    	CraftEventFactory.blockDamage = p_180634_1_.getWorld().getBlockAt(p_180634_2_.func_177958_n(), p_180634_2_.func_177956_o(), p_180634_2_.func_177952_p()); // CraftBukkit
+         p_180634_4_.func_70097_a(DamageSource.field_76367_g, 1.0F);
++        CraftEventFactory.blockDamage = null; // CraftBukkit
+     }
+ 
+     public IBlockState func_176203_a(int p_176203_1_)

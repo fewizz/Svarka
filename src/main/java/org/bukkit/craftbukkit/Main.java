@@ -9,7 +9,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-import net.minecraft.server.MinecraftServer;
 import org.fusesource.jansi.AnsiConsole;
 
 public class Main {
@@ -132,7 +131,7 @@ public class Main {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else if (options.has("v")) {
-            System.out.println(CraftServer.class.getPackage().getImplementationVersion());
+            // System.out.println(CraftServer.class.getPackage().getImplementationVersion()); // Svarka - all time prints null... Ugh...
         } else {
             // Do you love Java using + and ! as string based identifiers? I sure do!
             String path = new File(".").getAbsolutePath();
