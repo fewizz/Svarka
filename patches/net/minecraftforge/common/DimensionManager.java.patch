@@ -1,6 +1,28 @@
 --- ../src-base/minecraft/net/minecraftforge/common/DimensionManager.java
 +++ ../src-work/minecraft/net/minecraftforge/common/DimensionManager.java
-@@ -208,7 +208,7 @@
+@@ -12,6 +12,7 @@
+ import java.util.concurrent.ConcurrentMap;
+ 
+ import org.apache.logging.log4j.Level;
++import org.bukkit.craftbukkit.CraftServer;
+ 
+ import com.google.common.collect.HashMultiset;
+ import com.google.common.collect.Lists;
+@@ -71,8 +72,11 @@
+         hasInit = true;
+ 
+         registerDimension( 0, DimensionType.OVERWORLD);
+-        registerDimension(-1, DimensionType.NETHER);
+-        registerDimension( 1, DimensionType.THE_END);
++        
++        if(MinecraftServer.getServerStatic().func_71255_r())
++        	registerDimension(-1, DimensionType.NETHER);
++        if(MinecraftServer.getServerStatic().server.getAllowEnd())
++        	registerDimension( 1, DimensionType.THE_END);
+     }
+ 
+     public static void registerDimension(int id, DimensionType type)
+@@ -208,7 +212,7 @@
          ISaveHandler savehandler = overworld.func_72860_G();
          //WorldSettings worldSettings = new WorldSettings(overworld.getWorldInfo());
  

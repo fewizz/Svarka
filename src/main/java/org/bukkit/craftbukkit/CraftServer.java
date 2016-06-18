@@ -1002,7 +1002,7 @@ public final class CraftServer implements Server {
         //}
         boolean fnd = false;
         for(WorldServer wrld : console.worldServers) {
-        	if(wrld == world) {
+        	if(wrld == handle) {
         		fnd = true;
         		break;
         	}

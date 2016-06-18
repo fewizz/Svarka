@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/server/management/PlayerList.java
 +++ ../src-work/minecraft/net/minecraft/server/management/PlayerList.java
-@@ -4,7 +4,9 @@
+@@ -4,15 +4,21 @@
  import com.google.common.collect.Maps;
  import com.google.common.collect.Sets;
  import com.mojang.authlib.GameProfile;
@@ -10,7 +10,9 @@
  import java.io.File;
  import java.net.SocketAddress;
  import java.text.SimpleDateFormat;
-@@ -12,7 +14,9 @@
++import java.util.ArrayList;
++import java.util.Iterator;
+ import java.util.List;
  import java.util.Map;
  import java.util.Set;
  import java.util.UUID;
@@ -20,7 +22,15 @@
  import net.minecraft.entity.Entity;
  import net.minecraft.entity.player.EntityPlayer;
  import net.minecraft.entity.player.EntityPlayerMP;
-@@ -51,6 +55,7 @@
+@@ -43,6 +49,7 @@
+ import net.minecraft.scoreboard.ServerScoreboard;
+ import net.minecraft.scoreboard.Team;
+ import net.minecraft.server.MinecraftServer;
++import net.minecraft.server.network.NetHandlerLoginServer;
+ import net.minecraft.stats.StatList;
+ import net.minecraft.stats.StatisticsManagerServer;
+ import net.minecraft.util.datafix.FixTypes;
+@@ -51,6 +58,7 @@
  import net.minecraft.util.text.ITextComponent;
  import net.minecraft.util.text.TextComponentTranslation;
  import net.minecraft.util.text.TextFormatting;
@@ -28,7 +38,7 @@
  import net.minecraft.world.World;
  import net.minecraft.world.WorldServer;
  import net.minecraft.world.WorldSettings;
-@@ -62,9 +67,35 @@
+@@ -62,9 +70,37 @@
  import net.minecraft.world.storage.WorldInfo;
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
@@ -39,7 +49,9 @@
  
 +import org.bukkit.Location;
 +import org.bukkit.craftbukkit.chunkio.ChunkIOExecutor;
++import org.bukkit.entity.Player;
 +import org.bukkit.event.player.PlayerJoinEvent;
++import org.bukkit.event.player.PlayerLoginEvent;
 +import org.bukkit.event.player.PlayerQuitEvent;
 +
 +// CraftBukkit start
@@ -64,7 +76,7 @@
  public abstract class PlayerList
  {
      public static final File field_152613_a = new File("banned-players.json");
-@@ -74,14 +105,14 @@
+@@ -74,14 +110,14 @@
      private static final Logger field_148546_d = LogManager.getLogger();
      private static final SimpleDateFormat field_72403_e = new SimpleDateFormat("yyyy-MM-dd \'at\' HH:mm:ss z");
      private final MinecraftServer field_72400_f;
@@ -81,7 +93,7 @@
      private boolean field_72409_l;
      protected int field_72405_c;
      private int field_72402_d;
-@@ -89,8 +120,15 @@
+@@ -89,8 +125,15 @@
      private boolean field_72407_n;
      private int field_72408_o;
  
@@ -97,7 +109,7 @@
          this.field_72401_g = new UserListBans(field_152613_a);
          this.field_72413_h = new UserListIPBans(field_152614_b);
          this.field_72414_i = new UserListOps(field_152615_c);
-@@ -110,9 +148,17 @@
+@@ -110,9 +153,17 @@
          String s = gameprofile1 == null ? gameprofile.getName() : gameprofile1.getName();
          playerprofilecache.func_152649_a(gameprofile);
          NBTTagCompound nbttagcompound = this.func_72380_a(p_72355_2_);
@@ -118,7 +130,7 @@
          if (playerWorld == null)
          {
              p_72355_2_.field_71093_bK = 0;
-@@ -122,7 +168,7 @@
+@@ -122,7 +173,7 @@
          }
  
          p_72355_2_.func_70029_a(playerWorld);
@@ -127,7 +139,7 @@
          String s1 = "local";
  
          if (p_72355_1_.func_74430_c() != null)
-@@ -130,13 +176,18 @@
+@@ -130,13 +181,18 @@
              s1 = p_72355_1_.func_74430_c().toString();
          }
  
@@ -152,7 +164,7 @@
          nethandlerplayserver.func_147359_a(new SPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).func_180714_a(this.func_72365_p().getServerModName())));
          nethandlerplayserver.func_147359_a(new SPacketServerDifficulty(worldinfo.func_176130_y(), worldinfo.func_176123_z()));
          nethandlerplayserver.func_147359_a(new SPacketSpawnPosition(blockpos));
-@@ -145,24 +196,29 @@
+@@ -145,24 +201,29 @@
          this.func_187243_f(p_72355_2_);
          p_72355_2_.func_147099_x().func_150877_d();
          p_72355_2_.func_147099_x().func_150884_b(p_72355_2_);
@@ -190,7 +202,7 @@
  
          if (!this.field_72400_f.func_147133_T().isEmpty())
          {
-@@ -179,7 +235,7 @@
+@@ -179,7 +240,7 @@
              if (nbttagcompound.func_150297_b("RootVehicle", 10))
              {
                  NBTTagCompound nbttagcompound1 = nbttagcompound.func_74775_l("RootVehicle");
@@ -199,7 +211,7 @@
  
                  if (entity2 != null)
                  {
-@@ -204,18 +260,18 @@
+@@ -204,18 +265,18 @@
                      if (!p_72355_2_.func_184218_aH())
                      {
                          field_148546_d.warn("Couldn\'t reattach entity to player");
@@ -221,7 +233,7 @@
  
                  if (entity1 != null)
                  {
-@@ -225,6 +281,8 @@
+@@ -225,6 +286,8 @@
          }
  
          p_72355_2_.func_71116_b();
@@ -230,7 +242,7 @@
          net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerLoggedIn(p_72355_2_);
      }
  
-@@ -352,21 +410,47 @@
+@@ -352,21 +415,47 @@
          }
      }
  
@@ -286,7 +298,7 @@
      }
  
      public void func_72358_d(EntityPlayerMP p_72358_1_)
-@@ -374,21 +458,30 @@
+@@ -374,21 +463,30 @@
          p_72358_1_.func_71121_q().func_184164_w().func_72685_d(p_72358_1_);
      }
  
@@ -325,7 +337,7 @@
                  worldserver.func_72973_f(entity);
  
                  for (Entity entity1 : entity.func_184182_bu())
-@@ -396,24 +489,42 @@
+@@ -396,60 +494,115 @@
                      worldserver.func_72973_f(entity1);
                  }
  
@@ -374,8 +386,110 @@
 +        return playerQuitEvent.getQuitMessage(); // CraftBukkit
      }
  
-     public String func_148542_a(SocketAddress p_148542_1_, GameProfile p_148542_2_)
-@@ -495,54 +606,139 @@
+-    public String func_148542_a(SocketAddress p_148542_1_, GameProfile p_148542_2_)
++    // CraftBukkit start - Whole method, SocketAddress to LoginListener, added hostname to signature, return EntityPlayer
++    public EntityPlayerMP allowUserToConnect(NetHandlerLoginServer loginlistener, GameProfile profile, String hostname)
+     {
+-        if (this.field_72401_g.func_152702_a(p_148542_2_))
+-        {
+-            UserListBansEntry userlistbansentry = (UserListBansEntry)this.field_72401_g.func_152683_b(p_148542_2_);
+-            String s1 = "You are banned from this server!\nReason: " + userlistbansentry.func_73686_f();
++		// Moved from processLogin
++		UUID uuid = EntityPlayer.func_146094_a(profile);
++		ArrayList arraylist = Lists.newArrayList();
+ 
+-            if (userlistbansentry.func_73680_d() != null)
+-            {
+-                s1 = s1 + "\nYour ban will be removed on " + field_72403_e.format(userlistbansentry.func_73680_d());
+-            }
++		EntityPlayerMP entityplayer;
+ 
+-            return s1;
+-        }
+-        else if (!this.func_152607_e(p_148542_2_))
+-        {
+-            return "You are not white-listed on this server!";
+-        }
+-        else if (this.field_72413_h.func_152708_a(p_148542_1_))
+-        {
+-            UserListIPBansEntry userlistipbansentry = this.field_72413_h.func_152709_b(p_148542_1_);
+-            String s = "Your IP address is banned from this server!\nReason: " + userlistipbansentry.func_73686_f();
++		for (int i = 0; i < this.field_72404_b.size(); ++i) {
++			entityplayer = (EntityPlayerMP) this.field_72404_b.get(i);
++			if (entityplayer.func_110124_au().equals(uuid)) {
++				arraylist.add(entityplayer);
++			}
++		}
+ 
+-            if (userlistipbansentry.func_73680_d() != null)
+-            {
+-                s = s + "\nYour ban will be removed on " + field_72403_e.format(userlistipbansentry.func_73680_d());
+-            }
++		Iterator iterator = arraylist.iterator();
+ 
+-            return s;
+-        }
+-        else
+-        {
+-            return this.field_72404_b.size() >= this.field_72405_c && !this.func_183023_f(p_148542_2_) ? "The server is full!" : null;
+-        }
++		while (iterator.hasNext()) {
++			entityplayer = (EntityPlayerMP) iterator.next();
++			func_72391_b(entityplayer); // CraftBukkit - Force the player's
++											// inventory to be saved
++			entityplayer.field_71135_a.func_147360_c("You logged in from another location");
++		}
++
++		// Instead of kicking then returning, we need to store the kick reason
++		// in the event, check with plugins to see if it's ok, and THEN kick
++		// depending on the outcome.
++		SocketAddress socketaddress = loginlistener.field_147333_a.func_74430_c();
++
++		EntityPlayerMP entity = new EntityPlayerMP(field_72400_f, field_72400_f.field_71305_c[0], profile, new PlayerInteractionManager(field_72400_f.field_71305_c[0]));
++		Player player = entity.getBukkitEntity();
++		PlayerLoginEvent event = new PlayerLoginEvent(player, hostname, ((java.net.InetSocketAddress) socketaddress).getAddress());
++		if (this.func_152608_h().func_152702_a(profile) && !((UserListBansEntry) this.func_152608_h().func_152683_b(profile)).func_73682_e()) {
++			UserListBansEntry userlistbansentry = (UserListBansEntry) this.field_72401_g.func_152683_b(profile);
++			String s1 = "You are banned from this server!\nReason: " + userlistbansentry.func_73686_f();
++
++			if (userlistbansentry.func_73680_d() != null) {
++				s1 = s1 + "\nYour ban will be removed on " + field_72403_e.format(userlistbansentry.func_73680_d());
++			}
++
++			// return s1;
++			event.disallow(PlayerLoginEvent.Result.KICK_BANNED, s1);
++		} else if (!this.func_152607_e(profile)) {
++			// return "You are not white-listed on this server!";
++			event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, "You are not white-listed on this server!");
++		} else if (this.func_72363_f().func_152708_a(socketaddress) && !this.func_72363_f().func_152709_b(socketaddress).func_73682_e()) {
++			UserListIPBansEntry userlistipbansentry = this.field_72413_h.func_152709_b(socketaddress);
++			String s = "Your IP address is banned from this server!\nReason: " + userlistipbansentry.func_73686_f();
++
++			if (userlistipbansentry.func_73680_d() != null) {
++				s = s + "\nYour ban will be removed on " + field_72403_e.format(userlistipbansentry.func_73680_d());
++			}
++
++			// return s;
++			event.disallow(PlayerLoginEvent.Result.KICK_BANNED, s);
++		} else {
++			// return this.playerEntityList.size() >= this.maxPlayers &&
++			// !this.bypassesPlayerLimit(profile) ? "The server is full!" :
++			// null;
++			if (this.field_72404_b.size() >= this.field_72405_c && !this.func_183023_f(profile)) {
++				event.disallow(PlayerLoginEvent.Result.KICK_FULL, "The server is full");
++			}
++		}
++		
++		cserver.getPluginManager().callEvent(event);
++		if (event.getResult() != PlayerLoginEvent.Result.ALLOWED) {
++			loginlistener.func_147322_a(event.getKickMessage());
++			return null;
++		}
++		return entity;
+     }
+ 
+     public EntityPlayerMP func_148545_a(GameProfile p_148545_1_)
+@@ -495,54 +648,139 @@
  
      public EntityPlayerMP func_72368_a(EntityPlayerMP p_72368_1_, int p_72368_2_, boolean p_72368_3_)
      {
@@ -539,7 +653,7 @@
  
              if (blockpos1 != null)
              {
-@@ -583,7 +779,7 @@
+@@ -583,7 +821,7 @@
      {
          GameProfile gameprofile = p_187243_1_.func_146103_bH();
          int i = this.func_152596_g(gameprofile) ? this.field_72414_i.func_187452_a(gameprofile) : 0;
@@ -548,7 +662,7 @@
          i = this.field_72407_n ? 4 : i;
          this.func_187245_a(p_187243_1_, i);
      }
-@@ -1058,6 +1254,14 @@
+@@ -1058,6 +1296,14 @@
          }
      }
  

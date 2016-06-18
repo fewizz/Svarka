@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraftforge/fml/common/network/ByteBufUtils.java
++++ ../src-work/minecraft/net/minecraftforge/fml/common/network/ByteBufUtils.java
+@@ -216,7 +216,7 @@
+                 returnString.append('\t');
+                 for (j = i - 16; j < i; j++)
+                 {
+-                    if (buffer.getByte(j) < 0x20 || buffer.getByte(j) > 0x7F)
++                    if ((buffer.getByte(j) & 0xFF) < 0x20 || buffer.getByte(j) > (0x7F & 0xFF))
+                         returnString.append('.');
+                     else
+                         returnString.append((char) buffer.getByte(j));

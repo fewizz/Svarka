@@ -1,0 +1,20 @@
+--- ../src-base/minecraft/net/minecraftforge/client/model/obj/OBJModel.java
++++ ../src-work/minecraft/net/minecraftforge/client/model/obj/OBJModel.java
+@@ -223,7 +223,7 @@
+                 lineNum++;
+                 currentLine = objReader.readLine();
+                 if (currentLine == null) break;
+-                currentLine.trim();
++                currentLine = currentLine.trim();
+                 if (currentLine.isEmpty() || currentLine.startsWith("#")) continue;
+ 
+                 try
+@@ -499,7 +499,7 @@
+             {
+                 currentLine = mtlReader.readLine();
+                 if (currentLine == null) break;
+-                currentLine.trim();
++                currentLine = currentLine.trim();
+                 if (currentLine.isEmpty() || currentLine.startsWith("#")) continue;
+ 
+                 String[] fields = WHITE_SPACE.split(currentLine, 2);

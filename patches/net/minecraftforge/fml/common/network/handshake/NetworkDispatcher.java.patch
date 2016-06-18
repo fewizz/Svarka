@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraftforge/fml/common/network/handshake/NetworkDispatcher.java
++++ ../src-work/minecraft/net/minecraftforge/fml/common/network/handshake/NetworkDispatcher.java
+@@ -602,7 +602,7 @@
+             channel = preamble.func_150789_c(20);
+             part_count = preamble.readUnsignedByte();
+             int length = preamble.readInt();
+-            if (length <= 0 || length >= FMLProxyPacket.MAX_LENGTH)
++            if (length <= 0 || length >= (FMLProxyPacket.MAX_LENGTH & 0xFFFFFFFF))
+             {
+                 throw new IOException("The received FML MultiPart packet outside of valid length bounds, Max: " + FMLProxyPacket.MAX_LENGTH + ", Received: " + length);
+             }

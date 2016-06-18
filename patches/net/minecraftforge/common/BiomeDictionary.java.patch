@@ -1,0 +1,27 @@
+--- ../src-base/minecraft/net/minecraftforge/common/BiomeDictionary.java
++++ ../src-work/minecraft/net/minecraftforge/common/BiomeDictionary.java
+@@ -373,20 +373,20 @@
+             BiomeDictionary.registerBiomeType(biome, SNOWY);
+         }
+ 
+-        if (biome.field_76752_A != Blocks.field_150354_m && biome.func_185353_n() >= 1.0f && biome.func_76727_i() < 0.2f)
++        if (biome.field_76752_A.func_177230_c() != Blocks.field_150354_m && biome.func_185353_n() >= 1.0f && biome.func_76727_i() < 0.2f)
+         {
+             BiomeDictionary.registerBiomeType(biome, SAVANNA);
+         }
+ 
+-        if (biome.field_76752_A == Blocks.field_150354_m)
++        if (biome.field_76752_A.func_177230_c() == Blocks.field_150354_m)
+         {
+             BiomeDictionary.registerBiomeType(biome, SANDY);
+         }
+-        else if (biome.field_76752_A == Blocks.field_150391_bh)
++        else if (biome.field_76752_A.func_177230_c() == Blocks.field_150391_bh)
+         {
+             BiomeDictionary.registerBiomeType(biome, MUSHROOM);
+         }
+-        if (biome.field_76753_B == Blocks.field_150405_ch)
++        if (biome.field_76753_B.func_177230_c() == Blocks.field_150405_ch)
+         {
+             BiomeDictionary.registerBiomeType(biome, MESA);
+         }
