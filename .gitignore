@@ -15,3 +15,6 @@
 *.ipr
 *.iws
 .idea/
+
+# Other
+ForgeGradle-2.2-SNAPSHOT.jar

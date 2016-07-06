@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraftforge/fml/common/registry/FMLControlledNamespacedRegistry.java
 +++ ../src-work/minecraft/net/minecraftforge/fml/common/registry/FMLControlledNamespacedRegistry.java
-@@ -754,12 +754,12 @@
+@@ -773,12 +773,12 @@
      }
  
      @Override

@@ -1,14 +1,6 @@
 --- ../src-base/minecraft/net/minecraftforge/common/IMinecartCollisionHandler.java
 +++ ../src-work/minecraft/net/minecraftforge/common/IMinecartCollisionHandler.java
-@@ -38,7 +38,6 @@
-      * @return The collision box, cannot be null.
-      */
-     public AxisAlignedBB getMinecartCollisionBox(EntityMinecart cart);
--
-     /**
-      * This function replaces the function of the same name in EntityMinecart.
-      * It defines whether minecarts are solid to the player.
-@@ -47,4 +46,3 @@
+@@ -66,4 +66,3 @@
       */
      public AxisAlignedBB getBoundingBox(EntityMinecart cart);
  }

@@ -1,23 +1,6 @@
 --- ../src-base/minecraft/ibxm/ProTracker.java
 +++ ../src-work/minecraft/ibxm/ProTracker.java
-@@ -72,7 +72,7 @@
- 	
- 	private static int calculate_num_channels( byte[] module_header ) {
- 		int num_channels;
--		switch( ( module_header[ 1082 ] << 8 ) | module_header[ 1083 ] ) {
-+		switch( ( (module_header[ 1082 ] << 8) & 0xFF | module_header[ 1083 ]) & 0xFFFF ) {
- 			case 0x4b2e: /* M.K. */
- 			case 0x4b21: /* M!K! */
- 			case 0x542e: /* N.T. */
-@@ -203,7 +203,6 @@
- 		}
- 		return ( byte ) key;
- 	}
--
- 	private static int unsigned_short_be( byte[] buf, int offset ) {
- 		int value;
- 		value = ( buf[ offset ] & 0xFF ) << 8;
-@@ -231,4 +230,3 @@
+@@ -231,4 +231,3 @@
  		return string;
  	}
  }

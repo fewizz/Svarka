@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraftforge/fml/client/FMLFolderResourcePack.java
 +++ ../src-work/minecraft/net/minecraftforge/fml/client/FMLFolderResourcePack.java
-@@ -27,9 +27,9 @@
+@@ -46,9 +46,9 @@
      }
  
      @Override

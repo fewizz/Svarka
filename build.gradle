@@ -11,7 +11,8 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+        //classpath files('ForgeGradle-2.2-SNAPSHOT.jar')
+		classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
 	}
 }
 
@@ -19,7 +20,7 @@ apply plugin: 'java'
 apply plugin: 'net.minecraftforge.gradle.patcher'
 
 group = 'fewizz.svarka'
-version = '0.0.1'
+version = '0.0.2'
 outputJar.archiveName = 'svarka'
 
 afterEvaluate {
@@ -30,13 +31,27 @@ tasks.whenTaskAdded	{ task ->
 	if(task.name.equals("genSvarkaPatches")) {
 		task.addOriginalSource file('bukkit/src/main/java/')
 	}
+	if(task.name.equals("extractSvarkaRangemap")) {
+		task.addLibs configurations.compileClasspath
+	}
 }
 
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+	compileClasspath "junit:junit:4.12"
+	compileClasspath "commons-lang:commons-lang:2.6"
+	compileClasspath "org.avaje:ebean:2.7.3"
+	compileClasspath "com.googlecode.json-simple:json-simple:1.1"
+	compileClasspath "org.yaml:snakeyaml:1.9"
+}
 minecraft {
-    version = "1.9.4"
+    version = "1.10.2"
     mappings = 'snapshot_nodoc_20160518'
     workspaceDir = "projects"
-    versionJson = "forge/jsons/1.9.4-dev.json"
+    versionJson = "forge/jsons/1.10.2-dev.json"
     buildUserdev = false
     buildInstaller = false
 
@@ -74,8 +89,19 @@ minecraft {
     }
 }
 
+/*outputJar {
+    classifier = 'universal'
+
+    manifest.attributes([
+        "Main-Class": "net.minecraftforge.fml.relauncher.ServerLaunchWrapper",
+        "TweakClass": "net.minecraftforge.fml.common.launcher.FMLTweaker",
+        "Class-Path": getServerClasspath(file("forge/jsons/${minecraft.version}-rel.json"))
+    ])
+}
+//tasks.build.dependsOn outputJar*/
+
 processJson {
-    releaseJson = "forge/jsons/1.9.4-rel.json"
+    releaseJson = "forge/jsons/1.10.2-rel.json"
     addReplacements([
         "@minecraft_version@": project.minecraft.version,
         "@version@": project.version,
@@ -97,3 +123,25 @@ genGradleProjects {
 	addCompileDep "com.googlecode.json-simple:json-simple:1.1"
 	addCompileDep "org.yaml:snakeyaml:1.9"
 }
+
+/*import groovy.json.JsonSlurper;
+
+String getServerClasspath(File file)
+{
+    def node = new JsonSlurper().parse(file);
+    def out = new StringBuilder()
+    node.versionInfo.libraries.each { lib ->
+        if (lib.serverreq)
+        {
+            // group : artifact : version
+            def split = lib.name.split(':')
+            def group = split[0].replace('.', '/')
+            def artifact = split[1]
+            def version = split[2]
+            out += "libraries/$group/$artifact/$version/$artifact-${version}.jar "
+        }
+    }
+    out += "minecraft_server.${minecraft.version}.jar"
+
+    return out.toString();
+}*/

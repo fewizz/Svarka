@@ -1,28 +1,80 @@
 --- ../src-base/minecraft/net/minecraft/world/chunk/storage/ExtendedBlockStorage.java
 +++ ../src-work/minecraft/net/minecraft/world/chunk/storage/ExtendedBlockStorage.java
-@@ -26,6 +26,25 @@
-             this.field_76685_h = new NibbleArray();
-         }
-     }
+@@ -14,7 +14,7 @@
+     private final BlockStateContainer field_177488_d;
+     private NibbleArray field_76679_g;
+     private NibbleArray field_76685_h;
+-
 +    
-+    // CraftBukkit start
-+    public ExtendedBlockStorage(int y, boolean flag, char[] blockIds)
-+    {
-+    	this.field_76684_a = y;
-+    	field_177488_d = new BlockStateContainer();
-+    	for (int i = 0; i < blockIds.length; i++) {
-+    		int xx = i & 15;
-+    		int yy = (i >> 8) & 15;
-+    		int zz = (i >> 4) & 15;
-+    		field_177488_d.func_186013_a(xx, yy, zz, Block.field_176229_d.func_148745_a(blockIds[i]));
-+    	}
-+    	field_76679_g = new NibbleArray();
-+    	if (flag) {
-+    		field_76685_h = new NibbleArray();
-+    	}
-+    	func_76672_e();
-+    }
-+    // CraftBukkit end
- 
-     public IBlockState func_177485_a(int p_177485_1_, int p_177485_2_, int p_177485_3_)
+     public ExtendedBlockStorage(int p_i1997_1_, boolean p_i1997_2_)
      {
+         this.field_76684_a = p_i1997_1_;
+@@ -36,12 +36,14 @@
+     {
+         if (p_177484_4_ instanceof net.minecraftforge.common.property.IExtendedBlockState)
+             p_177484_4_ = ((net.minecraftforge.common.property.IExtendedBlockState) p_177484_4_).getClean();
+-        IBlockState iblockstate = this.func_177485_a(p_177484_1_, p_177484_2_, p_177484_3_);
+-        Block block = iblockstate.func_177230_c();
++        //IBlockState iblockstate = this.get(x, y, z);
++        int istID = field_177488_d.getID(p_177484_1_, p_177484_2_, p_177484_3_);
++        //Block block = iblockstate.getBlock();
+         Block block1 = p_177484_4_.func_177230_c();
+ 
+-        if (block != Blocks.field_150350_a)
++        if (istID > 0/*block != Blocks.AIR*/)
+         {
++        	Block block = field_177488_d.field_186022_c.func_186039_a(istID).func_177230_c();
+             --this.field_76682_b;
+ 
+             if (block.func_149653_t())
+@@ -100,29 +102,42 @@
+ 
+     public void func_76672_e()
+     {
+-        this.field_76682_b = 0;
+-        this.field_76683_c = 0;
++        int blockRefCount = 0;
++        int tickRefCount = 0;
+ 
+-        for (int i = 0; i < 16; ++i)
++        /*for (int i = 0; i < 16; ++i)
+         {
+             for (int j = 0; j < 16; ++j)
+             {
+                 for (int k = 0; k < 16; ++k)
+                 {
+-                    Block block = this.func_177485_a(i, j, k).func_177230_c();
++                    Block block = this.get(i, j, k).getBlock();
+ 
+-                    if (block != Blocks.field_150350_a)
++                    if (block != Blocks.AIR)
+                     {
+-                        ++this.field_76682_b;
++                        ++this.blockRefCount;
+ 
+-                        if (block.func_149653_t())
++                        if (block.getTickRandomly())
+                         {
+-                            ++this.field_76683_c;
++                            ++this.tickRefCount;
+                         }
+                     }
+                 }
+             }
++        }*/
++        for(int i = 0; i < 4096; i++) {
++        	int id = this.field_177488_d.field_186021_b[i];
++        	if(id > 0) {
++        		blockRefCount++;
++        		Block blck = this.field_177488_d.field_186022_c.func_186039_a(id).func_177230_c();
++        		if(blck.func_149653_t()) {
++        			tickRefCount++;
++        		}
++        	}
+         }
++        
++        this.field_76682_b = blockRefCount;
++        this.field_76683_c = tickRefCount;
+     }
+ 
+     public BlockStateContainer func_186049_g()

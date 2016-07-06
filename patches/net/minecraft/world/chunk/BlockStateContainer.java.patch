@@ -1,0 +1,169 @@
+--- ../src-base/minecraft/net/minecraft/world/chunk/BlockStateContainer.java
++++ ../src-work/minecraft/net/minecraft/world/chunk/BlockStateContainer.java
+@@ -5,22 +5,26 @@
+ import net.minecraft.block.state.IBlockState;
+ import net.minecraft.init.Blocks;
+ import net.minecraft.network.PacketBuffer;
+-import net.minecraft.util.BitArray;
+-import net.minecraft.util.math.MathHelper;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
+ 
++//import net.minecraft.util.BitArray;
++//import net.minecraft.util.math.MathHelper;
++import net.minecraftforge.fml.relauncher.Side;
++import net.minecraftforge.fml.relauncher.SideOnly;
++
+ public class BlockStateContainer implements IBlockStatePaletteResizer
+ {
+-    private static final IBlockStatePalette field_186023_d = new BlockStatePaletteRegistry();
++    //private static final IBlockStatePalette REGISTRY_BASED_PALETTE = new BlockStatePaletteRegistry();
+     protected static final IBlockState field_186020_a = Blocks.field_150350_a.func_176223_P();
+-    protected BitArray field_186021_b;
+-    protected IBlockStatePalette field_186022_c;
++    //protected BitArray storage;
++    public final char[] field_186021_b = new char[4096];
++    public final IBlockStatePalette field_186022_c = new BlockStatePaletteRegistry();;
+     private int field_186024_e;
+ 
+     public BlockStateContainer()
+     {
+-        this.func_186012_b(4);
++        this.func_186012_b(16);
+     }
+ 
+     private static int func_186011_b(int p_186011_0_, int p_186011_1_, int p_186011_2_)
+@@ -30,47 +34,50 @@
+ 
+     private void func_186012_b(int p_186012_1_)
+     {
+-        if (p_186012_1_ != this.field_186024_e)
++        /*if (bitsIn != this.bits)
+         {
+-            this.field_186024_e = p_186012_1_;
++            this.bits = bitsIn;
+ 
+-            if (this.field_186024_e <= 4)
++            if (this.bits <= 4)
+             {
+-                this.field_186024_e = 4;
+-                this.field_186022_c = new BlockStatePaletteLinear(this.field_186024_e, this);
++                this.bits = 4;
++                this.palette = new BlockStatePaletteLinear(this.bits, this);
+             }
+-            else if (this.field_186024_e <= 8)
++            else if (this.bits <= 8)
+             {
+-                this.field_186022_c = new BlockStatePaletteHashMap(this.field_186024_e, this);
++                this.palette = new BlockStatePaletteHashMap(this.bits, this);
+             }
+             else
+             {
+-                this.field_186022_c = field_186023_d;
+-                this.field_186024_e = MathHelper.func_151241_e(Block.field_176229_d.func_186804_a());
++                this.palette = REGISTRY_BASED_PALETTE;
++                this.bits = MathHelper.calculateLogBaseTwoDeBruijn(Block.BLOCK_STATE_IDS.size());
+             }
+ 
+-            this.field_186022_c.func_186041_a(field_186020_a);
+-            this.field_186021_b = new BitArray(this.field_186024_e, 4096);
+-        }
++            this.palette.idFor(AIR_BLOCK_STATE);
++            this.storage = new BitArray(this.bits, 4096);
++        }*/
++    	this.field_186024_e = p_186012_1_; // 16
++    	//REGISTRY_BASED_PALETTE;
++    	//this.storage = new BitArray(this.bits, 4096);
+     }
+ 
+     public int func_186008_a(int p_186008_1_, IBlockState p_186008_2_)
+     {
+-        BitArray bitarray = this.field_186021_b;
+-        IBlockStatePalette iblockstatepalette = this.field_186022_c;
+-        this.func_186012_b(p_186008_1_);
++        /*BitArray bitarray = this.storage;
++        IBlockStatePalette iblockstatepalette = this.palette;
++        this.setBits(p_186008_1_);
+ 
+-        for (int i = 0; i < bitarray.func_188144_b(); ++i)
++        for (int i = 0; i < bitarray.size(); ++i)
+         {
+-            IBlockState iblockstate = iblockstatepalette.func_186039_a(bitarray.func_188142_a(i));
++            IBlockState iblockstate = iblockstatepalette.getBlockState(bitarray.getAt(i));
+ 
+             if (iblockstate != null)
+             {
+-                this.func_186014_b(i, iblockstate);
++                this.set(i, iblockstate);
+             }
+         }
+ 
+-        return this.field_186022_c.func_186041_a(p_186008_2_);
++        return this.palette.idFor(state);*/ return 0;
+     }
+ 
+     public void func_186013_a(int p_186013_1_, int p_186013_2_, int p_186013_3_, IBlockState p_186013_4_)
+@@ -78,20 +85,29 @@
+         this.func_186014_b(func_186011_b(p_186013_1_, p_186013_2_, p_186013_3_), p_186013_4_);
+     }
+ 
+-    protected void func_186014_b(int p_186014_1_, IBlockState p_186014_2_)
++    public void func_186014_b(int p_186014_1_, IBlockState p_186014_2_)
+     {
+         int i = this.field_186022_c.func_186041_a(p_186014_2_);
+-        this.field_186021_b.func_188141_a(p_186014_1_, i);
++        //this.storage.setAt(index, i);
++        field_186021_b[p_186014_1_] = (char) i;
+     }
++    
++    public void set(int index, int id) {
++    	field_186021_b[index] = (char) id;
++    }
+ 
+     public IBlockState func_186016_a(int p_186016_1_, int p_186016_2_, int p_186016_3_)
+     {
+         return this.func_186015_a(func_186011_b(p_186016_1_, p_186016_2_, p_186016_3_));
+     }
++    
++    public int getID(int x, int y, int z) {
++    	return field_186021_b[func_186011_b(x, y, z)];
++    }
+ 
+     protected IBlockState func_186015_a(int p_186015_1_)
+     {
+-        IBlockState iblockstate = this.field_186022_c.func_186039_a(this.field_186021_b.func_188142_a(p_186015_1_));
++        IBlockState iblockstate = this.field_186022_c.func_186039_a(/*this.storage.getAt(index)*/ field_186021_b[p_186015_1_]);
+         return iblockstate == null ? field_186020_a : iblockstate;
+     }
+ 
+@@ -106,14 +122,20 @@
+         }
+ 
+         this.field_186022_c.func_186038_a(p_186010_1_);
+-        p_186010_1_.func_186873_b(this.field_186021_b.func_188143_a());
++        //buf.readLongArray(this.storage.getBackingLongArray());
++        for(int z = 0; z < 4096; z++) {
++        	field_186021_b[z] = p_186010_1_.readChar();
++        }
+     }
+ 
+     public void func_186009_b(PacketBuffer p_186009_1_)
+     {
+         p_186009_1_.writeByte(this.field_186024_e);
+         this.field_186022_c.func_186037_b(p_186009_1_);
+-        p_186009_1_.func_186865_a(this.field_186021_b.func_188143_a());
++        //buf.writeLongArray(this.storage.getBackingLongArray());
++        for(int z = 0; z < 4096; z++) {
++        	p_186009_1_.writeChar(field_186021_b[z]);
++        }
+     }
+ 
+     @Nullable
+@@ -160,6 +182,6 @@
+ 
+     public int func_186018_a()
+     {
+-        return 1 + this.field_186022_c.func_186040_a() + PacketBuffer.func_150790_a(this.field_186021_b.func_188144_b()) + this.field_186021_b.func_188143_a().length * 8;
++        return 1 + this.field_186022_c.func_186040_a() + PacketBuffer.func_150790_a(/*this.storage.size()*/ 4096) + /*this.storage.getBackingLongArray().length*/ 1024 * 8;
+     }
+ }

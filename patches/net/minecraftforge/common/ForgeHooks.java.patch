@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraftforge/common/ForgeHooks.java
 +++ ../src-work/minecraft/net/minecraftforge/common/ForgeHooks.java
-@@ -289,7 +289,7 @@
+@@ -307,7 +307,7 @@
                      return;
                  }
  
@@ -9,7 +9,7 @@
  
                  if (itemstack == null)
                  {
-@@ -335,7 +335,7 @@
+@@ -353,7 +353,7 @@
                      EntityMinecart entityminecart = (EntityMinecart)this.objectMouseOver.entityHit;
                      Item item;
  
@@ -18,7 +18,7 @@
                      {
                          case FURNACE:
                              item = Items.furnace_minecart;
-@@ -360,7 +360,7 @@
+@@ -378,7 +378,7 @@
                  }
                  else if (this.objectMouseOver.entityHit instanceof EntityBoat)
                  {
@@ -27,7 +27,7 @@
                  }
                  else if (this.objectMouseOver.entityHit instanceof EntityArmorStand)
                  {
-@@ -368,7 +368,7 @@
+@@ -386,7 +386,7 @@
                  }
                  else if (this.objectMouseOver.entityHit instanceof EntityEnderCrystal)
                  {
@@ -36,7 +36,7 @@
                  }
                  else
                  {
-@@ -380,7 +380,7 @@
+@@ -398,7 +398,7 @@
                      }
  
                      itemstack = new ItemStack(Items.spawn_egg);
@@ -45,7 +45,7 @@
                  }
              }
           */
-@@ -839,7 +839,7 @@
+@@ -850,7 +850,7 @@
      }
  
      /**

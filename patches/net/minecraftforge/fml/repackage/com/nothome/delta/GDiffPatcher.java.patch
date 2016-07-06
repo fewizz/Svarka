@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraftforge/fml/repackage/com/nothome/delta/GDiffPatcher.java
 +++ ../src-work/minecraft/net/minecraftforge/fml/repackage/com/nothome/delta/GDiffPatcher.java
-@@ -243,4 +243,3 @@
+@@ -237,4 +237,3 @@
          }
      }
  }

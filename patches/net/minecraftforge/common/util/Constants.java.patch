@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraftforge/common/util/Constants.java
 +++ ../src-work/minecraft/net/minecraftforge/common/util/Constants.java
-@@ -10,7 +10,7 @@
+@@ -29,7 +29,7 @@
       * NBT Tag type IDS, used when storing the nbt to disc, Should align with NBTBase.getId, 
       * table used in NBTBase.func_150283_g
       * 

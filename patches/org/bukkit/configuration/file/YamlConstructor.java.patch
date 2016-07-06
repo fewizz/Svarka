@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/org/bukkit/configuration/file/YamlConstructor.java
++++ ../src-work/minecraft/org/bukkit/configuration/file/YamlConstructor.java
+@@ -10,6 +10,8 @@
+ 
+ import org.bukkit.configuration.serialization.ConfigurationSerialization;
+ 
++import org.yaml.snakeyaml.constructor.SafeConstructor.ConstructYamlMap;
++
+ public class YamlConstructor extends SafeConstructor {
+ 
+     public YamlConstructor() {
