@@ -1,7 +1,0 @@
---- ../src-base/minecraft/net/minecraftforge/common/IMinecartCollisionHandler.java
-+++ ../src-work/minecraft/net/minecraftforge/common/IMinecartCollisionHandler.java
-@@ -66,4 +66,3 @@
-      */
-     public AxisAlignedBB getBoundingBox(EntityMinecart cart);
- }
--

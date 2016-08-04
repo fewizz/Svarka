@@ -1,7 +1,0 @@
---- ../src-base/minecraft/net/minecraftforge/common/ForgeVersion.java
-+++ ../src-work/minecraft/net/minecraftforge/common/ForgeVersion.java
-@@ -323,4 +323,3 @@
-         return ret == null ? PENDING_CHECK : ret;
-     }
- }
--
