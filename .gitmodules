@@ -2,6 +2,3 @@
 	path = forge
 	url = https://github.com/MinecraftForge/MinecraftForge.git
 	branch = 1.10.x
-[submodule "bukkit"]
-	path = bukkit
-	url = https://hub.spigotmc.org/stash/scm/spigot/bukkit.git

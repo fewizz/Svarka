@@ -11,7 +11,7 @@ buildscript {
         }
     }
     dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+		classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'//files('SForgeGradle-2.2-SNAPSHOT.jar')//'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
 	}
 }
 
@@ -22,14 +22,22 @@ apply plugin: 'net.minecraftforge.gradle.launch4j'
 group = 'fewizz.svarka'
 version = '0.0.2'
 
-afterEvaluate {
-	patchSvarkaJar.addInject file('bukkit/src/main/java/')
-}
+//afterEvaluate {
+//	patchSvarkaJar.addInject file('bukkit/src/main/java/')
+//}
 
-tasks.whenTaskAdded	{ task ->
-	if(task.name.equals("genSvarkaPatches")) {
-		task.addOriginalSource file('bukkit/src/main/java/')
-	}
+//tasks.whenTaskAdded	{ task ->
+//	if(task.name.equals("genSvarkaPatches")) {
+//		task.addOriginalSource file('bukkit/src/main/java/')
+//	}
+//}
+
+dependencies {
+	compile 'commons-lang:commons-lang:2.6'
+	compile 'org.avaje:ebean:2.8.1'
+	compile 'com.googlecode.json-simple:json-simple:1.1'
+	compile 'org.yaml:snakeyaml:1.15'
+	compile 'com.google.guava:guava:17.0'
 }
 
 tasks.withType(JavaCompile) {
@@ -63,6 +71,8 @@ minecraft {
             genMcpPatches = false
             applyMcpPatches = false
             s2sKeepImports = true
+			//dchImports = true
+			//ignoreWhiteSpaces = false
             with common
         }
 		
@@ -74,6 +84,8 @@ minecraft {
             genMcpPatches = false
             applyMcpPatches = false
             s2sKeepImports = true
+			//dchImports = true
+			//ignoreWhiteSpaces = false
             with common
 		}
     }
@@ -165,6 +177,5 @@ String getServerClasspath(File file) {
         }
     }
     out += "minecraft_server.${minecraft.version}.jar"
-
     return out.toString();
 }
