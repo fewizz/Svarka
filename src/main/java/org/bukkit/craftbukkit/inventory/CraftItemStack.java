@@ -263,13 +263,13 @@ public final class CraftItemStack extends ItemStack
     static Map<Enchantment, Integer> getEnchantments(final net.minecraft.item.ItemStack item) {
         final NBTTagList list = (item != null && item.isItemEnchanted()) ? item.getEnchantmentTagList() : null;
         if (list == null || list.tagCount() == 0) {
-            return (Map<Enchantment, Integer>)ImmutableMap.of();
+            return /*(Map<Enchantment, Integer>)*/ImmutableMap.of();
         }
-        final ImmutableMap.Builder<Enchantment, Integer> result = (ImmutableMap.Builder<Enchantment, Integer>)ImmutableMap.builder();
+        final ImmutableMap.Builder<Enchantment, Integer> result = /*(ImmutableMap.Builder<Enchantment, Integer>)*/ImmutableMap.builder();
         for (int i = 0; i < list.tagCount(); ++i) {
             final int id = 0xFFFF & list.getCompoundTagAt(i).getShort(CraftMetaItem.ENCHANTMENTS_ID.NBT);
             final int level = 0xFFFF & list.getCompoundTagAt(i).getShort(CraftMetaItem.ENCHANTMENTS_LVL.NBT);
-            result.put((Object)Enchantment.getById(id), (Object)level);
+            result.put(/*(Object)*/Enchantment.getById(id), /*(Object)*/level);
         }
         return (Map<Enchantment, Integer>)result.build();
     }

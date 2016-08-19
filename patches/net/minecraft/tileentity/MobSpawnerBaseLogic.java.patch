@@ -1,0 +1,20 @@
+--- ../src-base/minecraft/net/minecraft/tileentity/MobSpawnerBaseLogic.java
++++ ../src-work/minecraft/net/minecraft/tileentity/MobSpawnerBaseLogic.java
+@@ -20,7 +20,7 @@
+ 
+ public abstract class MobSpawnerBaseLogic
+ {
+-    private int field_98286_b = 20;
++    public int field_98286_b = 20;
+     private final List<WeightedSpawnerEntity> field_98285_e = Lists.<WeightedSpawnerEntity>newArrayList();
+     private WeightedSpawnerEntity field_98282_f = new WeightedSpawnerEntity();
+     private double field_98287_c;
+@@ -33,7 +33,7 @@
+     private int field_98289_l = 16;
+     private int field_98290_m = 4;
+ 
+-    private String func_98276_e()
++    public String func_98276_e()
+     {
+         return this.field_98282_f.func_185277_b().func_74779_i("id");
+     }

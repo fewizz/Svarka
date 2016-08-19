@@ -1,0 +1,22 @@
+--- ../src-base/minecraft/net/minecraftforge/common/DimensionManager.java
++++ ../src-work/minecraft/net/minecraftforge/common/DimensionManager.java
+@@ -48,6 +48,7 @@
+ import net.minecraft.world.WorldServerMulti;
+ import net.minecraft.world.storage.ISaveHandler;
+ import net.minecraft.world.storage.SaveHandler;
++import net.minecraft.world.storage.WorldInfo;
+ import net.minecraftforge.event.world.WorldEvent;
+ import net.minecraftforge.fml.common.FMLCommonHandler;
+ import net.minecraftforge.fml.common.FMLLog;
+@@ -225,9 +226,10 @@
+         }
+         MinecraftServer mcServer = overworld.func_73046_m();
+         ISaveHandler savehandler = overworld.func_72860_G();
++        WorldInfo info = savehandler.func_75757_d(); // Svarka
+         //WorldSettings worldSettings = new WorldSettings(overworld.getWorldInfo());
+ 
+-        WorldServer world = (dim == 0 ? overworld : (WorldServer)(new WorldServerMulti(mcServer, savehandler, dim, overworld, mcServer.field_71304_b).func_175643_b()));
++        WorldServer world = (dim == 0 ? overworld : (WorldServer)(new WorldServerMulti(mcServer, savehandler, dim, overworld, mcServer.field_71304_b, info, org.bukkit.World.Environment.getEnvironment(dim), MinecraftServer.getServerInst().server.getGenerator(String.valueOf(dim))).func_175643_b()));
+         world.func_72954_a(new ServerWorldEventHandler(mcServer, world));
+         MinecraftForge.EVENT_BUS.post(new WorldEvent.Load(world));
+         if (!mcServer.func_71264_H())

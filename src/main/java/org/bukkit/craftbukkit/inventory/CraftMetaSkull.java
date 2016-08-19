@@ -15,7 +15,7 @@ import com.mojang.authlib.GameProfile;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.inventory.meta.SkullMeta;
 
-@DelegateDeserialization(SerializableMeta.class)
+//@DelegateDeserialization(SerializableMeta.class)
 class CraftMetaSkull extends CraftMetaItem implements SkullMeta
 {
     static final ItemMetaKey SKULL_PROFILE;
@@ -161,7 +161,7 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta
     ImmutableMap.Builder<String, Object> serialize(final ImmutableMap.Builder<String, Object> builder) {
         super.serialize(builder);
         if (this.hasOwner()) {
-            return (ImmutableMap.Builder<String, Object>)builder.put((Object)CraftMetaSkull.SKULL_OWNER.BUKKIT, (Object)this.profile.getName());
+            return (ImmutableMap.Builder<String, Object>)builder.put(CraftMetaSkull.SKULL_OWNER.BUKKIT, this.profile.getName());
         }
         return builder;
     }

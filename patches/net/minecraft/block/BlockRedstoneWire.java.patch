@@ -1,0 +1,37 @@
+--- ../src-base/minecraft/net/minecraft/block/BlockRedstoneWire.java
++++ ../src-work/minecraft/net/minecraft/block/BlockRedstoneWire.java
+@@ -30,7 +30,10 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.event.block.BlockRedstoneEvent; // CraftBukkit
+ 
++import org.bukkit.event.block.BlockRedstoneEvent;
++
+ public class BlockRedstoneWire extends Block
+ {
+     public static final PropertyEnum<BlockRedstoneWire.EnumAttachPosition> field_176348_a = PropertyEnum.<BlockRedstoneWire.EnumAttachPosition>func_177709_a("north", BlockRedstoneWire.EnumAttachPosition.class);
+@@ -217,6 +220,14 @@
+         {
+             j = k;
+         }
++        // CraftBukkit start
++        if (i != j) {
++        	BlockRedstoneEvent event = new BlockRedstoneEvent(p_176345_1_.getWorld().getBlockAt(p_176345_2_.func_177958_n(), p_176345_2_.func_177956_o(),p_176345_2_.func_177952_p()), i, j);
++        	p_176345_1_.getServer().getPluginManager().callEvent(event);
++        	
++        	j = event.getNewCurrent();
++        }
++        // CraftBukkit end
+ 
+         if (i != j)
+         {
+@@ -317,7 +328,7 @@
+         }
+     }
+ 
+-    private int func_176342_a(World p_176342_1_, BlockPos p_176342_2_, int p_176342_3_)
++    public int func_176342_a(World p_176342_1_, BlockPos p_176342_2_, int p_176342_3_)
+     {
+         if (p_176342_1_.func_180495_p(p_176342_2_).func_177230_c() != this)
+         {

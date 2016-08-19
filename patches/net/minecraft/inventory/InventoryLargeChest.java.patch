@@ -1,0 +1,74 @@
+--- ../src-base/minecraft/net/minecraft/inventory/InventoryLargeChest.java
++++ ../src-work/minecraft/net/minecraft/inventory/InventoryLargeChest.java
+@@ -9,12 +9,68 @@
+ import net.minecraft.util.text.TextComponentTranslation;
+ import net.minecraft.world.ILockableContainer;
+ import net.minecraft.world.LockCode;
++import ru.svarka.inventory.ICBInventory;
++import ru.svarka.inventory.ICBLockableContainer;
+ 
+-public class InventoryLargeChest implements ILockableContainer
++import java.util.List;
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.entity.HumanEntity;
++
++//CraftBukkit start
++import java.util.List;
++import org.bukkit.Location;
++
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.entity.HumanEntity;
++// CraftBukkit end
++
++public class InventoryLargeChest implements ICBLockableContainer
+ {
+     private final String field_70479_a;
+-    private final ILockableContainer field_70477_b;
+-    private final ILockableContainer field_70478_c;
++    public final ILockableContainer field_70477_b;
++    public final ILockableContainer field_70478_c;
++    // CraftBukkit start - add fields and methods
++    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    
++    public ItemStack[] getContents() {
++    	ItemStack[] result = new ItemStack[this.func_70302_i_()];
++    	for (int i = 0; i < result.length; i++) {
++    		result[i] = this.func_70301_a(i);
++    	}
++    	return result;
++    }
++    
++    public void onOpen(CraftHumanEntity who) {
++    	((ICBInventory) this.field_70477_b).onOpen(who);
++    	((ICBInventory) this.field_70478_c).onOpen(who);
++    	transaction.add(who);
++    }
++    	
++    public void onClose(CraftHumanEntity who) {
++    	((ICBInventory) this.field_70477_b).onClose(who);
++    	((ICBInventory) this.field_70478_c).onClose(who);
++    	transaction.remove(who);
++    }
++    	
++    public List<HumanEntity> getViewers() {
++    	return transaction;
++    }
++    
++    public org.bukkit.inventory.InventoryHolder getOwner() {
++    	return null; // This method won't be called since CraftInventoryDoubleChest doesn't defer to here
++    }
++    
++    public void setMaxStackSize(int size) {
++    	((ICBInventory) this.field_70477_b).setMaxStackSize(size);
++    	((ICBInventory) this.field_70478_c).setMaxStackSize(size);
++    }
++    
++    @Override
++    public Location getLocation() {
++    	return ((ICBInventory) field_70477_b).getLocation(); // TODO: right?
++    }
++    // CraftBukkit end
+ 
+     public InventoryLargeChest(String p_i45905_1_, ILockableContainer p_i45905_2_, ILockableContainer p_i45905_3_)
+     {

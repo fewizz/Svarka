@@ -158,9 +158,9 @@ public class CraftAreaEffectCloud extends CraftEntity implements AreaEffectCloud
     
     @Override
     public List<PotionEffect> getCustomEffects() {
-        final ImmutableList.Builder<PotionEffect> builder = (ImmutableList.Builder<PotionEffect>)ImmutableList.builder();
+        final ImmutableList.Builder<PotionEffect> builder = /*(ImmutableList.Builder<PotionEffect>)*/ImmutableList.builder();
         for (final net.minecraft.potion.PotionEffect effect : this.getHandle().effects) {
-            builder.add((Object)CraftPotionUtil.toBukkit(effect));
+            builder.add(/*(Object)*/CraftPotionUtil.toBukkit(effect));
         }
         return (List<PotionEffect>)builder.build();
     }

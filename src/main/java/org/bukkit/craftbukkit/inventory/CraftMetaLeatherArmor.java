@@ -14,7 +14,7 @@ import org.bukkit.Color;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
-@DelegateDeserialization(SerializableMeta.class)
+//@DelegateDeserialization(SerializableMeta.class)
 class CraftMetaLeatherArmor extends CraftMetaItem implements LeatherArmorMeta
 {
     static final ItemMetaKey COLOR;
@@ -106,7 +106,7 @@ class CraftMetaLeatherArmor extends CraftMetaItem implements LeatherArmorMeta
     ImmutableMap.Builder<String, Object> serialize(final ImmutableMap.Builder<String, Object> builder) {
         super.serialize(builder);
         if (this.hasColor()) {
-            builder.put((Object)CraftMetaLeatherArmor.COLOR.BUKKIT, (Object)this.color);
+            builder.put(CraftMetaLeatherArmor.COLOR.BUKKIT, this.color);
         }
         return builder;
     }

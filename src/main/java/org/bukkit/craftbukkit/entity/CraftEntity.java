@@ -658,22 +658,22 @@ public abstract class CraftEntity implements Entity
     
     @Override
     public void setMetadata(final String metadataKey, final MetadataValue newMetadataValue) {
-        ((MetadataStoreBase<CraftEntity>)this.server.getEntityMetadata()).setMetadata(this, metadataKey, newMetadataValue);
+        (/*(MetadataStoreBase<CraftEntity>)*/this.server.getEntityMetadata()).setMetadata(this, metadataKey, newMetadataValue);
     }
     
     @Override
     public List<MetadataValue> getMetadata(final String metadataKey) {
-        return ((MetadataStoreBase<CraftEntity>)this.server.getEntityMetadata()).getMetadata(this, metadataKey);
+        return (/*(MetadataStoreBase<CraftEntity>)*/this.server.getEntityMetadata()).getMetadata(this, metadataKey);
     }
     
     @Override
     public boolean hasMetadata(final String metadataKey) {
-        return ((MetadataStoreBase<CraftEntity>)this.server.getEntityMetadata()).hasMetadata(this, metadataKey);
+        return (/*(MetadataStoreBase<CraftEntity>)*/this.server.getEntityMetadata()).hasMetadata(this, metadataKey);
     }
     
     @Override
     public void removeMetadata(final String metadataKey, final Plugin owningPlugin) {
-        ((MetadataStoreBase<CraftEntity>)this.server.getEntityMetadata()).removeMetadata(this, metadataKey, owningPlugin);
+        (/*(MetadataStoreBase<CraftEntity>)*/this.server.getEntityMetadata()).removeMetadata(this, metadataKey, owningPlugin);
     }
     
     @Override

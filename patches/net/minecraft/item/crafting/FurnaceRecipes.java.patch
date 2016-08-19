@@ -1,0 +1,55 @@
+--- ../src-base/minecraft/net/minecraft/item/crafting/FurnaceRecipes.java
++++ ../src-work/minecraft/net/minecraft/item/crafting/FurnaceRecipes.java
+@@ -16,15 +16,18 @@
+ public class FurnaceRecipes
+ {
+     private static final FurnaceRecipes field_77606_a = new FurnaceRecipes();
+-    private final Map<ItemStack, ItemStack> field_77604_b = Maps.<ItemStack, ItemStack>newHashMap();
++    public Map<ItemStack, ItemStack> field_77604_b = Maps.<ItemStack, ItemStack>newHashMap(); //CB - final -> non-final
+     private final Map<ItemStack, Float> field_77605_c = Maps.<ItemStack, Float>newHashMap();
++    public Map<ItemStack,ItemStack> customRecipes = Maps.newHashMap(); // CraftBukkit - add field
++    public int customRecipesSize = 0;
++    public Map<ItemStack,Float> customExperience = Maps.newHashMap(); // CraftBukkit - add field
+ 
+     public static FurnaceRecipes func_77602_a()
+     {
+         return field_77606_a;
+     }
+ 
+-    private FurnaceRecipes()
++    public FurnaceRecipes()
+     {
+         this.func_151393_a(Blocks.field_150366_p, new ItemStack(Items.field_151042_j), 0.7F);
+         this.func_151393_a(Blocks.field_150352_o, new ItemStack(Items.field_151043_k), 1.0F);
+@@ -61,6 +64,13 @@
+         this.func_151393_a(Blocks.field_150369_x, new ItemStack(Items.field_151100_aR, 1, EnumDyeColor.BLUE.func_176767_b()), 0.2F);
+         this.func_151393_a(Blocks.field_150449_bY, new ItemStack(Items.field_151128_bU), 0.2F);
+     }
++    
++    // CraftBukkit start - add method
++    public void registerRecipe(ItemStack itemstack, ItemStack itemstack1, float f) {
++    	this.customRecipes.put(itemstack, itemstack1);
++    	customRecipesSize++;
++    }
++    // CraftBukkit end
+ 
+     public void func_151393_a(Block p_151393_1_, ItemStack p_151393_2_, float p_151393_3_)
+     {
+@@ -82,6 +92,17 @@
+     @Nullable
+     public ItemStack func_151395_a(ItemStack p_151395_1_)
+     {
++    	// CB start
++    	if(customRecipesSize > 0)
++    		for (Entry<ItemStack, ItemStack> entry : this.customRecipes.entrySet())
++    		{
++    			if (this.func_151397_a(p_151395_1_, (ItemStack)entry.getKey()))
++    			{
++    				return (ItemStack)entry.getValue();
++    			}
++    		}
++    	// CB end
++    	
+         for (Entry<ItemStack, ItemStack> entry : this.field_77604_b.entrySet())
+         {
+             if (this.func_151397_a(p_151395_1_, (ItemStack)entry.getKey()))

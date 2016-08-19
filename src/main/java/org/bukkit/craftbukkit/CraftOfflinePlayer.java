@@ -38,7 +38,7 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
     protected CraftOfflinePlayer(final CraftServer server, final GameProfile profile) {
         this.server = server;
         this.profile = profile;
-        this.storage = (SaveHandler)server.console.worlds.get(0).getSaveHandler();
+        this.storage = (SaveHandler)server.console/*worlds.get(0)*/.worldServers[0].getSaveHandler();
     }
     
     public GameProfile getProfile() {
@@ -135,9 +135,9 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
     
     public static OfflinePlayer deserialize(final Map<String, Object> args) {
         if (args.get("name") != null) {
-            return Bukkit.getServer().getOfflinePlayer(args.get("name"));
+            return Bukkit.getServer().getOfflinePlayer((String) args.get("name"));
         }
-        return Bukkit.getServer().getOfflinePlayer(UUID.fromString(args.get("UUID")));
+        return Bukkit.getServer().getOfflinePlayer(UUID.fromString((String) args.get("UUID")));
     }
     
     @Override

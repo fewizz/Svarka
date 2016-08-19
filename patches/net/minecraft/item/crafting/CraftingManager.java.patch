@@ -1,0 +1,71 @@
+--- ../src-base/minecraft/net/minecraft/item/crafting/CraftingManager.java
++++ ../src-work/minecraft/net/minecraft/item/crafting/CraftingManager.java
+@@ -7,6 +7,9 @@
+ import java.util.List;
+ import java.util.Map;
+ import javax.annotation.Nullable;
++
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++
+ import net.minecraft.block.Block;
+ import net.minecraft.block.BlockPlanks;
+ import net.minecraft.block.BlockStone;
+@@ -20,18 +23,23 @@
+ import net.minecraft.item.Item;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.world.World;
++import ru.svarka.crafting.ICBRecipe;
+ 
+ public class CraftingManager
+ {
+     private static final CraftingManager field_77598_a = new CraftingManager();
+-    private final List<IRecipe> field_77597_b = Lists.<IRecipe>newArrayList();
++    public List<IRecipe> field_77597_b = Lists.<IRecipe>newArrayList(); //CB - final -> non-final
++    // CraftBukkit start
++    public ICBRecipe lastRecipe;
++    public org.bukkit.inventory.InventoryView lastCraftView;
++    // CraftBukkit end
+ 
+     public static CraftingManager func_77594_a()
+     {
+         return field_77598_a;
+     }
+ 
+-    private CraftingManager()
++    public CraftingManager()
+     {
+         (new RecipesTools()).func_77586_a(this);
+         (new RecipesWeapons()).func_77583_a(this);
+@@ -191,7 +199,10 @@
+         this.func_92103_a(new ItemStack(Items.field_179565_cj, 1), new Object[] {"///", " / ", "/_/", '/', Items.field_151055_y, '_', new ItemStack(Blocks.field_150333_U, 1, BlockStoneSlab.EnumType.STONE.func_176624_a())});
+         this.func_92103_a(new ItemStack(Blocks.field_185764_cQ, 4), new Object[] {"/", "#", '/', Items.field_151072_bj, '#', Items.field_185162_cT});
+         this.func_92103_a(new ItemStack(Blocks.field_189880_di, 1), new Object[] {"XXX", "XXX", "XXX", 'X', new ItemStack(Items.field_151100_aR, 1, EnumDyeColor.WHITE.func_176767_b())});
+-        Collections.sort(this.field_77597_b, new Comparator<IRecipe>()
++        //Collections.sort(this.recipes, new Comparator<IRecipe>()
++    }
++    public void sort() {
++    	Collections.sort(this.field_77597_b, new Comparator<IRecipe>()
+         {
+             public int compare(IRecipe p_compare_1_, IRecipe p_compare_2_)
+             {
+@@ -313,10 +324,19 @@
+         {
+             if (irecipe.func_77569_a(p_82787_1_, p_82787_2_))
+             {
+-                return irecipe.func_77572_b(p_82787_1_);
++            	if(!(irecipe instanceof ICBRecipe)) {
++            		continue;
++            	}
++                //return irecipe.getCraftingResult(craftMatrix);
++            	// CraftBukkit start - INVENTORY_PRE_CRAFT event
++            	p_82787_1_.currentRecipe = (ICBRecipe) irecipe;
++            	ItemStack result = irecipe.func_77572_b(p_82787_1_);
++            	return CraftEventFactory.callPreCraftEvent(p_82787_1_, result, lastCraftView, false);
++            	// CraftBukkit end
+             }
+         }
+ 
++        p_82787_1_.currentRecipe = null;
+         return null;
+     }
+ 

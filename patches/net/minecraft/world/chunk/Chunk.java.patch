@@ -1,0 +1,162 @@
+--- ../src-base/minecraft/net/minecraft/world/chunk/Chunk.java
++++ ../src-work/minecraft/net/minecraft/world/chunk/Chunk.java
+@@ -39,7 +39,11 @@
+ import net.minecraftforge.fml.relauncher.SideOnly;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import com.google.common.collect.Lists; // CraftBukkit
++import org.bukkit.Server; // CraftBukkit
+ 
++import org.bukkit.Server;
++
+ public class Chunk
+ {
+     private static final Logger field_150817_t = LogManager.getLogger();
+@@ -49,13 +53,13 @@
+     private final int[] field_76638_b;
+     private final boolean[] field_76639_c;
+     private boolean field_76636_d;
+-    private final World field_76637_e;
+-    private final int[] field_76634_f;
++    public final World field_76637_e;
++    public final int[] field_76634_f;
+     public final int field_76635_g;
+     public final int field_76647_h;
+     private boolean field_76650_s;
+-    private final Map<BlockPos, TileEntity> field_150816_i;
+-    private final ClassInheritanceMultiMap<Entity>[] field_76645_j;
++    public final Map<BlockPos, TileEntity> field_150816_i;
++    public final ClassInheritanceMultiMap<Entity>[] field_76645_j;
+     private boolean field_76646_k;
+     private boolean field_150814_l;
+     private boolean field_150815_m;
+@@ -67,6 +71,34 @@
+     private int field_76649_t;
+     private ConcurrentLinkedQueue<BlockPos> field_177447_w;
+     public boolean field_189550_d;
++    // CraftBukkit start - Neighbor loaded cache for chunk lighting and entity ticking
++    private int neighbors = 0x1 << 12;
++    public long chunkKey;
++    
++    public boolean areNeighborsLoaded(final int radius) {
++    	switch (radius) {
++    		case 2:
++    			return this.neighbors == Integer.MAX_VALUE >> 6;
++			case 1:
++				final int mask =
++				//       x        z   offset          x        z   offset          x         z   offset
++				(0x1 << (1 * 5 +  1 + 12)) | (0x1 << (0 * 5 +  1 + 12)) | (0x1 << (-1 * 5 +  1 + 12)) |
++				(0x1 << (1 * 5 +  0 + 12)) | (0x1 << (0 * 5 +  0 + 12)) | (0x1 << (-1 * 5 +  0 + 12)) |
++				(0x1 << (1 * 5 + -1 + 12)) | (0x1 << (0 * 5 + -1 + 12)) | (0x1 << (-1 * 5 + -1 + 12));
++				return (this.neighbors & mask) == mask;
++			default:
++				throw new UnsupportedOperationException(String.valueOf(radius));
++            }
++    }
++    
++    public void setNeighborLoaded(final int x, final int z) {
++    	this.neighbors |= 0x1 << (x * 5 + 12 + z);
++    }
++    
++    public void setNeighborUnloaded(final int x, final int z) {
++    	this.neighbors &= ~(0x1 << (x * 5 + 12 + z));
++    }
++    // CraftBukkit end
+ 
+     public Chunk(World p_i1995_1_, int p_i1995_2_, int p_i1995_3_)
+     {
+@@ -90,7 +122,13 @@
+ 
+         Arrays.fill((int[])this.field_76638_b, (int) - 999);
+         Arrays.fill(this.field_76651_r, (byte) - 1);
++        // CraftBukkit start
++        this.bukkitChunk = new org.bukkit.craftbukkit.CraftChunk(this);
++        this.chunkKey = ChunkPos.func_77272_a(this.field_76635_g, this.field_76647_h);
+     }
++    public org.bukkit.Chunk bukkitChunk;
++    public boolean mustSave;
++    // CraftBukkit end
+ 
+     public Chunk(World p_i45645_1_, ChunkPrimer p_i45645_2_, int p_i45645_3_, int p_i45645_4_)
+     {
+@@ -951,36 +989,67 @@
+     {
+         return false;
+     }
++    
++    public void func_186030_a(IChunkProvider p_186030_1_, IChunkGenerator p_186030_2_) {
++    	this.loadNearby(p_186030_1_, p_186030_2_, true);
++    }
+ 
+-    public void func_186030_a(IChunkProvider p_186030_1_, IChunkGenerator p_186030_2_)
++    public void loadNearby(IChunkProvider chunkProvider, IChunkGenerator chunkGenrator, boolean newChunk)
+     {
+-        Chunk chunk = p_186030_1_.func_186026_b(this.field_76635_g, this.field_76647_h - 1);
+-        Chunk chunk1 = p_186030_1_.func_186026_b(this.field_76635_g + 1, this.field_76647_h);
+-        Chunk chunk2 = p_186030_1_.func_186026_b(this.field_76635_g, this.field_76647_h + 1);
+-        Chunk chunk3 = p_186030_1_.func_186026_b(this.field_76635_g - 1, this.field_76647_h);
++    	Server server = field_76637_e.getServer();
++    	if (server != null) {
++    		/*
++    		 * If it's a new world, the first few chunks are generated inside
++    		 * the World constructor. We can't reliably alter that, so we have
++    		 * no way of creating a CraftWorld/CraftServer at that point.
++    		 */
++    		server.getPluginManager().callEvent(new org.bukkit.event.world.ChunkLoadEvent(bukkitChunk, newChunk));
++    	}
++    	Chunk[] nChunks = new Chunk[8];
++    	// Update neighbor counts
++    	int i = 0;
++    	for (int x = -1; x < 2; x++) {
++    		for (int z = -1; z < 2; z++) {
++    			if (x == 0 && z == 0) {
++    				continue;
++    			}
++    			Chunk neighbor = func_177412_p().getChunkIfLoaded(field_76635_g + x, field_76647_h + z);
++    			if (neighbor != null) {
++    				nChunks[i] = neighbor;
++    				neighbor.setNeighborLoaded(-x, -z);
++    				setNeighborLoaded(x, z);
++    			}
++    			i++;
++    		}
++    	}
++    	// CraftBukkit end
++        Chunk chunk = nChunks[1] == null ? chunkProvider.func_186026_b(this.field_76635_g, this.field_76647_h - 1) : nChunks[1];
++        Chunk chunk1 = nChunks[3] == null ? chunkProvider.func_186026_b(this.field_76635_g + 1, this.field_76647_h) : nChunks[3];
++        Chunk chunk2 = nChunks[4] == null ? chunkProvider.func_186026_b(this.field_76635_g, this.field_76647_h + 1) : nChunks[4];
++        Chunk chunk3 = nChunks[6] == null ? chunkProvider.func_186026_b(this.field_76635_g - 1, this.field_76647_h) : nChunks[6];
+ 
+-        if (chunk1 != null && chunk2 != null && p_186030_1_.func_186026_b(this.field_76635_g + 1, this.field_76647_h + 1) != null)
++        if (chunk1 != null && chunk2 != null && chunkProvider.func_186026_b(this.field_76635_g + 1, this.field_76647_h + 1) != null)
+         {
+-            this.func_186034_a(p_186030_2_);
++            this.func_186034_a(chunkGenrator);
+         }
+ 
+-        if (chunk3 != null && chunk2 != null && p_186030_1_.func_186026_b(this.field_76635_g - 1, this.field_76647_h + 1) != null)
++        if (chunk3 != null && chunk2 != null && chunkProvider.func_186026_b(this.field_76635_g - 1, this.field_76647_h + 1) != null)
+         {
+-            chunk3.func_186034_a(p_186030_2_);
++            chunk3.func_186034_a(chunkGenrator);
+         }
+ 
+-        if (chunk != null && chunk1 != null && p_186030_1_.func_186026_b(this.field_76635_g + 1, this.field_76647_h - 1) != null)
++        if (chunk != null && chunk1 != null && chunkProvider.func_186026_b(this.field_76635_g + 1, this.field_76647_h - 1) != null)
+         {
+-            chunk.func_186034_a(p_186030_2_);
++            chunk.func_186034_a(chunkGenrator);
+         }
+ 
+         if (chunk != null && chunk3 != null)
+         {
+-            Chunk chunk4 = p_186030_1_.func_186026_b(this.field_76635_g - 1, this.field_76647_h - 1);
++            Chunk chunk4 = chunkProvider.func_186026_b(this.field_76635_g - 1, this.field_76647_h - 1);
+ 
+             if (chunk4 != null)
+             {
+-                chunk4.func_186034_a(p_186030_2_);
++                chunk4.func_186034_a(chunkGenrator);
+             }
+         }
+     }

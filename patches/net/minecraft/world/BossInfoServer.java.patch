@@ -1,0 +1,20 @@
+--- ../src-base/minecraft/net/minecraft/world/BossInfoServer.java
++++ ../src-work/minecraft/net/minecraft/world/BossInfoServer.java
+@@ -14,7 +14,7 @@
+ {
+     private final Set<EntityPlayerMP> field_186762_h = Sets.<EntityPlayerMP>newHashSet();
+     private final Set<EntityPlayerMP> field_186763_i;
+-    private boolean field_186764_j;
++    public boolean field_186764_j;
+ 
+     public BossInfoServer(ITextComponent p_i46839_1_, BossInfo.Color p_i46839_2_, BossInfo.Overlay p_i46839_3_)
+     {
+@@ -92,7 +92,7 @@
+         }
+     }
+ 
+-    private void func_186759_a(SPacketUpdateBossInfo.Operation p_186759_1_)
++    public void func_186759_a(SPacketUpdateBossInfo.Operation p_186759_1_)
+     {
+         if (this.field_186764_j)
+         {

@@ -13,7 +13,7 @@ import org.bukkit.FireworkEffect;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.inventory.meta.FireworkEffectMeta;
 
-@DelegateDeserialization(SerializableMeta.class)
+//@DelegateDeserialization(SerializableMeta.class)
 class CraftMetaCharge extends CraftMetaItem implements FireworkEffectMeta
 {
     static final ItemMetaKey EXPLOSION;
@@ -122,7 +122,7 @@ class CraftMetaCharge extends CraftMetaItem implements FireworkEffectMeta
     ImmutableMap.Builder<String, Object> serialize(final ImmutableMap.Builder<String, Object> builder) {
         super.serialize(builder);
         if (this.hasEffect()) {
-            builder.put((Object)CraftMetaCharge.EXPLOSION.BUKKIT, (Object)this.effect);
+            builder.put(CraftMetaCharge.EXPLOSION.BUKKIT, this.effect);
         }
         return builder;
     }

@@ -45,12 +45,13 @@ import net.minecraft.nbt.NBTBase;
 import java.util.Set;
 import org.bukkit.enchantments.Enchantment;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.List;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.inventory.meta.Repairable;
 import org.bukkit.inventory.meta.ItemMeta;
 
-@DelegateDeserialization(SerializableMeta.class)
+//@DelegateDeserialization(SerializableMeta.class)
 class CraftMetaItem implements ItemMeta, Repairable
 {
     static final ItemMetaKey NAME;
@@ -199,7 +200,7 @@ class CraftMetaItem implements ItemMeta, Repairable
     CraftMetaItem(final Map<String, Object> map) {
         this.unhandledTags = new HashMap<String, NBTBase>();
         this.setDisplayName(SerializableMeta.getString(map, CraftMetaItem.NAME.BUKKIT, true));
-        final Iterable<?> lore = SerializableMeta.getObject((Class<Iterable<?>>)Iterable.class, map, CraftMetaItem.LORE.BUKKIT, true);
+        final Iterable<?> lore = SerializableMeta.getObject(/*(Class<Iterable<?>>)*/Iterable.class, map, CraftMetaItem.LORE.BUKKIT, true);
         if (lore != null) {
             safelyAdd(lore, this.lore = new ArrayList<String>(), Integer.MAX_VALUE);
         }
@@ -242,7 +243,7 @@ class CraftMetaItem implements ItemMeta, Repairable
     }
     
     static Map<Enchantment, Integer> buildEnchantments(final Map<String, Object> map, final ItemMetaKey key) {
-        final Map<?, ?> ench = SerializableMeta.getObject((Class<Map<?, ?>>)Map.class, map, key.BUKKIT, true);
+        final Map<?, ?> ench = SerializableMeta.getObject(/*(Class<Map<?, ?>>)*/Map.class, map, key.BUKKIT, true);
         if (ench == null) {
             return null;
         }
@@ -295,7 +296,7 @@ class CraftMetaItem implements ItemMeta, Repairable
         for (final Map.Entry<Enchantment, Integer> entry : enchantments.entrySet()) {
             final NBTTagCompound subtag = new NBTTagCompound();
             subtag.setShort(CraftMetaItem.ENCHANTMENTS_ID.NBT, (short)entry.getKey().getId());
-            subtag.setShort(CraftMetaItem.ENCHANTMENTS_LVL.NBT, (short)(Object)entry.getValue());
+            subtag.setShort(CraftMetaItem.ENCHANTMENTS_LVL.NBT, entry.getValue().shortValue());
             list.appendTag(subtag);
         }
         tag.setTag(key.NBT, list);
@@ -544,8 +545,8 @@ class CraftMetaItem implements ItemMeta, Repairable
     
     @Override
     public final Map<String, Object> serialize() {
-        final ImmutableMap.Builder<String, Object> map = (ImmutableMap.Builder<String, Object>)ImmutableMap.builder();
-        map.put((Object)"meta-type", SerializableMeta.classMap.get((Object)this.getClass()));
+        final ImmutableMap.Builder<String, Object> map = /*(ImmutableMap.Builder<String, Object>)*/ImmutableMap.builder();
+        map.put("meta-type", SerializableMeta.classMap.get(this.getClass()));
         this.serialize(map);
         return (Map<String, Object>)map.build();
     }
@@ -553,21 +554,21 @@ class CraftMetaItem implements ItemMeta, Repairable
     @Overridden
     ImmutableMap.Builder<String, Object> serialize(final ImmutableMap.Builder<String, Object> builder) {
         if (this.hasDisplayName()) {
-            builder.put((Object)CraftMetaItem.NAME.BUKKIT, (Object)this.displayName);
+            builder.put(CraftMetaItem.NAME.BUKKIT, this.displayName);
         }
         if (this.hasLore()) {
-            builder.put((Object)CraftMetaItem.LORE.BUKKIT, (Object)ImmutableList.copyOf((Collection)this.lore));
+            builder.put(CraftMetaItem.LORE.BUKKIT, ImmutableList.copyOf(this.lore));
         }
         serializeEnchantments(this.enchantments, builder, CraftMetaItem.ENCHANTMENTS);
         if (this.hasRepairCost()) {
-            builder.put((Object)CraftMetaItem.REPAIR.BUKKIT, (Object)this.repairCost);
+            builder.put(CraftMetaItem.REPAIR.BUKKIT, this.repairCost);
         }
         final Set<String> hideFlags = new HashSet<String>();
         for (final ItemFlag hideFlagEnum : this.getItemFlags()) {
             hideFlags.add(hideFlagEnum.name());
         }
         if (!hideFlags.isEmpty()) {
-            builder.put((Object)CraftMetaItem.HIDEFLAGS.BUKKIT, (Object)hideFlags);
+            builder.put(CraftMetaItem.HIDEFLAGS.BUKKIT, hideFlags);
         }
         final Map<String, NBTBase> internalTags = new HashMap<String, NBTBase>(this.unhandledTags);
         this.serializeInternal(internalTags);
@@ -579,7 +580,7 @@ class CraftMetaItem implements ItemMeta, Repairable
             try {
                 final ByteArrayOutputStream buf = new ByteArrayOutputStream();
                 CompressedStreamTools.writeCompressed(internal, buf);
-                builder.put((Object)"internal", (Object)Base64.encodeBase64String(buf.toByteArray()));
+                builder.put("internal", Base64.encodeBase64String(buf.toByteArray()));
             }
             catch (IOException ex) {
                 Logger.getLogger(CraftMetaItem.class.getName()).log(Level.SEVERE, null, ex);
@@ -595,11 +596,11 @@ class CraftMetaItem implements ItemMeta, Repairable
         if (enchantments == null || enchantments.isEmpty()) {
             return;
         }
-        final ImmutableMap.Builder<String, Integer> enchants = (ImmutableMap.Builder<String, Integer>)ImmutableMap.builder();
+        final ImmutableMap.Builder<String, Integer> enchants = /*(ImmutableMap.Builder<String, Integer>)*/ImmutableMap.builder();
         for (final Map.Entry<? extends Enchantment, Integer> enchant : enchantments.entrySet()) {
-            enchants.put((Object)((Enchantment)enchant.getKey()).getName(), (Object)enchant.getValue());
+            enchants.put(((Enchantment)enchant.getKey()).getName(), enchant.getValue());
         }
-        builder.put((Object)key.BUKKIT, (Object)enchants.build());
+        builder.put(key.BUKKIT, enchants.build());
     }
     
     static void safelyAdd(final Iterable<?> addFrom, final Collection<String> addTo, final int maxItemLength) {
@@ -684,15 +685,15 @@ class CraftMetaItem implements ItemMeta, Repairable
     public static class SerializableMeta implements ConfigurationSerializable
     {
         static final String TYPE_FIELD = "meta-type";
-        static final ImmutableMap<Class<? extends CraftMetaItem>, String> classMap;
+        static final ImmutableMap<Object, Object> classMap;
         static final ImmutableMap<String, Constructor<? extends CraftMetaItem>> constructorMap;
         
         static {
-            classMap = ImmutableMap.builder().put((Object)CraftMetaBanner.class, (Object)"BANNER").put((Object)CraftMetaBlockState.class, (Object)"TILE_ENTITY").put((Object)CraftMetaBook.class, (Object)"BOOK").put((Object)CraftMetaBookSigned.class, (Object)"BOOK_SIGNED").put((Object)CraftMetaSkull.class, (Object)"SKULL").put((Object)CraftMetaLeatherArmor.class, (Object)"LEATHER_ARMOR").put((Object)CraftMetaMap.class, (Object)"MAP").put((Object)CraftMetaPotion.class, (Object)"POTION").put((Object)CraftMetaEnchantedBook.class, (Object)"ENCHANTED").put((Object)CraftMetaFirework.class, (Object)"FIREWORK").put((Object)CraftMetaCharge.class, (Object)"FIREWORK_EFFECT").put((Object)CraftMetaItem.class, (Object)"UNSPECIFIC").build();
-            final ImmutableMap.Builder<String, Constructor<? extends CraftMetaItem>> classConstructorBuilder = (ImmutableMap.Builder<String, Constructor<? extends CraftMetaItem>>)ImmutableMap.builder();
-            for (final Map.Entry<Class<? extends CraftMetaItem>, String> mapping : SerializableMeta.classMap.entrySet()) {
+            classMap = ImmutableMap.builder().put(CraftMetaBanner.class, "BANNER").put(CraftMetaBlockState.class, "TILE_ENTITY").put(CraftMetaBook.class, "BOOK").put(CraftMetaBookSigned.class, "BOOK_SIGNED").put(CraftMetaSkull.class, "SKULL").put(CraftMetaLeatherArmor.class, "LEATHER_ARMOR").put(CraftMetaMap.class, "MAP").put(CraftMetaPotion.class, "POTION").put(CraftMetaEnchantedBook.class, "ENCHANTED").put(CraftMetaFirework.class, "FIREWORK").put(CraftMetaCharge.class, "FIREWORK_EFFECT").put(CraftMetaItem.class, "UNSPECIFIC").build();
+            final ImmutableMap.Builder<String, Constructor<? extends CraftMetaItem>> classConstructorBuilder = ImmutableMap.builder();
+            for (final Entry<Object, Object> mapping : SerializableMeta.classMap.entrySet()) {
                 try {
-                    classConstructorBuilder.put((Object)mapping.getValue(), (Object)mapping.getKey().getDeclaredConstructor(Map.class));
+                    classConstructorBuilder.put((String) mapping.getValue(), ((Class<? extends CraftMetaItem>) mapping.getKey()).getDeclaredConstructor(Map.class));
                 }
                 catch (NoSuchMethodException e) {
                     throw new AssertionError((Object)e);

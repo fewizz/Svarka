@@ -1,0 +1,84 @@
+--- ../src-base/minecraft/net/minecraft/item/crafting/ShapedRecipes.java
++++ ../src-work/minecraft/net/minecraft/item/crafting/ShapedRecipes.java
+@@ -4,8 +4,17 @@
+ import net.minecraft.inventory.InventoryCrafting;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.world.World;
++import ru.svarka.crafting.ICBRecipe;
+ 
+-public class ShapedRecipes implements IRecipe
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.craftbukkit.inventory.CraftShapedRecipe;
++
++//CraftBukkit start
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.craftbukkit.inventory.CraftShapedRecipe;
++// CraftBukkit end
++
++public class ShapedRecipes implements ICBRecipe
+ {
+     public final int field_77576_b;
+     public final int field_77577_c;
+@@ -20,7 +29,61 @@
+         this.field_77574_d = p_i1917_3_;
+         this.field_77575_e = p_i1917_4_;
+     }
+-
++    // CraftBukkit start
++    public org.bukkit.inventory.ShapedRecipe toBukkitRecipe() {
++    	CraftItemStack result = CraftItemStack.asCraftMirror(this.field_77575_e);
++    	CraftShapedRecipe recipe = new CraftShapedRecipe(result, this);
++    	switch (this.field_77577_c) {
++    	case 1:
++    		switch (this.field_77576_b) {
++    		case 1:
++    			recipe.shape("a");
++    			break;
++    		case 2:
++    			recipe.shape("ab");
++    			break;
++    		case 3:
++    			recipe.shape("abc");
++    			break;
++    		}
++    		break;
++    	case 2:
++    		switch (this.field_77576_b) {
++    		case 1:
++    			recipe.shape("a","b");
++    			break;
++    		case 2:
++    			recipe.shape("ab","cd");
++    			break;
++    		case 3:
++    			recipe.shape("abc","def");
++    			break;
++    		}
++                break;
++    	case 3:
++    		switch (this.field_77576_b) {
++    		case 1:
++    			recipe.shape("a","b","c");
++    			break;
++    		case 2:
++    			recipe.shape("ab","cd","ef");
++    			break;
++    		case 3:
++    			recipe.shape("abc","def","ghi");
++    			break;
++    		}
++    		break;
++    	}
++    	char c = 'a';
++    	for (ItemStack stack : this.field_77574_d) {
++    		if (stack != null) {
++    			recipe.setIngredient(c, org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(stack.func_77973_b()), stack.func_77960_j());
++    		}
++    		c++;
++    	}
++    	return recipe;
++    }
++    // CraftBukkit end
+     @Nullable
+     public ItemStack func_77571_b()
+     {

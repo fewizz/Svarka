@@ -28,10 +28,10 @@ public final class AsynchronousExecutor<P, T, C, E extends Throwable>
     final ThreadPoolExecutor pool;
     
     static {
-        STATE_FIELD = AtomicIntegerFieldUpdater.newUpdater(Task.class, "state");
+        STATE_FIELD = AtomicIntegerFieldUpdater.newUpdater(AsynchronousExecutor.Task.class, "state");
     }
     
-    private static boolean set(final Task $this, final int expected, final int value) {
+    private static boolean set(final AsynchronousExecutor.Task $this, final int expected, final int value) {
         return AsynchronousExecutor.STATE_FIELD.compareAndSet($this, expected, value);
     }
     

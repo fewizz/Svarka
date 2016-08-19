@@ -12,6 +12,8 @@ import org.bukkit.inventory.Inventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.world.ILockableContainer;
+import ru.svarka.inventory.ICBInventory;
+
 import org.bukkit.inventory.DoubleChestInventory;
 
 public class CraftInventoryDoubleChest extends CraftInventory implements DoubleChestInventory
@@ -31,13 +33,13 @@ public class CraftInventoryDoubleChest extends CraftInventory implements DoubleC
             this.left = new CraftInventoryDoubleChest((InventoryLargeChest)largeChest.upperChest);
         }
         else {
-            this.left = new CraftInventory(largeChest.upperChest);
+            this.left = new CraftInventory((ICBInventory) largeChest.upperChest);
         }
         if (largeChest.lowerChest instanceof InventoryLargeChest) {
             this.right = new CraftInventoryDoubleChest((InventoryLargeChest)largeChest.lowerChest);
         }
         else {
-            this.right = new CraftInventory(largeChest.lowerChest);
+            this.right = new CraftInventory((ICBInventory) largeChest.lowerChest);
         }
     }
     

@@ -37,7 +37,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator
     @Override
     public Chunk provideChunk(final int x, final int z) {
         this.random.setSeed(x * 341873128712L + z * 132897987541L);
-        final CustomBiomeGrid biomegrid = new CustomBiomeGrid(null);
+        final CustomBiomeGrid biomegrid = new CustomBiomeGrid();
         biomegrid.biome = new Biome[256];
         this.world.getBiomeProvider().loadBlockGeneratorData(biomegrid.biome, x << 4, z << 4, 16, 16);
         final CraftChunkData data = (CraftChunkData)this.generator.generateChunkData(this.world.getWorld(), this.random, x, z, biomegrid);

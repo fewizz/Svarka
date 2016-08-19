@@ -70,9 +70,9 @@ public class CraftTippedArrow extends CraftArrow implements TippedArrow
     
     @Override
     public List<PotionEffect> getCustomEffects() {
-        final ImmutableList.Builder<PotionEffect> builder = (ImmutableList.Builder<PotionEffect>)ImmutableList.builder();
+        final ImmutableList.Builder<PotionEffect> builder = /*(ImmutableList.Builder<PotionEffect>)*/ImmutableList.builder();
         for (final net.minecraft.potion.PotionEffect effect : this.getHandle().customPotionEffects) {
-            builder.add((Object)CraftPotionUtil.toBukkit(effect));
+            builder.add(/*(Object)*/CraftPotionUtil.toBukkit(effect));
         }
         return (List<PotionEffect>)builder.build();
     }

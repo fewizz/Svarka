@@ -13,6 +13,7 @@ import net.minecraft.inventory.InventoryMerchant;
 import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.tileentity.TileEntityBrewingStand;
 import net.minecraft.tileentity.TileEntityFurnace;
+import ru.svarka.inventory.ICBInventory;
 import net.minecraft.tileentity.TileEntityDispenser;
 import net.minecraft.tileentity.TileEntityDropper;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -30,13 +31,13 @@ import org.bukkit.inventory.Inventory;
 
 public class CraftInventory implements Inventory
 {
-    protected final IInventory inventory;
+    protected final ICBInventory inventory;
     
-    public CraftInventory(final IInventory inventory) {
+    public CraftInventory(final ICBInventory inventory) {
         this.inventory = inventory;
     }
     
-    public IInventory getInventory() {
+    public ICBInventory getInventory() {
         return this.inventory;
     }
     

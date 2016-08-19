@@ -56,7 +56,7 @@ public class CraftTravelAgent extends Teleporter implements TravelAgent
     @Override
     public boolean createPortal(final Location location) {
         final Teleporter pta = ((CraftWorld)location.getWorld()).getHandle().getDefaultTeleporter();
-        return pta.createPortal(location.getX(), location.getY(), location.getZ(), this.getCreationRadius());
+        return pta.makePortal(location.getX(), location.getY(), location.getZ(), this.getCreationRadius());
     }
     
     @Override

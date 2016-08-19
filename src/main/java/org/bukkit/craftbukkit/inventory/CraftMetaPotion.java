@@ -24,7 +24,7 @@ import org.bukkit.potion.PotionData;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.inventory.meta.PotionMeta;
 
-@DelegateDeserialization(SerializableMeta.class)
+//@DelegateDeserialization(SerializableMeta.class)
 class CraftMetaPotion extends CraftMetaItem implements PotionMeta
 {
     static final ItemMetaKey AMPLIFIER;
@@ -86,7 +86,7 @@ class CraftMetaPotion extends CraftMetaItem implements PotionMeta
         super(map);
         this.type = new PotionData(PotionType.UNCRAFTABLE, false, false);
         this.type = CraftPotionUtil.toBukkit(SerializableMeta.getString(map, CraftMetaPotion.DEFAULT_POTION.BUKKIT, true));
-        final Iterable<?> rawEffectList = SerializableMeta.getObject((Class<Iterable<?>>)Iterable.class, map, CraftMetaPotion.POTION_EFFECTS.BUKKIT, true);
+        final Iterable<?> rawEffectList = SerializableMeta.getObject(Iterable.class, map, CraftMetaPotion.POTION_EFFECTS.BUKKIT, true);
         if (rawEffectList == null) {
             return;
         }
@@ -172,7 +172,7 @@ class CraftMetaPotion extends CraftMetaItem implements PotionMeta
         if (this.hasCustomEffects()) {
             return (List<PotionEffect>)ImmutableList.copyOf((Collection)this.customEffects);
         }
-        return (List<PotionEffect>)ImmutableList.of();
+        return ImmutableList.of();
     }
     
     @Override
@@ -300,10 +300,10 @@ class CraftMetaPotion extends CraftMetaItem implements PotionMeta
     ImmutableMap.Builder<String, Object> serialize(final ImmutableMap.Builder<String, Object> builder) {
         super.serialize(builder);
         if (this.type.getType() != PotionType.UNCRAFTABLE) {
-            builder.put((Object)CraftMetaPotion.DEFAULT_POTION.BUKKIT, (Object)CraftPotionUtil.fromBukkit(this.type));
+            builder.put(CraftMetaPotion.DEFAULT_POTION.BUKKIT, CraftPotionUtil.fromBukkit(this.type));
         }
         if (this.hasCustomEffects()) {
-            builder.put((Object)CraftMetaPotion.POTION_EFFECTS.BUKKIT, (Object)ImmutableList.copyOf((Collection)this.customEffects));
+            builder.put(CraftMetaPotion.POTION_EFFECTS.BUKKIT, ImmutableList.copyOf(this.customEffects));
         }
         return builder;
     }

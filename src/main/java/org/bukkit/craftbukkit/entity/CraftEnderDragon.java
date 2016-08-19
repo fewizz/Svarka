@@ -23,11 +23,11 @@ public class CraftEnderDragon extends CraftComplexLivingEntity implements EnderD
     
     @Override
     public Set<ComplexEntityPart> getParts() {
-        final ImmutableSet.Builder<ComplexEntityPart> builder = (ImmutableSet.Builder<ComplexEntityPart>)ImmutableSet.builder();
+        final ImmutableSet.Builder<ComplexEntityPart> builder = /*(ImmutableSet.Builder<ComplexEntityPart>)*/ImmutableSet.builder();
         EntityDragonPart[] dragonPartArray;
         for (int length = (dragonPartArray = this.getHandle().dragonPartArray).length, i = 0; i < length; ++i) {
             final EntityDragonPart part = dragonPartArray[i];
-            builder.add((Object)part.getBukkitEntity());
+            builder.add((ComplexEntityPart) /*(Object)*/part.getBukkitEntity());
         }
         return (Set<ComplexEntityPart>)builder.build();
     }

@@ -36,12 +36,12 @@ public class CraftShulkerBullet extends AbstractProjectile implements ShulkerBul
     }
     
     @Override
-    public Entity getTarget() {
+    public org.bukkit.entity.Entity getTarget() {
         return (this.getHandle().getTarget() != null) ? this.getHandle().getTarget().getBukkitEntity() : null;
     }
     
     @Override
-    public void setTarget(final Entity target) {
+    public void setTarget(final org.bukkit.entity.Entity target) {
         this.getHandle().setTarget((target == null) ? null : ((CraftEntity)target).getHandle());
     }
     

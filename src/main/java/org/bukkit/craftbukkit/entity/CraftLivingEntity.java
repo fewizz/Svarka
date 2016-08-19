@@ -42,6 +42,8 @@ import org.bukkit.entity.TippedArrow;
 import org.bukkit.entity.Arrow;
 import net.minecraft.entity.item.EntityEnderPearl;
 import org.bukkit.entity.EnderPearl;
+import org.bukkit.entity.Entity;
+
 import net.minecraft.entity.projectile.EntityEgg;
 import org.bukkit.entity.Egg;
 import net.minecraft.entity.projectile.EntityThrowable;
@@ -70,7 +72,7 @@ import org.apache.commons.lang.Validate;
 import net.minecraft.util.DamageSource;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.Entity;
+//import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.inventory.CraftEntityEquipment;

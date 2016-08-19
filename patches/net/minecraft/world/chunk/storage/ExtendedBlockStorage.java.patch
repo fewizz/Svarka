@@ -1,0 +1,27 @@
+--- ../src-base/minecraft/net/minecraft/world/chunk/storage/ExtendedBlockStorage.java
++++ ../src-work/minecraft/net/minecraft/world/chunk/storage/ExtendedBlockStorage.java
+@@ -14,7 +14,23 @@
+     private final BlockStateContainer field_177488_d;
+     private NibbleArray field_76679_g;
+     private NibbleArray field_76685_h;
+-
++    // CraftBukkit start
++    public ExtendedBlockStorage(int y, boolean flag, char[] blockIds) {
++    	this.field_76684_a = y;
++    	this.field_177488_d = new BlockStateContainer();
++    	for (int i = 0; i < blockIds.length; i++) {
++    		int xx = i & 15;
++    		int yy = (i >> 8) & 15;
++    		int zz = (i >> 4) & 15;
++    		this.field_177488_d.func_186013_a(xx, yy, zz, Block.field_176229_d.func_148745_a(blockIds[i]));
++    	}
++    	this.field_76679_g = new NibbleArray();
++    	if (flag) {
++    		this.field_76685_h = new NibbleArray();
++    	}
++    	func_76672_e();
++    }
++    // CraftBukkit end
+     public ExtendedBlockStorage(int p_i1997_1_, boolean p_i1997_2_)
+     {
+         this.field_76684_a = p_i1997_1_;

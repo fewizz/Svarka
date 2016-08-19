@@ -1,0 +1,418 @@
+--- ../src-base/minecraft/net/minecraft/world/Teleporter.java
++++ ../src-work/minecraft/net/minecraft/world/Teleporter.java
+@@ -4,6 +4,11 @@
+ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+ import it.unimi.dsi.fastutil.objects.ObjectIterator;
+ import java.util.Random;
++
++import org.bukkit.Location;
++import org.bukkit.event.entity.EntityPortalExitEvent;
++import org.bukkit.util.Vector;
++
+ import net.minecraft.block.BlockPortal;
+ import net.minecraft.block.state.IBlockState;
+ import net.minecraft.block.state.pattern.BlockPattern;
+@@ -19,14 +24,73 @@
+ {
+     private final WorldServer field_85192_a;
+     private final Random field_77187_a;
+-    private final Long2ObjectMap<Teleporter.PortalPosition> field_85191_c = new Long2ObjectOpenHashMap(4096);
++    private final Long2ObjectMap<Teleporter.PortalPosition> field_85191_c = new Long2ObjectOpenHashMap<Teleporter.PortalPosition>(4096);
+ 
+     public Teleporter(WorldServer p_i1963_1_)
+     {
+         this.field_85192_a = p_i1963_1_;
+         this.field_77187_a = new Random(p_i1963_1_.func_72905_C());
+     }
++    public BlockPos findPortal(double x, double y, double z, int radius) {
++    	//if(worldServerInstance.provider.getDimensionType() == DimensionType.THE_END) {
++    	//	return this.findEndPortal(this.worldServerInstance.provider.getSpawnCoordinate());
++    	//}
++    	int fX = MathHelper.func_76128_c(x);
++    	int fZ = MathHelper.func_76128_c(z);
++    	double d0 = -1.0D;
++        // CraftBukkit end
++    	boolean flag = true;
++        BlockPos blockpos = BlockPos.field_177992_a;
++        long l = ChunkPos.func_77272_a(fX, fZ);
++        if (this.field_85191_c.containsKey(l)) {
++            Teleporter.PortalPosition teleporter$portalposition = (Teleporter.PortalPosition)this.field_85191_c.get(l);
++            d0 = 0.0D;
++            blockpos = teleporter$portalposition;
++            teleporter$portalposition.field_85087_d = this.field_85192_a.func_82737_E();
++            flag = false;
++        }
++        else
++        {
++            BlockPos blockpos3 = new BlockPos(x, y, z);
+ 
++            for (int i1 = -radius; i1 <= radius; ++i1)
++            {
++                BlockPos blockpos2;
++
++                for (int j1 = -radius; j1 <= radius; ++j1)
++                {
++                    for (BlockPos blockpos1 = blockpos3.func_177982_a(i1, this.field_85192_a.func_72940_L() - 1 - blockpos3.func_177956_o(), j1); blockpos1.func_177956_o() >= 0; blockpos1 = blockpos2)
++                    {
++                        blockpos2 = blockpos1.func_177977_b();
++
++                        if (this.field_85192_a.func_180495_p(blockpos1).func_177230_c() == Blocks.field_150427_aO)
++                        {
++                            for (blockpos2 = blockpos1.func_177977_b(); this.field_85192_a.func_180495_p(blockpos2).func_177230_c() == Blocks.field_150427_aO; blockpos2 = blockpos2.func_177977_b())
++                            {
++                                blockpos1 = blockpos2;
++                            }
++
++                            double d1 = blockpos1.func_177951_i(blockpos3);
++
++                            if (d0 < 0.0D || d1 < d0)
++                            {
++                                d0 = d1;
++                                blockpos = blockpos1;
++                            }
++                        }
++                    }
++                }
++            }
++        }
++
++        if (d0 >= 0.0D) {
++            if (flag) {
++                this.field_85191_c.put(l, new Teleporter.PortalPosition(blockpos, this.field_85192_a.func_82737_E()));
++            }
++            return blockpos;
++        }
++        return null;
++    }
+     public void func_180266_a(Entity p_180266_1_, float p_180266_2_)
+     {
+         if (this.field_85192_a.field_73011_w.func_186058_p().func_186068_a() != 1)
+@@ -69,25 +133,38 @@
+ 
+     public boolean func_180620_b(Entity p_180620_1_, float p_180620_2_)
+     {
++    	BlockPos found = findPortal(p_180620_1_.field_70165_t, p_180620_1_.field_70163_u, p_180620_1_.field_70161_v, 128);
++    	if(found == null) {
++    		return false;
++    	}
++    	Location exit = new Location(this.field_85192_a.getWorld(), found.func_177958_n(), found.func_177956_o(), found.func_177952_p());
++    	Vector velocity = p_180620_1_.getBukkitEntity().getVelocity();
++        this.adjustExit(p_180620_1_, exit, velocity);
++        p_180620_1_.func_70080_a(exit.getX(), exit.getY(), exit.getZ(), exit.getYaw(), exit.getPitch());
++        if (p_180620_1_.field_70159_w != velocity.getX() || p_180620_1_.field_70181_x != velocity.getY() || p_180620_1_.field_70179_y != velocity.getZ()) {
++            p_180620_1_.getBukkitEntity().setVelocity(velocity);
++        }
++        return true;
++    	/*
+         int i = 128;
+         double d0 = -1.0D;
+-        int j = MathHelper.func_76128_c(p_180620_1_.field_70165_t);
+-        int k = MathHelper.func_76128_c(p_180620_1_.field_70161_v);
++        int j = MathHelper.floor_double(entityIn.posX);
++        int k = MathHelper.floor_double(entityIn.posZ);
+         boolean flag = true;
+-        BlockPos blockpos = BlockPos.field_177992_a;
+-        long l = ChunkPos.func_77272_a(j, k);
++        BlockPos blockpos = BlockPos.ORIGIN;
++        long l = ChunkPos.chunkXZ2Int(j, k);
+ 
+-        if (this.field_85191_c.containsKey(l))
++        if (this.destinationCoordinateCache.containsKey(l))
+         {
+-            Teleporter.PortalPosition teleporter$portalposition = (Teleporter.PortalPosition)this.field_85191_c.get(l);
++            Teleporter.PortalPosition teleporter$portalposition = (Teleporter.PortalPosition)this.destinationCoordinateCache.get(l);
+             d0 = 0.0D;
+             blockpos = teleporter$portalposition;
+-            teleporter$portalposition.field_85087_d = this.field_85192_a.func_82737_E();
++            teleporter$portalposition.lastUpdateTime = this.worldServerInstance.getTotalWorldTime();
+             flag = false;
+         }
+         else
+         {
+-            BlockPos blockpos3 = new BlockPos(p_180620_1_);
++            BlockPos blockpos3 = new BlockPos(entityIn);
+ 
+             for (int i1 = -128; i1 <= 128; ++i1)
+             {
+@@ -95,18 +172,18 @@
+ 
+                 for (int j1 = -128; j1 <= 128; ++j1)
+                 {
+-                    for (BlockPos blockpos1 = blockpos3.func_177982_a(i1, this.field_85192_a.func_72940_L() - 1 - blockpos3.func_177956_o(), j1); blockpos1.func_177956_o() >= 0; blockpos1 = blockpos2)
++                    for (BlockPos blockpos1 = blockpos3.add(i1, this.worldServerInstance.getActualHeight() - 1 - blockpos3.getY(), j1); blockpos1.getY() >= 0; blockpos1 = blockpos2)
+                     {
+-                        blockpos2 = blockpos1.func_177977_b();
++                        blockpos2 = blockpos1.down();
+ 
+-                        if (this.field_85192_a.func_180495_p(blockpos1).func_177230_c() == Blocks.field_150427_aO)
++                        if (this.worldServerInstance.getBlockState(blockpos1).getBlock() == Blocks.PORTAL)
+                         {
+-                            for (blockpos2 = blockpos1.func_177977_b(); this.field_85192_a.func_180495_p(blockpos2).func_177230_c() == Blocks.field_150427_aO; blockpos2 = blockpos2.func_177977_b())
++                            for (blockpos2 = blockpos1.down(); this.worldServerInstance.getBlockState(blockpos2).getBlock() == Blocks.PORTAL; blockpos2 = blockpos2.down())
+                             {
+                                 blockpos1 = blockpos2;
+                             }
+ 
+-                            double d1 = blockpos1.func_177951_i(blockpos3);
++                            double d1 = blockpos1.distanceSq(blockpos3);
+ 
+                             if (d0 < 0.0D || d1 < d0)
+                             {
+@@ -123,28 +200,28 @@
+         {
+             if (flag)
+             {
+-                this.field_85191_c.put(l, new Teleporter.PortalPosition(blockpos, this.field_85192_a.func_82737_E()));
++                this.destinationCoordinateCache.put(l, new Teleporter.PortalPosition(blockpos, this.worldServerInstance.getTotalWorldTime()));
+             }
+ 
+-            double d5 = (double)blockpos.func_177958_n() + 0.5D;
+-            double d7 = (double)blockpos.func_177952_p() + 0.5D;
+-            BlockPattern.PatternHelper blockpattern$patternhelper = Blocks.field_150427_aO.func_181089_f(this.field_85192_a, blockpos);
+-            boolean flag1 = blockpattern$patternhelper.func_177669_b().func_176746_e().func_176743_c() == EnumFacing.AxisDirection.NEGATIVE;
+-            double d2 = blockpattern$patternhelper.func_177669_b().func_176740_k() == EnumFacing.Axis.X ? (double)blockpattern$patternhelper.func_181117_a().func_177952_p() : (double)blockpattern$patternhelper.func_181117_a().func_177958_n();
+-            double d6 = (double)(blockpattern$patternhelper.func_181117_a().func_177956_o() + 1) - p_180620_1_.func_181014_aG().field_72448_b * (double)blockpattern$patternhelper.func_181119_e();
++            double d5 = (double)blockpos.getX() + 0.5D;
++            double d7 = (double)blockpos.getZ() + 0.5D;
++            BlockPattern.PatternHelper blockpattern$patternhelper = Blocks.PORTAL.createPatternHelper(this.worldServerInstance, blockpos);
++            boolean flag1 = blockpattern$patternhelper.getForwards().rotateY().getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE;
++            double d2 = blockpattern$patternhelper.getForwards().getAxis() == EnumFacing.Axis.X ? (double)blockpattern$patternhelper.getFrontTopLeft().getZ() : (double)blockpattern$patternhelper.getFrontTopLeft().getX();
++            double d6 = (double)(blockpattern$patternhelper.getFrontTopLeft().getY() + 1) - entityIn.getLastPortalVec().yCoord * (double)blockpattern$patternhelper.getHeight();
+ 
+             if (flag1)
+             {
+                 ++d2;
+             }
+ 
+-            if (blockpattern$patternhelper.func_177669_b().func_176740_k() == EnumFacing.Axis.X)
++            if (blockpattern$patternhelper.getForwards().getAxis() == EnumFacing.Axis.X)
+             {
+-                d7 = d2 + (1.0D - p_180620_1_.func_181014_aG().field_72450_a) * (double)blockpattern$patternhelper.func_181118_d() * (double)blockpattern$patternhelper.func_177669_b().func_176746_e().func_176743_c().func_179524_a();
++                d7 = d2 + (1.0D - entityIn.getLastPortalVec().xCoord) * (double)blockpattern$patternhelper.getWidth() * (double)blockpattern$patternhelper.getForwards().rotateY().getAxisDirection().getOffset();
+             }
+             else
+             {
+-                d5 = d2 + (1.0D - p_180620_1_.func_181014_aG().field_72450_a) * (double)blockpattern$patternhelper.func_181118_d() * (double)blockpattern$patternhelper.func_177669_b().func_176746_e().func_176743_c().func_179524_a();
++                d5 = d2 + (1.0D - entityIn.getLastPortalVec().xCoord) * (double)blockpattern$patternhelper.getWidth() * (double)blockpattern$patternhelper.getForwards().rotateY().getAxisDirection().getOffset();
+             }
+ 
+             float f = 0.0F;
+@@ -152,17 +229,17 @@
+             float f2 = 0.0F;
+             float f3 = 0.0F;
+ 
+-            if (blockpattern$patternhelper.func_177669_b().func_176734_d() == p_180620_1_.func_181012_aH())
++            if (blockpattern$patternhelper.getForwards().getOpposite() == entityIn.getTeleportDirection())
+             {
+                 f = 1.0F;
+                 f1 = 1.0F;
+             }
+-            else if (blockpattern$patternhelper.func_177669_b().func_176734_d() == p_180620_1_.func_181012_aH().func_176734_d())
++            else if (blockpattern$patternhelper.getForwards().getOpposite() == entityIn.getTeleportDirection().getOpposite())
+             {
+                 f = -1.0F;
+                 f1 = -1.0F;
+             }
+-            else if (blockpattern$patternhelper.func_177669_b().func_176734_d() == p_180620_1_.func_181012_aH().func_176746_e())
++            else if (blockpattern$patternhelper.getForwards().getOpposite() == entityIn.getTeleportDirection().rotateY())
+             {
+                 f2 = 1.0F;
+                 f3 = -1.0F;
+@@ -173,19 +250,19 @@
+                 f3 = 1.0F;
+             }
+ 
+-            double d3 = p_180620_1_.field_70159_w;
+-            double d4 = p_180620_1_.field_70179_y;
+-            p_180620_1_.field_70159_w = d3 * (double)f + d4 * (double)f3;
+-            p_180620_1_.field_70179_y = d3 * (double)f2 + d4 * (double)f1;
+-            p_180620_1_.field_70177_z = p_180620_2_ - (float)(p_180620_1_.func_181012_aH().func_176734_d().func_176736_b() * 90) + (float)(blockpattern$patternhelper.func_177669_b().func_176736_b() * 90);
++            double d3 = entityIn.motionX;
++            double d4 = entityIn.motionZ;
++            entityIn.motionX = d3 * (double)f + d4 * (double)f3;
++            entityIn.motionZ = d3 * (double)f2 + d4 * (double)f1;
++            entityIn.rotationYaw = rotationYaw - (float)(entityIn.getTeleportDirection().getOpposite().getHorizontalIndex() * 90) + (float)(blockpattern$patternhelper.getForwards().getHorizontalIndex() * 90);
+ 
+-            if (p_180620_1_ instanceof EntityPlayerMP)
++            if (entityIn instanceof EntityPlayerMP)
+             {
+-                ((EntityPlayerMP)p_180620_1_).field_71135_a.func_147364_a(d5, d6, d7, p_180620_1_.field_70177_z, p_180620_1_.field_70125_A);
++                ((EntityPlayerMP)entityIn).connection.setPlayerLocation(d5, d6, d7, entityIn.rotationYaw, entityIn.rotationPitch);
+             }
+             else
+             {
+-                p_180620_1_.func_70012_b(d5, d6, d7, p_180620_1_.field_70177_z, p_180620_1_.field_70125_A);
++                entityIn.setLocationAndAngles(d5, d6, d7, entityIn.rotationYaw, entityIn.rotationPitch);
+             }
+ 
+             return true;
+@@ -193,16 +270,119 @@
+         else
+         {
+             return false;
++        }*/
++    }
++    
++ // Entity repositioning logic split out from original b method and combined with repositioning logic for The End from original a method
++    public void adjustExit(Entity entity, Location position, Vector velocity) {
++        Location from = position.clone();
++        Vector before = velocity.clone();
++        BlockPos object = new BlockPos(position.getBlockX(), position.getBlockY(), position.getBlockZ());
++        float yaw = position.getYaw();
++
++        if (this.field_85192_a.getWorld().getEnvironment() == org.bukkit.World.Environment.THE_END || entity.getBukkitEntity().getWorld().getEnvironment() == org.bukkit.World.Environment.THE_END || entity.func_181014_aG() == null) {
++            // entity.setPositionRotation((double) i, (double) j, (double) k, entity.yaw, 0.0F);
++            // entity.motX = entity.motY = entity.motZ = 0.0D;
++            position.setPitch(0.0F);
++            velocity.setX(0);
++            velocity.setY(0);
++            velocity.setZ(0);
++        } else {
++            // CraftBukkit end
++
++            double d2 = (double) ((BlockPos) object).func_177958_n() + 0.5D;
++            double d3 = (double) ((BlockPos) object).func_177952_p() + 0.5D;
++            BlockPattern.PatternHelper blockpattern$patternhelper = Blocks.field_150427_aO.func_181089_f(this.field_85192_a, object);
++            boolean flag1 = blockpattern$patternhelper.func_177669_b().func_176746_e().func_176743_c() == EnumFacing.AxisDirection.NEGATIVE;
++            double d5 = blockpattern$patternhelper.func_177669_b().func_176740_k() == EnumFacing.Axis.X ? (double)blockpattern$patternhelper.func_181117_a().func_177952_p() : (double)blockpattern$patternhelper.func_181117_a().func_177958_n();
++            double d7 = (double)(blockpattern$patternhelper.func_181117_a().func_177956_o() + 1) - entity.func_181014_aG().field_72448_b * (double)blockpattern$patternhelper.func_181119_e();
++
++            if (flag1) {
++                ++d2;
++            }
++
++            if (blockpattern$patternhelper.func_177669_b().func_176740_k() == EnumFacing.Axis.X)
++            {
++                d7 = d2 + (1.0D - entity.func_181014_aG().field_72450_a) * (double)blockpattern$patternhelper.func_181118_d() * (double)blockpattern$patternhelper.func_177669_b().func_176746_e().func_176743_c().func_179524_a();
++            }
++            else
++            {
++                d5 = d2 + (1.0D - entity.func_181014_aG().field_72450_a) * (double)blockpattern$patternhelper.func_181118_d() * (double)blockpattern$patternhelper.func_177669_b().func_176746_e().func_176743_c().func_179524_a();
++            }
++
++            float f = 0.0F;
++            float f1 = 0.0F;
++            float f2 = 0.0F;
++            float f3 = 0.0F;
++
++            if (blockpattern$patternhelper.func_177669_b().func_176734_d() == entity.func_181012_aH())
++            {
++                f = 1.0F;
++                f1 = 1.0F;
++            }
++            else if (blockpattern$patternhelper.func_177669_b().func_176734_d() == entity.func_181012_aH().func_176734_d())
++            {
++                f = -1.0F;
++                f1 = -1.0F;
++            }
++            else if (blockpattern$patternhelper.func_177669_b().func_176734_d() == entity.func_181012_aH().func_176746_e())
++            {
++                f2 = 1.0F;
++                f3 = -1.0F;
++            }
++            else
++            {
++                f2 = -1.0F;
++                f3 = 1.0F;
++            }
++
++            // CraftBukkit start
++            double vX = velocity.getX();
++            double vZ = velocity.getZ();
++            // CraftBukkit end
++
++            // CraftBukkit start - Adjust position and velocity instances instead of entity
++            velocity.setX(vX * (double) f1 + d7 * (double) f3);
++            velocity.setZ(vZ * (double) f3 + d7 * (double) f2);
++            f = f - (float) (entity.func_181012_aH().func_176734_d().func_185119_l() * 90) + (float) (blockpattern$patternhelper.func_177669_b().func_185119_l() * 90);
++            // entity.setPositionRotation(d2, d5, d3, entity.yaw, entity.pitch);
++            position.setX(d2);
++            position.setY(d5);
++            position.setZ(d3);
++            position.setYaw(f);
+         }
++        EntityPortalExitEvent event = new EntityPortalExitEvent(entity.getBukkitEntity(), from, position, before, velocity);
++        this.field_85192_a.getServer().getPluginManager().callEvent(event);
++        Location to = event.getTo();
++        if (event.isCancelled() || to == null || !entity.func_70089_S()) {
++            position.setX(from.getX());
++            position.setY(from.getY());
++            position.setZ(from.getZ());
++            position.setYaw(from.getYaw());
++            position.setPitch(from.getPitch());
++            velocity.copy(before);
++        } else {
++            position.setX(to.getX());
++            position.setY(to.getY());
++            position.setZ(to.getZ());
++            position.setYaw(to.getYaw());
++            position.setPitch(to.getPitch());
++            velocity.copy(event.getAfter()); // event.getAfter() will never be null, as setAfter() will cause an NPE if null is passed in
++        }
++        // CraftBukkit end
+     }
+ 
+-    public boolean func_85188_a(Entity p_85188_1_)
++    public boolean func_85188_a(Entity p_85188_1_) {
++    	return this.makePortal(p_85188_1_.field_70165_t, p_85188_1_.field_70163_u, p_85188_1_.field_70161_v, 16);
++    }
++    
++    public boolean makePortal(double x, double y, double z, int b0)
+     {
+         int i = 16;
+         double d0 = -1.0D;
+-        int j = MathHelper.func_76128_c(p_85188_1_.field_70165_t);
+-        int k = MathHelper.func_76128_c(p_85188_1_.field_70163_u);
+-        int l = MathHelper.func_76128_c(p_85188_1_.field_70161_v);
++        int j = MathHelper.func_76128_c(x);
++        int k = MathHelper.func_76128_c(y);
++        int l = MathHelper.func_76128_c(z);
+         int i1 = j;
+         int j1 = k;
+         int k1 = l;
+@@ -212,11 +392,11 @@
+ 
+         for (int j2 = j - 16; j2 <= j + 16; ++j2)
+         {
+-            double d1 = (double)j2 + 0.5D - p_85188_1_.field_70165_t;
++            double d1 = (double)j2 + 0.5D - x;
+ 
+             for (int l2 = l - 16; l2 <= l + 16; ++l2)
+             {
+-                double d2 = (double)l2 + 0.5D - p_85188_1_.field_70161_v;
++                double d2 = (double)l2 + 0.5D - z;
+                 label146:
+ 
+                 for (int j3 = this.field_85192_a.func_72940_L() - 1; j3 >= 0; --j3)
+@@ -258,7 +438,7 @@
+                                 }
+                             }
+ 
+-                            double d5 = (double)j3 + 0.5D - p_85188_1_.field_70163_u;
++                            double d5 = (double)j3 + 0.5D - y;
+                             double d7 = d1 * d1 + d5 * d5 + d2 * d2;
+ 
+                             if (d0 < 0.0D || d7 < d0)
+@@ -279,11 +459,11 @@
+         {
+             for (int l5 = j - 16; l5 <= j + 16; ++l5)
+             {
+-                double d3 = (double)l5 + 0.5D - p_85188_1_.field_70165_t;
++                double d3 = (double)l5 + 0.5D - x;
+ 
+                 for (int j6 = l - 16; j6 <= l + 16; ++j6)
+                 {
+-                    double d4 = (double)j6 + 0.5D - p_85188_1_.field_70161_v;
++                    double d4 = (double)j6 + 0.5D - z;
+                     label567:
+ 
+                     for (int i7 = this.field_85192_a.func_72940_L() - 1; i7 >= 0; --i7)
+@@ -316,7 +496,7 @@
+                                     }
+                                 }
+ 
+-                                double d6 = (double)i7 + 0.5D - p_85188_1_.field_70163_u;
++                                double d6 = (double)i7 + 0.5D - y;
+                                 double d8 = d3 * d3 + d6 * d6 + d4 * d4;
+ 
+                                 if (d0 < 0.0D || d8 < d0)

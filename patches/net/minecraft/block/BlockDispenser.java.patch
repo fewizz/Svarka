@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/block/BlockDispenser.java
++++ ../src-work/minecraft/net/minecraft/block/BlockDispenser.java
+@@ -121,7 +121,7 @@
+         }
+     }
+ 
+-    protected void func_176439_d(World p_176439_1_, BlockPos p_176439_2_)
++    public void func_176439_d(World p_176439_1_, BlockPos p_176439_2_)
+     {
+         BlockSourceImpl blocksourceimpl = new BlockSourceImpl(p_176439_1_, p_176439_2_);
+         TileEntityDispenser tileentitydispenser = (TileEntityDispenser)blocksourceimpl.func_150835_j();

@@ -8,19 +8,30 @@ import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import ru.svarka.crafting.ICBRecipe;
+
 import org.bukkit.inventory.Recipe;
+
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class RecipeIterator implements Iterator<Recipe>
 {
-    private final Iterator<IRecipe> recipes;
+    private final Iterator<ICBRecipe> recipes;
     private final Iterator<ItemStack> smeltingCustom;
     private final Iterator<ItemStack> smeltingVanilla;
     private Iterator<?> removeFrom;
     
     public RecipeIterator() {
         this.removeFrom = null;
-        this.recipes = CraftingManager.getInstance().getRecipeList().iterator();
+        List<ICBRecipe> list = new ArrayList<ICBRecipe>();
+        for(IRecipe recipe : CraftingManager.getInstance().getRecipeList()) {
+        	if(recipe instanceof ICBRecipe) {
+        		list.add((ICBRecipe) recipe);
+        	}
+        }
+        this.recipes = list.iterator();
         this.smeltingCustom = FurnaceRecipes.instance().customRecipes.keySet().iterator();
         this.smeltingVanilla = FurnaceRecipes.instance().smeltingList.keySet().iterator();
     }

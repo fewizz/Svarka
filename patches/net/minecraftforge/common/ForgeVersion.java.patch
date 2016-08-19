@@ -1,0 +1,15 @@
+--- ../src-base/minecraft/net/minecraftforge/common/ForgeVersion.java
++++ ../src-work/minecraft/net/minecraftforge/common/ForgeVersion.java
+@@ -313,7 +313,6 @@
+ 
+     private static Map<ModContainer, CheckResult> results = new ConcurrentHashMap<ModContainer, CheckResult>();
+     private static final CheckResult PENDING_CHECK = new CheckResult(PENDING, null, null, null);
+-
+     public static CheckResult getResult(ModContainer mod)
+     {
+         if (mod == null) return PENDING_CHECK;
+@@ -323,4 +322,3 @@
+         return ret == null ? PENDING_CHECK : ret;
+     }
+ }
+-

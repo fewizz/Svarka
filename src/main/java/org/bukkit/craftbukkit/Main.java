@@ -5,19 +5,21 @@
 package org.bukkit.craftbukkit;
 
 import java.util.Arrays;
-import org.bukkit.craftbukkit.libs.joptsimple.OptionSet;
 import java.io.IOException;
 import java.io.OutputStream;
 import net.minecraft.server.MinecraftServer;
-import org.bukkit.craftbukkit.libs.jline.UnsupportedTerminal;
 import org.fusesource.jansi.AnsiConsole;
-import org.bukkit.craftbukkit.libs.joptsimple.OptionException;
+
+import jline.UnsupportedTerminal;
+import joptsimple.OptionException;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.text.SimpleDateFormat;
 import java.io.File;
 import java.util.List;
-import org.bukkit.craftbukkit.libs.joptsimple.OptionParser;
 
 public class Main
 {
@@ -29,7 +31,7 @@ public class Main
         Main.useConsole = true;
     }
     
-    public static void main(final String[] args) {
+    public static OptionSet main(final String[] args) {
         final OptionParser parser = new OptionParser() {
             {
                 this.acceptsAll(asList(new String[] { "?", "help" }), "Show the help");
@@ -64,14 +66,14 @@ public class Main
         }
         if (options != null) {
             if (!options.has("?")) {
-                if (options.has("v")) {
-                    System.out.println(CraftServer.class.getPackage().getImplementationVersion());
-                    return;
-                }
+                //if (options.has("v")) {
+                //    System.out.println(CraftServer.class.getPackage().getImplementationVersion());
+                //    return null;
+                //}
                 final String path = new File(".").getAbsolutePath();
                 if (path.contains("!") || path.contains("+")) {
                     System.err.println("Cannot run server in a directory with ! or + in the pathname. Please rename the affected folders and try again.");
-                    return;
+                    return null;
                 }
                 try {
                     final String jline_UnsupportedTerminal = new String(new char[] { 'j', 'l', 'i', 'n', 'e', '.', 'U', 'n', 's', 'u', 'p', 'p', 'o', 'r', 't', 'e', 'd', 'T', 'e', 'r', 'm', 'i', 'n', 'a', 'l' });
@@ -91,12 +93,12 @@ public class Main
                         Main.useConsole = false;
                     }
                     System.out.println("Loading libraries, please wait...");
-                    MinecraftServer.main(options);
+                    //MinecraftServer.main(options);
                 }
                 catch (Throwable t) {
                     t.printStackTrace();
                 }
-                return;
+                return options;
             }
         }
         try {
@@ -105,6 +107,7 @@ public class Main
         catch (IOException ex2) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex2);
         }
+        return null;
     }
     
     private static List<String> asList(final String... params) {

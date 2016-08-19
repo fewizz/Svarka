@@ -1,0 +1,119 @@
+--- ../src-base/minecraft/net/minecraft/entity/player/InventoryPlayer.java
++++ ../src-work/minecraft/net/minecraft/entity/player/InventoryPlayer.java
+@@ -20,8 +20,21 @@
+ import net.minecraft.util.text.TextComponentTranslation;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import ru.svarka.inventory.ICBInventory;
+ 
+-public class InventoryPlayer implements IInventory
++import java.util.List;
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.entity.HumanEntity;
++
++//CraftBukkit start
++import java.util.List;
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.entity.HumanEntity;
++// CraftBukkit end
++
++public class InventoryPlayer implements ICBInventory
+ {
+     public final ItemStack[] field_70462_a = new ItemStack[36];
+     public final ItemStack[] field_70460_b = new ItemStack[4];
+@@ -31,6 +44,47 @@
+     public EntityPlayer field_70458_d;
+     private ItemStack field_70457_g;
+     public boolean field_70459_e;
++    // CraftBukkit start - add fields and methods
++    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    private int maxStack = MAX_STACK;
++    
++    public ItemStack[] getContents() {
++    	ItemStack[] combined = new ItemStack[field_70462_a.length + field_70460_b.length + field_184439_c.length];
++    	System.arraycopy(field_70462_a, 0, combined, 0, field_70462_a.length);
++    	System.arraycopy(field_70460_b, 0, combined, field_70462_a.length, field_70460_b.length);
++    	System.arraycopy(field_184439_c, 0, combined, field_70462_a.length + field_70460_b.length, field_184439_c.length);
++    	return combined;
++    }
++    
++    public ItemStack[] getArmorContents() {
++    	return this.field_70460_b;
++    }
++    
++    public void onOpen(CraftHumanEntity who) {
++    	transaction.add(who);
++    }
++    
++    public void onClose(CraftHumanEntity who) {
++    	transaction.remove(who);
++    }
++    
++    public List<HumanEntity> getViewers() {
++    	return transaction;
++    }
++    
++    public org.bukkit.inventory.InventoryHolder getOwner() {
++    	return this.field_70458_d.getBukkitEntity();
++    }
++    
++    public void setMaxStackSize(int size) {
++    	maxStack = size;
++    }
++    
++    @Override
++    public Location getLocation() {
++    	return field_70458_d.getBukkitEntity().getLocation();
++    }
++        // CraftBukkit end
+ 
+     public InventoryPlayer(EntityPlayer p_i1750_1_)
+     {
+@@ -58,7 +112,23 @@
+     {
+         return p_184431_1_.func_77973_b() == p_184431_2_.func_77973_b() && (!p_184431_1_.func_77981_g() || p_184431_1_.func_77960_j() == p_184431_2_.func_77960_j()) && ItemStack.func_77970_a(p_184431_1_, p_184431_2_);
+     }
+-
++    // CB start
++    public int canHold(final ItemStack itemstack) {
++        int remains = itemstack.field_77994_a;
++        for (int i = 0; i < this.field_70462_a.length; ++i) {
++            if (this.field_70462_a[i] == null) {
++                return itemstack.field_77994_a;
++            }
++            if (this.field_70462_a[i] != null && this.field_70462_a[i].func_77973_b() == itemstack.func_77973_b() && this.field_70462_a[i].func_77985_e() && this.field_70462_a[i].field_77994_a < this.field_70462_a[i].func_77976_d() && this.field_70462_a[i].field_77994_a < this.func_70297_j_() && (!this.field_70462_a[i].func_77981_g() || this.field_70462_a[i].func_77960_j() == itemstack.func_77960_j()) && ItemStack.func_77970_a(this.field_70462_a[i], itemstack)) {
++                remains -= ((this.field_70462_a[i].func_77976_d() < this.func_70297_j_()) ? this.field_70462_a[i].func_77976_d() : this.func_70297_j_()) - this.field_70462_a[i].field_77994_a;
++            }
++            if (remains <= 0) {
++                return itemstack.field_77994_a;
++            }
++        }
++        return itemstack.field_77994_a - remains;
++    }
++    // CB end
+     public int func_70447_i()
+     {
+         for (int i = 0; i < this.field_70462_a.length; ++i)
+@@ -634,7 +704,7 @@
+ 
+     public int func_70297_j_()
+     {
+-        return 64;
++        return maxStack; // CB
+     }
+ 
+     public boolean func_184432_b(IBlockState p_184432_1_)
+@@ -706,7 +776,10 @@
+ 
+     @Nullable
+     public ItemStack func_70445_o()
+-    {
++    {	// CB start
++    	if (this.field_70457_g != null && this.field_70457_g.field_77994_a == 0) {
++            this.func_70437_b(null);
++        } // CB end
+         return this.field_70457_g;
+     }
+ 

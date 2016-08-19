@@ -24,7 +24,7 @@ import org.bukkit.DyeColor;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.inventory.meta.BannerMeta;
 
-@DelegateDeserialization(SerializableMeta.class)
+//@DelegateDeserialization(SerializableMeta.class)
 public class CraftMetaBanner extends CraftMetaItem implements BannerMeta
 {
     static final ItemMetaKey BASE;
@@ -76,7 +76,7 @@ public class CraftMetaBanner extends CraftMetaItem implements BannerMeta
         if (baseStr != null) {
             this.base = DyeColor.valueOf(baseStr);
         }
-        final Iterable<?> rawPatternList = SerializableMeta.getObject((Class<Iterable<?>>)Iterable.class, map, CraftMetaBanner.PATTERNS.BUKKIT, true);
+        final Iterable<?> rawPatternList = SerializableMeta.getObject(/*(Class<Iterable<?>>)*/Iterable.class, map, CraftMetaBanner.PATTERNS.BUKKIT, true);
         if (rawPatternList == null) {
             return;
         }
@@ -155,10 +155,10 @@ public class CraftMetaBanner extends CraftMetaItem implements BannerMeta
     ImmutableMap.Builder<String, Object> serialize(final ImmutableMap.Builder<String, Object> builder) {
         super.serialize(builder);
         if (this.base != null) {
-            builder.put((Object)CraftMetaBanner.BASE.BUKKIT, (Object)this.base.toString());
+            builder.put(/*(Object)*/CraftMetaBanner.BASE.BUKKIT, /*(Object)*/this.base.toString());
         }
         if (!this.patterns.isEmpty()) {
-            builder.put((Object)CraftMetaBanner.PATTERNS.BUKKIT, (Object)ImmutableList.copyOf((Collection)this.patterns));
+            builder.put(/*(Object)*/CraftMetaBanner.PATTERNS.BUKKIT, /*(Object)*/ImmutableList.copyOf(/*(Collection)*/this.patterns));
         }
         return builder;
     }

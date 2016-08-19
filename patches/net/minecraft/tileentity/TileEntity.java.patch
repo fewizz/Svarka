@@ -1,0 +1,23 @@
+--- ../src-base/minecraft/net/minecraft/tileentity/TileEntity.java
++++ ../src-work/minecraft/net/minecraft/tileentity/TileEntity.java
+@@ -20,6 +20,7 @@
+ import net.minecraftforge.fml.relauncher.SideOnly;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import org.bukkit.inventory.InventoryHolder;
+ 
+ public abstract class TileEntity implements net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound>
+ {
+@@ -533,4 +534,12 @@
+         func_145826_a(TileEntityEndGateway.class, "EndGateway");
+         func_145826_a(TileEntityCommandBlock.class, "Control");
+     }
++    // CraftBukkit start - add method
++    public InventoryHolder getOwner() {
++    	if (field_145850_b == null) return null;
++    	org.bukkit.block.BlockState state = field_145850_b.getWorld().getBlockAt(field_174879_c.func_177958_n(), field_174879_c.func_177956_o(), field_174879_c.func_177952_p()).getState();
++    	if (state instanceof InventoryHolder) return (InventoryHolder) state;
++    	return null;
++    }
++    // CraftBukkit end
+ }

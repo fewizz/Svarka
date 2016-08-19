@@ -27,6 +27,7 @@ import org.bukkit.craftbukkit.inventory.CraftContainer;
 import net.minecraft.inventory.Container;
 import org.bukkit.event.inventory.InventoryType;
 import net.minecraft.world.IInteractionObject;
+import ru.svarka.inventory.CBContainer;
 import net.minecraft.block.BlockAnvil;
 import net.minecraft.tileentity.TileEntityBeacon;
 import net.minecraft.entity.item.EntityMinecartHopper;
@@ -232,7 +233,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity
     
     @Override
     public InventoryView getOpenInventory() {
-        return this.getHandle().openContainer.getBukkitView();
+        return ((CBContainer)this.getHandle().openContainer).getBukkitView();
     }
     
     @Override
@@ -327,16 +328,16 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity
         if (this.getHandle().openContainer == formerContainer) {
             return null;
         }
-        this.getHandle().openContainer.checkReachable = false;
-        return this.getHandle().openContainer.getBukkitView();
+        ((CBContainer)this.getHandle().openContainer).checkReachable = false;
+        return ((CBContainer)this.getHandle().openContainer).getBukkitView();
     }
     
     private void openCustomInventory(final Inventory inventory, final EntityPlayerMP player, final String windowType) {
         if (player.connection == null) {
             return;
         }
-        Container container = new CraftContainer(inventory, this, player.nextContainerCounter());
-        container = CraftEventFactory.callInventoryOpenEvent(player, container);
+        CBContainer container = new CraftContainer(inventory, this, player.nextContainerCounter());
+        container = (CBContainer) CraftEventFactory.callInventoryOpenEvent(player, container);
         if (container == null) {
             return;
         }
@@ -362,9 +363,9 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity
         }
         this.getHandle().displayGui(new BlockWorkbench.InterfaceCraftingTable(this.getHandle().worldObj, new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ())));
         if (force) {
-            this.getHandle().openContainer.checkReachable = false;
+        	((CBContainer)this.getHandle().openContainer).checkReachable = false;
         }
-        return this.getHandle().openContainer.getBukkitView();
+        return ((CBContainer)this.getHandle().openContainer).getBukkitView();
     }
     
     @Override
@@ -384,9 +385,9 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity
         }
         this.getHandle().displayGui((IInteractionObject)container);
         if (force) {
-            this.getHandle().openContainer.checkReachable = false;
+        	((CBContainer)this.getHandle().openContainer).checkReachable = false;
         }
-        return this.getHandle().openContainer.getBukkitView();
+        return ((CBContainer)this.getHandle().openContainer).getBukkitView();
     }
     
     @Override
@@ -432,7 +433,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity
         final EntityVillager ev = ((CraftVillager)villager).getHandle();
         ev.setCustomer(this.getHandle());
         this.getHandle().displayVillagerTradeGui(ev);
-        return this.getHandle().openContainer.getBukkitView();
+        return ((CBContainer)this.getHandle().openContainer).getBukkitView();
     }
     
     @Override

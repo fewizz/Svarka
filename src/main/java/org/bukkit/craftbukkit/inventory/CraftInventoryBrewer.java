@@ -8,11 +8,13 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.block.BrewingStand;
 import org.bukkit.inventory.ItemStack;
 import net.minecraft.inventory.IInventory;
+import ru.svarka.inventory.ICBInventory;
+
 import org.bukkit.inventory.BrewerInventory;
 
 public class CraftInventoryBrewer extends CraftInventory implements BrewerInventory
 {
-    public CraftInventoryBrewer(final IInventory inventory) {
+    public CraftInventoryBrewer(final ICBInventory inventory) {
         super(inventory);
     }
     

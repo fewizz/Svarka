@@ -33,7 +33,7 @@ public class CraftProfileBanList implements BanList
     @Override
     public BanEntry getBanEntry(final String target) {
         Validate.notNull((Object)target, "Target cannot be null");
-        final GameProfile profile = MinecraftServer.getServer().getUserCache().getGameProfileForUsername(target);
+        final GameProfile profile = MinecraftServer.getServerInst().getPlayerProfileCache().getGameProfileForUsername(target);
         if (profile == null) {
             return null;
         }
@@ -47,12 +47,12 @@ public class CraftProfileBanList implements BanList
     @Override
     public BanEntry addBan(final String target, final String reason, final Date expires, final String source) {
         Validate.notNull((Object)target, "Ban target cannot be null");
-        final GameProfile profile = MinecraftServer.getServer().getUserCache().getGameProfileForUsername(target);
+        final GameProfile profile = MinecraftServer.getServerInst().getPlayerProfileCache().getGameProfileForUsername(target);
         if (profile == null) {
             return null;
         }
         final UserListBansEntry entry = new UserListBansEntry(profile, new Date(), StringUtils.isBlank(source) ? null : source, expires, StringUtils.isBlank(reason) ? null : reason);
-        ((UserList<K, UserListBansEntry>)this.list).addEntry(entry);
+        (/*(UserList<K, UserListBansEntry>)*/this.list).addEntry(entry);
         try {
             this.list.writeChanges();
         }
@@ -65,7 +65,7 @@ public class CraftProfileBanList implements BanList
     @Override
     public Set<BanEntry> getBanEntries() {
         final ImmutableSet.Builder<BanEntry> builder = ImmutableSet.builder();
-        for (final UserListEntry entry : (/*(UserList<K, UserListBansEntry>)*/this.list).getValues()) {
+        for (final UserListEntry entry : (/*(UserList<K, UserListBansEntry>)*/this.list).getValuesCB()) {
             final GameProfile profile = (GameProfile) entry.getValue();
             builder.add(new CraftProfileBanEntry(profile, (UserListBansEntry)entry, this.list));
         }
@@ -75,14 +75,14 @@ public class CraftProfileBanList implements BanList
     @Override
     public boolean isBanned(final String target) {
         Validate.notNull((Object)target, "Target cannot be null");
-        final GameProfile profile = MinecraftServer.getServer().getUserCache().getGameProfileForUsername(target);
+        final GameProfile profile = MinecraftServer.getServerInst().getPlayerProfileCache().getGameProfileForUsername(target);
         return profile != null && this.list.isBanned(profile);
     }
     
     @Override
     public void pardon(final String target) {
         Validate.notNull((Object)target, "Target cannot be null");
-        final GameProfile profile = MinecraftServer.getServer().getUserCache().getGameProfileForUsername(target);
+        final GameProfile profile = MinecraftServer.getServerInst().getPlayerProfileCache().getGameProfileForUsername(target);
         (/*(UserList<GameProfile, V>)*/this.list).removeEntry(profile);
     }
 }

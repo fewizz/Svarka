@@ -9,6 +9,8 @@ import net.minecraft.network.Packet;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.util.text.TextComponentString;
+import ru.svarka.inventory.CBContainer;
+
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import net.minecraft.entity.player.EntityPlayer;
 import org.bukkit.entity.HumanEntity;
@@ -18,7 +20,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.InventoryView;
 import net.minecraft.inventory.Container;
 
-public class CraftContainer extends Container
+public class CraftContainer extends CBContainer
 {
     private final InventoryView view;
     private InventoryType cachedType;

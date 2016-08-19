@@ -127,7 +127,7 @@ public final class CraftMagicNumbers implements UnsafeValues
     @Override
     public List<String> tabCompleteInternalStatisticOrAchievementName(final String token, final List<String> completions) {
         final List<String> matches = new ArrayList<String>();
-        final Iterator iterator = StatList.ALL_STATS.iterator();
+        final Iterator<StatBase> iterator = StatList.ALL_STATS.iterator();
         while (iterator.hasNext()) {
             final String statistic = iterator.next().statId;
             if (statistic.startsWith(token)) {

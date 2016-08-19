@@ -21,7 +21,7 @@ import java.util.List;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.inventory.meta.FireworkMeta;
 
-@DelegateDeserialization(SerializableMeta.class)
+//@DelegateDeserialization(SerializableMeta.class)
 class CraftMetaFirework extends CraftMetaItem implements FireworkMeta
 {
     static final ItemMetaKey FIREWORKS;
@@ -158,7 +158,7 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta
         if (power != null) {
             this.setPower(power);
         }
-        final Iterable<?> effects = SerializableMeta.getObject((Class<Iterable<?>>)Iterable.class, map, CraftMetaFirework.EXPLOSIONS.BUKKIT, true);
+        final Iterable<?> effects = SerializableMeta.getObject(/*(Class<Iterable<?>>)*/Iterable.class, map, CraftMetaFirework.EXPLOSIONS.BUKKIT, true);
         this.safelyAddEffects(effects);
     }
     
@@ -294,10 +294,10 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta
     ImmutableMap.Builder<String, Object> serialize(final ImmutableMap.Builder<String, Object> builder) {
         super.serialize(builder);
         if (this.hasEffects()) {
-            builder.put((Object)CraftMetaFirework.EXPLOSIONS.BUKKIT, (Object)ImmutableList.copyOf((Collection)this.effects));
+            builder.put(CraftMetaFirework.EXPLOSIONS.BUKKIT, ImmutableList.copyOf(this.effects));
         }
         if (this.hasPower()) {
-            builder.put((Object)CraftMetaFirework.FLIGHT.BUKKIT, (Object)this.power);
+            builder.put(CraftMetaFirework.FLIGHT.BUKKIT, this.power);
         }
         return builder;
     }

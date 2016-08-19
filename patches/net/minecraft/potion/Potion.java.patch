@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/potion/Potion.java
++++ ../src-work/minecraft/net/minecraft/potion/Potion.java
+@@ -30,7 +30,7 @@
+     private final int field_76414_N;
+     private String field_76416_I = "";
+     private int field_76417_J = -1;
+-    private double field_76412_L;
++    public double field_76412_L;
+     private boolean field_188415_h;
+ 
+     @Nullable

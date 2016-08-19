@@ -1,0 +1,18 @@
+--- ../src-base/minecraft/net/minecraft/world/storage/ISaveHandler.java
++++ ../src-work/minecraft/net/minecraft/world/storage/ISaveHandler.java
+@@ -1,6 +1,8 @@
+ package net.minecraft.world.storage;
+ 
+ import java.io.File;
++import java.util.UUID;
++
+ import net.minecraft.nbt.NBTTagCompound;
+ import net.minecraft.world.MinecraftException;
+ import net.minecraft.world.WorldProvider;
+@@ -28,4 +30,6 @@
+     File func_75758_b(String p_75758_1_);
+ 
+     TemplateManager func_186340_h();
++    
++    UUID getUUID();
+ }

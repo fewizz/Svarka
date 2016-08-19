@@ -58,6 +58,8 @@ import net.minecraft.stats.StatBase;
 import org.bukkit.craftbukkit.CraftStatistic;
 import org.bukkit.Achievement;
 import net.minecraft.world.WorldServer;
+import ru.svarka.inventory.CBContainer;
+
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import java.util.Collection;
@@ -1149,28 +1151,28 @@ public class CraftPlayer extends CraftHumanEntity implements Player
     
     @Override
     public void setMetadata(final String metadataKey, final MetadataValue newMetadataValue) {
-        ((MetadataStoreBase<CraftPlayer>)this.server.getPlayerMetadata()).setMetadata(this, metadataKey, newMetadataValue);
+        (/*(MetadataStoreBase<CraftPlayer>)*/this.server.getPlayerMetadata()).setMetadata(this, metadataKey, newMetadataValue);
     }
     
     @Override
     public List<MetadataValue> getMetadata(final String metadataKey) {
-        return ((MetadataStoreBase<CraftPlayer>)this.server.getPlayerMetadata()).getMetadata(this, metadataKey);
+        return (/*(MetadataStoreBase<CraftPlayer>)*/this.server.getPlayerMetadata()).getMetadata(this, metadataKey);
     }
     
     @Override
     public boolean hasMetadata(final String metadataKey) {
-        return ((MetadataStoreBase<CraftPlayer>)this.server.getPlayerMetadata()).hasMetadata(this, metadataKey);
+        return (/*(MetadataStoreBase<CraftPlayer>)*/this.server.getPlayerMetadata()).hasMetadata(this, metadataKey);
     }
     
     @Override
     public void removeMetadata(final String metadataKey, final Plugin owningPlugin) {
-        ((MetadataStoreBase<CraftPlayer>)this.server.getPlayerMetadata()).removeMetadata(this, metadataKey, owningPlugin);
+        (/*(MetadataStoreBase<CraftPlayer>)*/this.server.getPlayerMetadata()).removeMetadata(this, metadataKey, owningPlugin);
     }
     
     @Override
     public boolean setWindowProperty(final InventoryView.Property prop, final int value) {
         final Container container = this.getHandle().openContainer;
-        if (container.getBukkitView().getType() != prop.getType()) {
+        if (((CBContainer)container).getBukkitView().getType() != prop.getType()) {
             return false;
         }
         this.getHandle().sendProgressBarUpdate(container, prop.getId(), value);
@@ -1355,13 +1357,13 @@ public class CraftPlayer extends CraftHumanEntity implements Player
     }
     
     @Override
-    public Entity getSpectatorTarget() {
+    public org.bukkit.entity.Entity getSpectatorTarget() {
         final net.minecraft.entity.Entity followed = this.getHandle().getSpectatingEntity();
         return (followed == this.getHandle()) ? null : followed.getBukkitEntity();
     }
     
     @Override
-    public void setSpectatorTarget(final Entity entity) {
+    public void setSpectatorTarget(final org.bukkit.entity.Entity entity) {
         Preconditions.checkArgument(this.getGameMode() == GameMode.SPECTATOR, (Object)"Player must be in spectator mode");
         this.getHandle().setSpectatingEntity((entity == null) ? null : ((CraftEntity)entity).getHandle());
     }

@@ -13,7 +13,7 @@ import java.util.Map;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 
-@DelegateDeserialization(SerializableMeta.class)
+//@DelegateDeserialization(SerializableMeta.class)
 class CraftMetaEnchantedBook extends CraftMetaItem implements EnchantmentStorageMeta
 {
     static final ItemMetaKey STORED_ENCHANTMENTS;

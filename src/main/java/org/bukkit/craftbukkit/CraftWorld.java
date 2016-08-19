@@ -403,8 +403,15 @@ public class CraftWorld implements World
     }
     
     private boolean unloadChunk0(final int x, final int z, final boolean save) {
-        final net.minecraft.world.chunk.Chunk chunk = this.world.getChunkProvider().getChunkIfLoaded(x, z);
-        return chunk == null || this.world.getChunkProvider().unloadChunk(chunk, chunk.mustSave || save);
+        final net.minecraft.world.chunk.Chunk chunk = this.world.getChunkProvider().getLoadedChunk(x, z);
+        if(chunk == null) {
+        	return true;
+        }
+        this.world.getChunkProvider().unload(chunk);
+        if(chunk.unloaded) {
+        	return true;
+        }
+        return false;
     }
     
     @Override
@@ -421,7 +428,7 @@ public class CraftWorld implements World
             playerChunk.chunk = chunk;
         }
         if (chunk != null) {
-            this.world.getChunkProvider().id2ChunkMap.put(chunkKey, (Object)chunk);
+            this.world.getChunkProvider().id2ChunkMap.put(chunkKey, /*(Object)*/chunk);
             chunk.onChunkLoad();
             chunk.loadNearby(this.world.getChunkProvider(), this.world.getChunkProvider().chunkGenerator, true);
             this.refreshChunk(x, z);
@@ -668,7 +675,7 @@ public class CraftWorld implements World
                 final int flag = ((CraftBlockState)blockstate).getFlag();
                 delegate.setTypeIdAndData(x, y, z, typeId, data);
                 final IBlockState newBlock = this.world.getBlockState(position);
-                this.world.notifyAndUpdatePhysics(position, null, oldBlock, newBlock, flag);
+                this.world.markAndNotifyBlock(position, null, oldBlock, newBlock, flag);
             }
             this.world.capturedBlockStates.clear();
             return true;
@@ -934,7 +941,7 @@ public class CraftWorld implements World
     @Override
     public Collection<org.bukkit.entity.Entity> getNearbyEntities(final Location location, final double x, final double y, final double z) {
         if (location == null || !location.getWorld().equals(this)) {
-            return (Collection<org.bukkit.entity.Entity>)Collections.emptyList();
+            return /*(Collection<org.bukkit.entity.Entity>)*/Collections.emptyList();
         }
         final AxisAlignedBB bb = new AxisAlignedBB(location.getX() - x, location.getY() - y, location.getZ() - z, location.getX() + x, location.getY() + y, location.getZ() + z);
         final List<Entity> entityList = this.getHandle().getEntitiesInAABBexcluding(null, bb, null);
@@ -1561,22 +1568,22 @@ public class CraftWorld implements World
     
     @Override
     public void setMetadata(final String metadataKey, final MetadataValue newMetadataValue) {
-        ((MetadataStoreBase<CraftWorld>)this.server.getWorldMetadata()).setMetadata(this, metadataKey, newMetadataValue);
+        (/*(MetadataStoreBase<CraftWorld>)*/this.server.getWorldMetadata()).setMetadata(this, metadataKey, newMetadataValue);
     }
     
     @Override
     public List<MetadataValue> getMetadata(final String metadataKey) {
-        return ((MetadataStoreBase<CraftWorld>)this.server.getWorldMetadata()).getMetadata(this, metadataKey);
+        return (/*(MetadataStoreBase<CraftWorld>)*/this.server.getWorldMetadata()).getMetadata(this, metadataKey);
     }
     
     @Override
     public boolean hasMetadata(final String metadataKey) {
-        return ((MetadataStoreBase<CraftWorld>)this.server.getWorldMetadata()).hasMetadata(this, metadataKey);
+        return (/*(MetadataStoreBase<CraftWorld>)*/this.server.getWorldMetadata()).hasMetadata(this, metadataKey);
     }
     
     @Override
     public void removeMetadata(final String metadataKey, final Plugin owningPlugin) {
-        ((MetadataStoreBase<CraftWorld>)this.server.getWorldMetadata()).removeMetadata(this, metadataKey, owningPlugin);
+        (/*(MetadataStoreBase<CraftWorld>)*/this.server.getWorldMetadata()).removeMetadata(this, metadataKey, owningPlugin);
     }
     
     @Override

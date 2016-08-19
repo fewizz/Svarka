@@ -1,0 +1,19 @@
+--- ../src-base/minecraft/net/minecraft/item/crafting/RecipeFireworks.java
++++ ../src-work/minecraft/net/minecraft/item/crafting/RecipeFireworks.java
+@@ -11,10 +11,14 @@
+ import net.minecraft.nbt.NBTTagList;
+ import net.minecraft.world.World;
+ 
+-public class RecipeFireworks implements IRecipe
++public class RecipeFireworks extends ShapelessRecipes implements IRecipe
+ {
+-    private ItemStack field_92102_a;
++    public RecipeFireworks() {
++		super(new ItemStack(Items.field_151152_bP, 0, 0), java.util.Arrays.asList(new ItemStack(Items.field_151016_H, 0, 5)));
++	}
+ 
++	private ItemStack field_92102_a;
++
+     public boolean func_77569_a(InventoryCrafting p_77569_1_, World p_77569_2_)
+     {
+         this.field_92102_a = null;

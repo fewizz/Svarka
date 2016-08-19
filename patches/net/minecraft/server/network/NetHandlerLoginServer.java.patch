@@ -1,0 +1,53 @@
+--- ../src-base/minecraft/net/minecraft/server/network/NetHandlerLoginServer.java
++++ ../src-work/minecraft/net/minecraft/server/network/NetHandlerLoginServer.java
+@@ -30,6 +30,11 @@
+ import org.apache.commons.lang3.Validate;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++//CraftBukkit start
++import org.bukkit.craftbukkit.util.Waitable;
++import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
++import org.bukkit.event.player.PlayerPreLoginEvent;
++// CraftBukkit end
+ 
+ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable
+ {
+@@ -45,6 +50,7 @@
+     private final String field_147334_j = "";
+     private SecretKey field_147335_k;
+     private EntityPlayerMP field_181025_l;
++    public String hostname = ""; // CraftBukkit - add field
+ 
+     public NetHandlerLoginServer(MinecraftServer p_i45298_1_, NetworkManager p_i45298_2_)
+     {
+@@ -99,11 +105,13 @@
+             this.field_147337_i = this.func_152506_a(this.field_147337_i);
+         }
+ 
+-        String s = this.field_147327_f.func_184103_al().func_148542_a(this.field_147333_a.func_74430_c(), this.field_147337_i);
++        //String s = this.server.getPlayerList().allowUserToConnect(this.networkManager.getRemoteAddress(), this.loginGameProfile);
++        // CraftBukkit start - fire PlayerLoginEvent
++        EntityPlayerMP s = this.field_147327_f.func_184103_al().allowUserToConnect(this, this.field_147337_i, hostname);
+ 
+-        if (s != null)
++        if (s == null)
+         {
+-            this.func_147322_a(s);
++            //this.closeConnection(s);
+         }
+         else
+         {
+@@ -126,11 +134,11 @@
+             if (entityplayermp != null)
+             {
+                 this.field_147328_g = NetHandlerLoginServer.LoginState.DELAY_ACCEPT;
+-                this.field_181025_l = this.field_147327_f.func_184103_al().func_148545_a(this.field_147337_i);
++                this.field_181025_l = this.field_147327_f.func_184103_al().createPlayerForUser(this.field_147337_i, s);
+             }
+             else
+             {
+-                net.minecraftforge.fml.common.network.internal.FMLNetworkHandler.fmlServerHandshake(this.field_147327_f.func_184103_al(), this.field_147333_a, this.field_147327_f.func_184103_al().func_148545_a(this.field_147337_i));
++                net.minecraftforge.fml.common.network.internal.FMLNetworkHandler.fmlServerHandshake(this.field_147327_f.func_184103_al(), this.field_147333_a, this.field_147327_f.func_184103_al().createPlayerForUser(this.field_147337_i, s));
+             }
+         }
+     }

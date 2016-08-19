@@ -26,9 +26,9 @@ public abstract class CraftThrownPotion extends CraftProjectile implements Throw
     
     @Override
     public Collection<PotionEffect> getEffects() {
-        final ImmutableList.Builder<PotionEffect> builder = (ImmutableList.Builder<PotionEffect>)ImmutableList.builder();
+        final ImmutableList.Builder<PotionEffect> builder = /*(ImmutableList.Builder<PotionEffect>)*/ImmutableList.builder();
         for (final net.minecraft.potion.PotionEffect effect : PotionUtils.getEffectsFromStack(this.getHandle().getPotion())) {
-            builder.add((Object)CraftPotionUtil.toBukkit(effect));
+            builder.add(/*(Object)*/CraftPotionUtil.toBukkit(effect));
         }
         return (Collection<PotionEffect>)builder.build();
     }

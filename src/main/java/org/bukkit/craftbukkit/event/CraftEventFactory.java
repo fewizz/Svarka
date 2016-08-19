@@ -142,6 +142,8 @@ import net.minecraft.world.World;
 import org.bukkit.event.Event;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import ru.svarka.inventory.CBContainer;
+
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -769,12 +771,12 @@ public class CraftEventFactory
         }
         final CraftServer server = player.worldObj.getServer();
         final CraftPlayer craftPlayer = player.getBukkitEntity();
-        player.openContainer.transferTo(container, craftPlayer);
-        final InventoryOpenEvent event = new InventoryOpenEvent(container.getBukkitView());
+        ((CBContainer)player.openContainer).transferTo((CBContainer) container, craftPlayer);
+        final InventoryOpenEvent event = new InventoryOpenEvent(((CBContainer) container).getBukkitView());
         event.setCancelled(cancelled);
         server.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
-            container.transferTo(player.openContainer, craftPlayer);
+            ((CBContainer) container).transferTo((CBContainer) player.openContainer, craftPlayer);
             return null;
         }
         return container;
@@ -894,9 +896,9 @@ public class CraftEventFactory
     }
     
     public static void handleInventoryCloseEvent(final EntityPlayer human) {
-        final InventoryCloseEvent event = new InventoryCloseEvent(human.openContainer.getBukkitView());
+        final InventoryCloseEvent event = new InventoryCloseEvent(((CBContainer) human.openContainer).getBukkitView());
         human.worldObj.getServer().getPluginManager().callEvent(event);
-        human.openContainer.transferTo(human.inventoryContainer, human.getBukkitEntity());
+        ((CBContainer) human.openContainer).transferTo((CBContainer) human.inventoryContainer, human.getBukkitEntity());
     }
     
     public static void handleEditBookEvent(final EntityPlayerMP player, final net.minecraft.item.ItemStack newBookItem) {

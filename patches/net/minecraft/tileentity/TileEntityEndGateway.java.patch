@@ -1,0 +1,13 @@
+--- ../src-base/minecraft/net/minecraft/tileentity/TileEntityEndGateway.java
++++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityEndGateway.java
+@@ -30,8 +30,8 @@
+     private static final Logger field_184314_a = LogManager.getLogger();
+     private long field_184315_f;
+     private int field_184316_g;
+-    private BlockPos field_184317_h;
+-    private boolean field_184318_i;
++    public BlockPos field_184317_h;
++    public boolean field_184318_i;
+ 
+     public NBTTagCompound func_189515_b(NBTTagCompound p_189515_1_)
+     {

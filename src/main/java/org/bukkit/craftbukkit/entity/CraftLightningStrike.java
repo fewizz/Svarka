@@ -5,7 +5,6 @@
 package org.bukkit.craftbukkit.entity;
 
 import org.bukkit.entity.EntityType;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.LightningStrike;
@@ -18,7 +17,7 @@ public class CraftLightningStrike extends CraftEntity implements LightningStrike
     
     @Override
     public boolean isEffect() {
-        return ((EntityLightningBolt)super.getHandle()).isEffect;
+        return ((EntityLightningBolt)super.getHandle()).effectOnly;
     }
     
     @Override

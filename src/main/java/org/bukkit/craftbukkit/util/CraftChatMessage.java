@@ -25,7 +25,7 @@ public final class CraftChatMessage
     private static final Pattern LINK_PATTERN;
     
     static {
-        LINK_PATTERN = Pattern.compile("((?:(?:https?):\\/\\/)?(?:[-\\w_\\.]{2,}\\.[a-z]{2,4}.*?(?=[\\.\\?!,;:]?(?:[" + String.valueOf('ง') + " \\n]|$))))");
+        LINK_PATTERN = Pattern.compile("((?:(?:https?):\\/\\/)?(?:[-\\w_\\.]{2,}\\.[a-z]{2,4}.*?(?=[\\.\\?!,;:]?(?:[" + String.valueOf('ยง') + " \\n]|$))))");
     }
     
     public static ITextComponent[] fromString(final String message) {
@@ -33,7 +33,7 @@ public final class CraftChatMessage
     }
     
     public static ITextComponent[] fromString(final String message, final boolean keepNewlines) {
-        return new StringMessage(message, keepNewlines, null).getOutput();
+        return new StringMessage(message, keepNewlines).getOutput();
     }
     
     public static String fromComponent(final ITextComponent component) {
@@ -108,7 +108,7 @@ public final class CraftChatMessage
                 }
             }
         }
-        final List extras2 = component.getSiblings();
+        final List<ITextComponent> extras2 = component.getSiblings();
         for (int i = 0; i < extras2.size(); ++i) {
             final ITextComponent comp = extras2.get(i);
             if (comp.getStyle() != null && comp.getStyle().getClickEvent() == null) {
@@ -145,12 +145,12 @@ public final class CraftChatMessage
         private final String message;
         
         static {
-            INCREMENTAL_PATTERN = Pattern.compile("(" + String.valueOf('ง') + "[0-9a-fk-or])|(\\n)|((?:(?:https?):\\/\\/)?(?:[-\\w_\\.]{2,}\\.[a-z]{2,4}.*?(?=[\\.\\?!,;:]?(?:[" + String.valueOf('ง') + " \\n]|$))))", 2);
-            final ImmutableMap.Builder<Character, TextFormatting> builder = (ImmutableMap.Builder<Character, TextFormatting>)ImmutableMap.builder();
+            INCREMENTAL_PATTERN = Pattern.compile("(" + String.valueOf('ยง') + "[0-9a-fk-or])|(\\n)|((?:(?:https?):\\/\\/)?(?:[-\\w_\\.]{2,}\\.[a-z]{2,4}.*?(?=[\\.\\?!,;:]?(?:[" + String.valueOf('ยง') + " \\n]|$))))", 2);
+            final ImmutableMap.Builder<Character, TextFormatting> builder = /*(ImmutableMap.Builder<Character, TextFormatting>)*/ImmutableMap.builder();
             TextFormatting[] values;
             for (int length = (values = TextFormatting.values()).length, i = 0; i < length; ++i) {
                 final TextFormatting format = values[i];
-                builder.put((Object)Character.toLowerCase(format.toString().charAt(1)), (Object)format);
+                builder.put(/*(Object)*/Character.toLowerCase(format.toString().charAt(1)), /*(Object)*/format);
             }
             formatMap = (Map)builder.build();
         }
@@ -208,7 +208,6 @@ public final class CraftChatMessage
                                     throw new AssertionError((Object)"Unexpected message format");
                                 }
                             }
-                            break;
                         }
                         case 2: {
                             if (keepNewlines) {

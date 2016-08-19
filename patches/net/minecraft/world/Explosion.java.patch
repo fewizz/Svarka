@@ -1,0 +1,116 @@
+--- ../src-base/minecraft/net/minecraft/world/Explosion.java
++++ ../src-work/minecraft/net/minecraft/world/Explosion.java
+@@ -13,6 +13,7 @@
+ import net.minecraft.enchantment.EnchantmentProtection;
+ import net.minecraft.entity.Entity;
+ import net.minecraft.entity.EntityLivingBase;
++import net.minecraft.entity.item.EntityFallingBlock;
+ import net.minecraft.entity.item.EntityTNTPrimed;
+ import net.minecraft.entity.player.EntityPlayer;
+ import net.minecraft.init.Blocks;
+@@ -26,7 +27,18 @@
+ import net.minecraft.util.math.Vec3d;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.block.BlockExplodeEvent;
++import org.bukkit.event.entity.EntityExplodeEvent;
+ 
++//CraftBukkit start
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.EntityExplodeEvent;
++import org.bukkit.Location;
++import org.bukkit.event.block.BlockExplodeEvent;
++// CraftBukkit end
++
+ public class Explosion
+ {
+     private final boolean field_77286_a;
+@@ -36,11 +48,12 @@
+     private final double field_77284_b;
+     private final double field_77285_c;
+     private final double field_77282_d;
+-    private final Entity field_77283_e;
++    public final Entity field_77283_e;
+     private final float field_77280_f;
+     private final List<BlockPos> field_77281_g;
+     private final Map<EntityPlayer, Vec3d> field_77288_k;
+     private final Vec3d position;
++    public boolean wasCanceled = false; // CraftBukkit - add field
+ 
+     @SideOnly(Side.CLIENT)
+     public Explosion(World p_i45752_1_, Entity p_i45752_2_, double p_i45752_3_, double p_i45752_5_, double p_i45752_7_, float p_i45752_9_, List<BlockPos> p_i45752_10_)
+@@ -62,7 +75,7 @@
+         this.field_77288_k = Maps.<EntityPlayer, Vec3d>newHashMap();
+         this.field_77287_j = p_i45754_1_;
+         this.field_77283_e = p_i45754_2_;
+-        this.field_77280_f = p_i45754_9_;
++        this.field_77280_f = (float) Math.max(p_i45754_9_, 0.0); // CraftBukkit - clamp bad values
+         this.field_77284_b = p_i45754_3_;
+         this.field_77285_c = p_i45754_5_;
+         this.field_77282_d = p_i45754_7_;
+@@ -155,7 +168,16 @@
+                         d9 = d9 / d13;
+                         double d14 = (double)this.field_77287_j.func_72842_a(vec3d, entity.func_174813_aQ());
+                         double d10 = (1.0D - d12) * d14;
+-                        entity.func_70097_a(DamageSource.func_94539_a(this), (float)((int)((d10 * d10 + d10) / 2.0D * 7.0D * (double)f3 + 1.0D)));
++                        //entity.attackEntityFrom(DamageSource.causeExplosionDamage(this), (float)((int)((d10 * d10 + d10) / 2.0D * 7.0D * (double)f3 + 1.0D)));
++                        // CraftBukkit start
++                        CraftEventFactory.entityDamage = field_77283_e;
++                        entity.forceExplosionKnockback = false;
++                        boolean wasDamaged = entity.func_70097_a(DamageSource.func_94539_a(this), (float) ((int) ((d13 * d13 + d13) / 2.0D * 7.0D * (double) f3 + 1.0D)));
++                        CraftEventFactory.entityDamage = null;
++                        if (!wasDamaged && !(entity instanceof EntityTNTPrimed || entity instanceof EntityFallingBlock) && !entity.forceExplosionKnockback) {
++                        	continue;
++                        }
++                        // CraftBukkit end
+                         double d11 = 1.0D;
+ 
+                         if (entity instanceof EntityLivingBase)
+@@ -197,6 +219,45 @@
+ 
+         if (this.field_82755_b)
+         {
++        	// CraftBukkit start
++        	final org.bukkit.World bworld = this.field_77287_j.getWorld();
++            final org.bukkit.entity.Entity explode = (this.field_77283_e == null) ? null : this.field_77283_e.getBukkitEntity();
++            final Location location = new Location(bworld, this.field_77284_b, this.field_77285_c, this.field_77282_d);
++            final List<org.bukkit.block.Block> blockList = /*(List<Block>)*/Lists.newArrayList();
++            for (int i1 = this.field_77281_g.size() - 1; i1 >= 0; --i1) {
++                final BlockPos cpos = this.field_77281_g.get(i1);
++                final org.bukkit.block.Block bblock = bworld.getBlockAt(cpos.func_177958_n(), cpos.func_177956_o(), cpos.func_177952_p());
++                if (bblock.getType() != org.bukkit.Material.AIR) {
++                    blockList.add(bblock);
++                }
++            }
++            boolean cancelled;
++            List<org.bukkit.block.Block> bukkitBlocks;
++            float yield;
++            if (explode != null) {
++                final EntityExplodeEvent event = new EntityExplodeEvent(explode, location, blockList, 1.0f / this.field_77280_f);
++                this.field_77287_j.getServer().getPluginManager().callEvent(event);
++                cancelled = event.isCancelled();
++                bukkitBlocks = event.blockList();
++                yield = event.getYield();
++            }
++            else {
++                final BlockExplodeEvent event2 = new BlockExplodeEvent(location.getBlock(), blockList, 1.0f / this.field_77280_f);
++                this.field_77287_j.getServer().getPluginManager().callEvent(event2);
++                cancelled = event2.isCancelled();
++                bukkitBlocks = event2.blockList();
++                yield = event2.getYield();
++            }
++            this.field_77281_g.clear();
++            for (final org.bukkit.block.Block bblock2 : bukkitBlocks) {
++                final BlockPos coords = new BlockPos(bblock2.getX(), bblock2.getY(), bblock2.getZ());
++                this.field_77281_g.add(coords);
++            }
++            if (cancelled) {
++                this.wasCanceled = true;
++                return;
++            }
++            // CraftBukkit end
+             for (BlockPos blockpos : this.field_77281_g)
+             {
+                 IBlockState iblockstate = this.field_77287_j.func_180495_p(blockpos);

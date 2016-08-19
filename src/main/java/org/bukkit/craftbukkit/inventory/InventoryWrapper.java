@@ -7,6 +7,8 @@ package org.bukkit.craftbukkit.inventory;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.util.CraftChatMessage;
 import net.minecraft.util.text.ITextComponent;
+import ru.svarka.inventory.ICBInventory;
+
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.craftbukkit.entity.CraftHumanEntity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -17,7 +19,7 @@ import java.util.List;
 import org.bukkit.inventory.Inventory;
 import net.minecraft.inventory.IInventory;
 
-public class InventoryWrapper implements IInventory
+public class InventoryWrapper implements ICBInventory
 {
     private final Inventory inventory;
     private final List<HumanEntity> viewers;

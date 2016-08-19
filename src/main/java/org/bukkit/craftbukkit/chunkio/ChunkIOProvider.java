@@ -25,7 +25,7 @@ class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChu
     public Chunk callStage1(final QueuedChunk queuedChunk) throws RuntimeException {
         try {
             final AnvilChunkLoader loader = queuedChunk.loader;
-            final Object[] data = loader.loadChunk(queuedChunk.world, queuedChunk.x, queuedChunk.z);
+            final Object[] data = loader.loadChunk__Async(queuedChunk.world, queuedChunk.x, queuedChunk.z);
             if (data != null) {
                 queuedChunk.compound = (NBTTagCompound)data[1];
                 return (Chunk)data[0];
@@ -40,12 +40,12 @@ class ChunkIOProvider implements AsynchronousExecutor.CallBackProvider<QueuedChu
     @Override
     public void callStage2(final QueuedChunk queuedChunk, final Chunk chunk) throws RuntimeException {
         if (chunk == null) {
-            queuedChunk.provider.originalGetChunkAt(queuedChunk.x, queuedChunk.z);
+            queuedChunk.provider.getLoadedChunk(queuedChunk.x, queuedChunk.z);
             return;
         }
-        queuedChunk.loader.loadEntities(chunk, queuedChunk.compound.getCompoundTag("Level"), queuedChunk.world);
+        queuedChunk.loader.loadEntities(queuedChunk.world, queuedChunk.compound.getCompoundTag("Level"), chunk);
         chunk.setLastSaveTime(queuedChunk.provider.worldObj.getTotalWorldTime());
-        queuedChunk.provider.id2ChunkMap.put(ChunkPos.chunkXZ2Int(queuedChunk.x, queuedChunk.z), (Object)chunk);
+        queuedChunk.provider.id2ChunkMap.put(ChunkPos.chunkXZ2Int(queuedChunk.x, queuedChunk.z), /*(Object)*/chunk);
         chunk.onChunkLoad();
         if (queuedChunk.provider.chunkGenerator != null) {
             queuedChunk.provider.chunkGenerator.recreateStructures(chunk, queuedChunk.x, queuedChunk.z);

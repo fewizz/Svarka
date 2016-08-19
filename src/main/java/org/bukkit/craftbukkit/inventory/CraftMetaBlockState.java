@@ -54,7 +54,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.inventory.meta.BlockStateMeta;
 
-@DelegateDeserialization(SerializableMeta.class)
+//@DelegateDeserialization(SerializableMeta.class)
 public class CraftMetaBlockState extends CraftMetaItem implements BlockStateMeta
 {
     static final ItemMetaKey BLOCK_ENTITY_TAG;
@@ -124,7 +124,7 @@ public class CraftMetaBlockState extends CraftMetaItem implements BlockStateMeta
     @Override
     ImmutableMap.Builder<String, Object> serialize(final ImmutableMap.Builder<String, Object> builder) {
         super.serialize(builder);
-        builder.put((Object)"blockMaterial", (Object)this.material.name());
+        builder.put(/*(Object)*/"blockMaterial", /*(Object)*/this.material.name());
         return builder;
     }
     

@@ -1,0 +1,57 @@
+--- ../src-base/minecraft/net/minecraft/entity/player/EntityPlayer.java
++++ ../src-work/minecraft/net/minecraft/entity/player/EntityPlayer.java
+@@ -95,7 +95,23 @@
+ import net.minecraft.world.WorldServer;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import ru.svarka.inventory.CBContainer;
+ 
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++
++//CraftBukkit start
++import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.craftbukkit.entity.CraftItem;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.entity.Player;
++import org.bukkit.event.entity.EntityCombustByEntityEvent;
++import org.bukkit.event.player.PlayerBedEnterEvent;
++import org.bukkit.event.player.PlayerBedLeaveEvent;
++import org.bukkit.event.player.PlayerDropItemEvent;
++import org.bukkit.event.player.PlayerVelocityEvent;
++import org.bukkit.util.Vector;
++// CraftBukkit end
++
+ @SuppressWarnings("incomplete-switch")
+ public abstract class EntityPlayer extends EntityLivingBase
+ {
+@@ -123,9 +139,9 @@
+     public double field_71094_bP;
+     public double field_71095_bQ;
+     public double field_71085_bR;
+-    protected boolean field_71083_bS;
++    public boolean field_71083_bS;
+     public BlockPos field_71081_bT;
+-    private int field_71076_b;
++    public int field_71076_b;
+     public float field_71079_bU;
+     @SideOnly(Side.CLIENT)
+     public float field_71082_cx;
+@@ -147,7 +163,17 @@
+     private ItemStack field_184831_bT;
+     private final CooldownTracker field_184832_bU = this.func_184815_l();
+     public EntityFishHook field_71104_cf;
+-
++    // CraftBukkit start
++    public boolean fauxSleeping;
++    public String spawnWorld = "";
++    public int oldLevel = -1;
++    
++    @Override
++    public CraftHumanEntity getBukkitEntity() {
++    	return (CraftHumanEntity) super.getBukkitEntity();
++    }
++    // CraftBukkit end
++    
+     protected CooldownTracker func_184815_l()
+     {
+         return new CooldownTracker();

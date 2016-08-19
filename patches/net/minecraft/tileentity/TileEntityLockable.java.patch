@@ -1,0 +1,10 @@
+--- ../src-base/minecraft/net/minecraft/tileentity/TileEntityLockable.java
++++ ../src-work/minecraft/net/minecraft/tileentity/TileEntityLockable.java
+@@ -7,6 +7,7 @@
+ import net.minecraft.world.IInteractionObject;
+ import net.minecraft.world.ILockableContainer;
+ import net.minecraft.world.LockCode;
++import ru.svarka.inventory.ICBLockableContainer;
+ 
+ public abstract class TileEntityLockable extends TileEntity implements IInteractionObject, ILockableContainer
+ {

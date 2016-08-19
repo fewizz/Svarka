@@ -29,7 +29,7 @@ public class CraftFirework extends CraftEntity implements Firework
         ItemStack item = (ItemStack)this.getHandle().getDataManager().get(EntityFireworkRocket.FIREWORK_ITEM).orNull();
         if (item == null) {
             item = new ItemStack(Items.FIREWORKS);
-            this.getHandle().getDataManager().set(EntityFireworkRocket.FIREWORK_ITEM, (Optional<ItemStack>)Optional.of((Object)item));
+            this.getHandle().getDataManager().set(EntityFireworkRocket.FIREWORK_ITEM, /*(Optional<ItemStack>)*/Optional.of(/*(Object)*/item));
         }
         this.item = CraftItemStack.asCraftMirror(item);
         if (this.item.getType() != Material.FIREWORK) {

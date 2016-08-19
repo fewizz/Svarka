@@ -27,7 +27,7 @@ import java.util.List;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.inventory.meta.BookMeta;
 
-@DelegateDeserialization(SerializableMeta.class)
+//@DelegateDeserialization(SerializableMeta.class)
 public class CraftMetaBook extends CraftMetaItem implements BookMeta
 {
     static final ItemMetaKey BOOK_TITLE;
@@ -103,7 +103,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta
         this.pages = new ArrayList<ITextComponent>();
         this.setAuthor(SerializableMeta.getString(map, CraftMetaBook.BOOK_AUTHOR.BUKKIT, true));
         this.setTitle(SerializableMeta.getString(map, CraftMetaBook.BOOK_TITLE.BUKKIT, true));
-        final Iterable<?> pages = SerializableMeta.getObject((Class<Iterable<?>>)Iterable.class, map, CraftMetaBook.BOOK_PAGES.BUKKIT, true);
+        final Iterable<?> pages = SerializableMeta.getObject(/*(Class<Iterable<?>>)*/Iterable.class, map, CraftMetaBook.BOOK_PAGES.BUKKIT, true);
         if (pages != null) {
             for (final Object page : pages) {
                 if (page instanceof String) {
@@ -368,20 +368,20 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta
     ImmutableMap.Builder<String, Object> serialize(final ImmutableMap.Builder<String, Object> builder) {
         super.serialize(builder);
         if (this.hasTitle()) {
-            builder.put((Object)CraftMetaBook.BOOK_TITLE.BUKKIT, (Object)this.title);
+            builder.put(CraftMetaBook.BOOK_TITLE.BUKKIT, (Object)this.title);
         }
         if (this.hasAuthor()) {
-            builder.put((Object)CraftMetaBook.BOOK_AUTHOR.BUKKIT, (Object)this.author);
+            builder.put(CraftMetaBook.BOOK_AUTHOR.BUKKIT, (Object)this.author);
         }
         if (this.hasPages()) {
             final List<String> pagesString = new ArrayList<String>();
             for (final ITextComponent comp : this.pages) {
                 pagesString.add(CraftChatMessage.fromComponent(comp));
             }
-            builder.put((Object)CraftMetaBook.BOOK_PAGES.BUKKIT, (Object)pagesString);
+            builder.put(CraftMetaBook.BOOK_PAGES.BUKKIT, (Object)pagesString);
         }
         if (this.generation != null) {
-            builder.put((Object)CraftMetaBook.GENERATION.BUKKIT, (Object)this.generation);
+            builder.put(CraftMetaBook.GENERATION.BUKKIT, (Object)this.generation);
         }
         return builder;
     }

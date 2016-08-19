@@ -7,6 +7,7 @@ package org.bukkit.craftbukkit.block;
 import net.minecraft.tileentity.TileEntity;
 import org.bukkit.craftbukkit.inventory.CraftInventoryDoubleChest;
 import net.minecraft.util.math.BlockPos;
+import ru.svarka.inventory.ICBInventory;
 import net.minecraft.inventory.IInventory;
 import org.bukkit.craftbukkit.inventory.CraftInventory;
 import org.bukkit.inventory.Inventory;
@@ -58,19 +59,19 @@ public class CraftChest extends CraftBlockState implements Chest
             id = Material.TRAPPED_CHEST.getId();
         }
         if (this.world.getBlockTypeIdAt(x - 1, y, z) == id) {
-            final CraftInventory left = new CraftInventory((IInventory)this.world.getHandle().getTileEntity(new BlockPos(x - 1, y, z)));
+            final CraftInventory left = new CraftInventory((ICBInventory)this.world.getHandle().getTileEntity(new BlockPos(x - 1, y, z)));
             inventory = new CraftInventoryDoubleChest(left, inventory);
         }
         if (this.world.getBlockTypeIdAt(x + 1, y, z) == id) {
-            final CraftInventory right = new CraftInventory((IInventory)this.world.getHandle().getTileEntity(new BlockPos(x + 1, y, z)));
+            final CraftInventory right = new CraftInventory((ICBInventory)this.world.getHandle().getTileEntity(new BlockPos(x + 1, y, z)));
             inventory = new CraftInventoryDoubleChest(inventory, right);
         }
         if (this.world.getBlockTypeIdAt(x, y, z - 1) == id) {
-            final CraftInventory left = new CraftInventory((IInventory)this.world.getHandle().getTileEntity(new BlockPos(x, y, z - 1)));
+            final CraftInventory left = new CraftInventory((ICBInventory)this.world.getHandle().getTileEntity(new BlockPos(x, y, z - 1)));
             inventory = new CraftInventoryDoubleChest(left, inventory);
         }
         if (this.world.getBlockTypeIdAt(x, y, z + 1) == id) {
-            final CraftInventory right = new CraftInventory((IInventory)this.world.getHandle().getTileEntity(new BlockPos(x, y, z + 1)));
+            final CraftInventory right = new CraftInventory((ICBInventory)this.world.getHandle().getTileEntity(new BlockPos(x, y, z + 1)));
             inventory = new CraftInventoryDoubleChest(inventory, right);
         }
         return inventory;

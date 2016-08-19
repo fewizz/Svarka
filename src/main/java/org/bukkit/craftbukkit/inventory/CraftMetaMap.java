@@ -11,7 +11,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.inventory.meta.MapMeta;
 
-@DelegateDeserialization(SerializableMeta.class)
+//@DelegateDeserialization(SerializableMeta.class)
 class CraftMetaMap extends CraftMetaItem implements MapMeta
 {
     static final ItemMetaKey MAP_SCALING;
@@ -130,7 +130,7 @@ class CraftMetaMap extends CraftMetaItem implements MapMeta
     ImmutableMap.Builder<String, Object> serialize(final ImmutableMap.Builder<String, Object> builder) {
         super.serialize(builder);
         if (this.hasScaling()) {
-            builder.put((Object)CraftMetaMap.MAP_SCALING.BUKKIT, (Object)this.isScaling());
+            builder.put(CraftMetaMap.MAP_SCALING.BUKKIT, this.isScaling());
         }
         return builder;
     }

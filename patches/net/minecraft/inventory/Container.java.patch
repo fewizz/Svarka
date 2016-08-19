@@ -1,0 +1,31 @@
+--- ../src-base/minecraft/net/minecraft/inventory/Container.java
++++ ../src-work/minecraft/net/minecraft/inventory/Container.java
+@@ -13,7 +13,19 @@
+ import net.minecraft.util.math.MathHelper;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import ru.svarka.inventory.ICBInventory;
+ 
++//CraftBukkit start
++import java.util.HashMap;
++import java.util.Map;
++import org.bukkit.craftbukkit.inventory.CraftInventory;
++import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.event.Event.Result;
++import org.bukkit.event.inventory.InventoryDragEvent;
++import org.bukkit.event.inventory.InventoryType;
++import org.bukkit.inventory.InventoryView;
++// CraftBukkit end
++
+ public abstract class Container
+ {
+     public List<ItemStack> field_75153_a = Lists.<ItemStack>newArrayList();
+@@ -31,7 +43,7 @@
+     {
+         p_75146_1_.field_75222_d = this.field_75151_b.size();
+         this.field_75151_b.add(p_75146_1_);
+-        this.field_75153_a.add((ItemStack)null);
++        this.field_75153_a.add(null);
+         return p_75146_1_;
+     }
+ 

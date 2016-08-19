@@ -16,7 +16,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.inventory.meta.BookMeta;
 
-@DelegateDeserialization(SerializableMeta.class)
+//@DelegateDeserialization(SerializableMeta.class)
 class CraftMetaBookSigned extends CraftMetaBook implements BookMeta
 {
     CraftMetaBookSigned(final CraftMetaItem meta) {

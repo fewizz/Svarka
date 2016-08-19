@@ -101,7 +101,7 @@ public class CraftMapCanvas implements MapCanvas
                 y += font.getHeight() + 1;
             }
             else {
-                if (ch == 'ง') {
+                if (ch == 'ยง') {
                     final int j = text.indexOf(59, i);
                     if (j >= 0) {
                         try {
