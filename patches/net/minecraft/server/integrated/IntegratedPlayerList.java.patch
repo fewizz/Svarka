@@ -2,10 +2,10 @@
 +++ ../src-work/minecraft/net/minecraft/server/integrated/IntegratedPlayerList.java
 @@ -31,7 +31,7 @@
  
-     public String func_148542_a(SocketAddress p_148542_1_, GameProfile p_148542_2_)
+     public String allowUserToConnect(SocketAddress address, GameProfile profile)
      {
--        return p_148542_2_.getName().equalsIgnoreCase(this.func_72365_p().func_71214_G()) && this.func_152612_a(p_148542_2_.getName()) != null ? "That name is already taken." : super.func_148542_a(p_148542_1_, p_148542_2_);
-+        return (String) (p_148542_2_.getName().equalsIgnoreCase(this.func_72365_p().func_71214_G()) && this.func_152612_a(p_148542_2_.getName()) != null ? "That name is already taken." : super.allowUserToConnect(null, /*address*/ null, /*profile*/ null));
+-        return profile.getName().equalsIgnoreCase(this.getServerInstance().getServerOwner()) && this.getPlayerByUsername(profile.getName()) != null ? "That name is already taken." : super.allowUserToConnect(address, profile);
++        return (String) (profile.getName().equalsIgnoreCase(this.getServerInstance().getServerOwner()) && this.getPlayerByUsername(profile.getName()) != null ? "That name is already taken." : super.allowUserToConnect(null, /*address*/ null, /*profile*/ null));
      }
  
-     public IntegratedServer func_72365_p()
+     public IntegratedServer getServerInstance()

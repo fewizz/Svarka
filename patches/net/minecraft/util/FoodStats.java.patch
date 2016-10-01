@@ -4,12 +4,12 @@
  
  public class FoodStats
  {
--    private int field_75127_a = 20;
--    private float field_75125_b = 5.0F;
--    private float field_75126_c;
-+    public int field_75127_a = 20;
-+    public float field_75125_b = 5.0F;
-+    public float field_75126_c;
-     private int field_75123_d;
-     private int field_75124_e = 20;
+-    private int foodLevel = 20;
+-    private float foodSaturationLevel = 5.0F;
+-    private float foodExhaustionLevel;
++    public int foodLevel = 20;
++    public float foodSaturationLevel = 5.0F;
++    public float foodExhaustionLevel;
+     private int foodTimer;
+     private int prevFoodLevel = 20;
  

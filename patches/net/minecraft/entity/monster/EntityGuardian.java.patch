@@ -1,20 +1,20 @@
 --- ../src-base/minecraft/net/minecraft/entity/monster/EntityGuardian.java
 +++ ../src-work/minecraft/net/minecraft/entity/monster/EntityGuardian.java
 @@ -55,7 +55,7 @@
-     private EntityLivingBase field_175478_bn;
-     private int field_175479_bo;
-     private boolean field_175480_bp;
--    private EntityAIWander field_175481_bq;
-+    public EntityAIWander field_175481_bq;
+     private EntityLivingBase targetedEntity;
+     private int clientSideAttackTime;
+     private boolean clientSideTouchedGround;
+-    private EntityAIWander wander;
++    public EntityAIWander wander;
  
-     public EntityGuardian(World p_i45835_1_)
+     public EntityGuardian(World worldIn)
      {
 @@ -82,7 +82,7 @@
-         this.field_70715_bh.func_75776_a(1, new EntityAINearestAttackableTarget(this, EntityLivingBase.class, 10, true, false, new EntityGuardian.GuardianTargetSelector(this)));
+         this.targetTasks.addTask(1, new EntityAINearestAttackableTarget(this, EntityLivingBase.class, 10, true, false, new EntityGuardian.GuardianTargetSelector(this)));
      }
  
--    protected void func_110147_ax()
-+    public void func_110147_ax()
+-    protected void applyEntityAttributes()
++    public void applyEntityAttributes()
      {
-         super.func_110147_ax();
-         this.func_110148_a(SharedMonsterAttributes.field_111264_e).func_111128_a(6.0D);
+         super.applyEntityAttributes();
+         this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0D);

@@ -14,62 +14,62 @@
 +
  public class EntityCreeper extends EntityMob
  {
-     private static final DataParameter<Integer> field_184713_a = EntityDataManager.<Integer>func_187226_a(EntityCreeper.class, DataSerializers.field_187192_b);
+     private static final DataParameter<Integer> STATE = EntityDataManager.<Integer>createKey(EntityCreeper.class, DataSerializers.VARINT);
 @@ -181,7 +188,7 @@
  
-     public void func_70645_a(DamageSource p_70645_1_)
+     public void onDeath(DamageSource cause)
      {
--        super.func_70645_a(p_70645_1_);
+-        super.onDeath(cause);
 +        //super.onDeath(cause);
  
-         if (this.field_70170_p.func_82736_K().func_82766_b("doMobLoot"))
+         if (this.worldObj.getGameRules().getBoolean("doMobLoot"))
          {
 @@ -197,7 +204,7 @@
-                 ((EntityCreeper)p_70645_1_.func_76346_g()).func_175493_co();
-                 this.func_70099_a(new ItemStack(Items.field_151144_bL, 1, 4), 0.0F);
+                 ((EntityCreeper)cause.getEntity()).incrementDroppedSkulls();
+                 this.entityDropItem(new ItemStack(Items.SKULL, 1, 4), 0.0F);
              }
 -        }
-+        }super.func_70645_a(p_70645_1_); // CB - moved.
++        }super.onDeath(cause); // CB - moved.
      }
  
-     public boolean func_70652_k(Entity p_70652_1_)
+     public boolean attackEntityAsMob(Entity entityIn)
 @@ -235,8 +242,16 @@
-     public void func_70077_a(EntityLightningBolt p_70077_1_)
+     public void onStruckByLightning(EntityLightningBolt lightningBolt)
      {
-         super.func_70077_a(p_70077_1_);
--        this.field_70180_af.func_187227_b(field_184714_b, Boolean.valueOf(true));
+         super.onStruckByLightning(lightningBolt);
+-        this.dataManager.set(POWERED, Boolean.valueOf(true));
 +        // CraftBukkit start
-+        if (CraftEventFactory.callCreeperPowerEvent(this, p_70077_1_, org.bukkit.event.entity.CreeperPowerEvent.PowerCause.LIGHTNING).isCancelled()) {
++        if (CraftEventFactory.callCreeperPowerEvent(this, lightningBolt, org.bukkit.event.entity.CreeperPowerEvent.PowerCause.LIGHTNING).isCancelled()) {
 +        	return;
 +        }
 +        	
 +        this.setPowered(true);
      }
 +    public void setPowered(boolean powered) {
-+        this.field_70180_af.func_187227_b(field_184714_b, powered);
++        this.dataManager.set(POWERED, powered);
 +    }
  
-     protected boolean func_184645_a(EntityPlayer p_184645_1_, EnumHand p_184645_2_, @Nullable ItemStack p_184645_3_)
+     protected boolean processInteract(EntityPlayer player, EnumHand hand, @Nullable ItemStack stack)
      {
 @@ -262,9 +277,20 @@
          {
-             boolean flag = this.field_70170_p.func_82736_K().func_82766_b("mobGriefing");
-             float f = this.func_70830_n() ? 2.0F : 1.0F;
--            this.field_70729_aU = true;
--            this.field_70170_p.func_72876_a(this, this.field_70165_t, this.field_70163_u, this.field_70161_v, (float)this.field_82226_g * f, flag);
--            this.func_70106_y();
+             boolean flag = this.worldObj.getGameRules().getBoolean("mobGriefing");
+             float f = this.getPowered() ? 2.0F : 1.0F;
+-            this.dead = true;
+-            this.worldObj.createExplosion(this, this.posX, this.posY, this.posZ, (float)this.explosionRadius * f, flag);
+-            this.setDead();
 +            //this.dead = true;
 +            //this.worldObj.createExplosion(this, this.posX, this.posY, this.posZ, (float)this.explosionRadius * f, flag);
 +            //this.setDead();
 +            // CraftBukkit start
-+            ExplosionPrimeEvent event = new ExplosionPrimeEvent(this.getBukkitEntity(), this.field_82226_g * f, false);
-+            this.field_70170_p.getServer().getPluginManager().callEvent(event);
++            ExplosionPrimeEvent event = new ExplosionPrimeEvent(this.getBukkitEntity(), this.explosionRadius * f, false);
++            this.worldObj.getServer().getPluginManager().callEvent(event);
 +            if (!event.isCancelled()) {
-+            	this.field_70729_aU = true;
-+            	this.field_70170_p.func_72885_a(this, this.field_70165_t, this.field_70163_u, this.field_70161_v, event.getRadius(), event.getFire(), flag);
-+            	this.func_70106_y();
++            	this.dead = true;
++            	this.worldObj.newExplosion(this, this.posX, this.posY, this.posZ, event.getRadius(), event.getFire(), flag);
++            	this.setDead();
 +            } else {
-+            	field_70833_d = 0;
++            	timeSinceIgnited = 0;
 +            }
 +            // CraftBukkit end
          }

@@ -17,7 +17,7 @@
 +
  public abstract class EntityMinecart extends Entity implements IWorldNameable
  {
-     private static final DataParameter<Integer> field_184265_a = EntityDataManager.<Integer>func_187226_a(EntityMinecart.class, DataSerializers.field_187192_b);
+     private static final DataParameter<Integer> ROLLING_AMPLITUDE = EntityDataManager.<Integer>createKey(EntityMinecart.class, DataSerializers.VARINT);
 @@ -71,6 +81,16 @@
      protected float maxSpeedAirLateral = defaultMaxSpeedAirLateral;
      protected float maxSpeedAirVertical = defaultMaxSpeedAirVertical;
@@ -33,7 +33,7 @@
 +    public double maxSpeed = 0.4D;
 +    // CraftBukkit end
  
-     public EntityMinecart(World p_i1712_1_)
+     public EntityMinecart(World worldIn)
      {
 @@ -1269,7 +1289,27 @@
      {

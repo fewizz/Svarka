@@ -10,15 +10,15 @@
 +
  public class BlockRedstoneWire extends Block
  {
-     public static final PropertyEnum<BlockRedstoneWire.EnumAttachPosition> field_176348_a = PropertyEnum.<BlockRedstoneWire.EnumAttachPosition>func_177709_a("north", BlockRedstoneWire.EnumAttachPosition.class);
+     public static final PropertyEnum<BlockRedstoneWire.EnumAttachPosition> NORTH = PropertyEnum.<BlockRedstoneWire.EnumAttachPosition>create("north", BlockRedstoneWire.EnumAttachPosition.class);
 @@ -217,6 +220,14 @@
          {
              j = k;
          }
 +        // CraftBukkit start
 +        if (i != j) {
-+        	BlockRedstoneEvent event = new BlockRedstoneEvent(p_176345_1_.getWorld().getBlockAt(p_176345_2_.func_177958_n(), p_176345_2_.func_177956_o(),p_176345_2_.func_177952_p()), i, j);
-+        	p_176345_1_.getServer().getPluginManager().callEvent(event);
++        	BlockRedstoneEvent event = new BlockRedstoneEvent(worldIn.getWorld().getBlockAt(pos1.getX(), pos1.getY(),pos1.getZ()), i, j);
++        	worldIn.getServer().getPluginManager().callEvent(event);
 +        	
 +        	j = event.getNewCurrent();
 +        }
@@ -30,8 +30,8 @@
          }
      }
  
--    private int func_176342_a(World p_176342_1_, BlockPos p_176342_2_, int p_176342_3_)
-+    public int func_176342_a(World p_176342_1_, BlockPos p_176342_2_, int p_176342_3_)
+-    private int getMaxCurrentStrength(World worldIn, BlockPos pos, int strength)
++    public int getMaxCurrentStrength(World worldIn, BlockPos pos, int strength)
      {
-         if (p_176342_1_.func_180495_p(p_176342_2_).func_177230_c() != this)
+         if (worldIn.getBlockState(pos).getBlock() != this)
          {

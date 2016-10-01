@@ -21,15 +21,15 @@
 +
 +public class TileEntityHopper extends CBTileEntityLockableLoot implements IHopper, ITickable
  {
-     private ItemStack[] field_145900_a = new ItemStack[5];
-     private String field_145902_i;
-     private int field_145901_j = -1;
+     private ItemStack[] inventory = new ItemStack[5];
+     private String customName;
+     private int transferCooldown = -1;
 +    // CraftBukkit start - add fields and methods
 +    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
 +    private int maxStack = MAX_STACK;
 +    
 +    public ItemStack[] getContents() {
-+    	return this.field_145900_a;
++    	return this.inventory;
 +    }
 +    
 +    public void onOpen(CraftHumanEntity who) {

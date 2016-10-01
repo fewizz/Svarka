@@ -6,6 +6,11 @@
 /eclipse
 /.gradle
 /spigot
+/patches2
+/patches3
+/patchesMCP
+/projects2
+/projects3
 
 # Mac filesystem dust
 .DS_Store

@@ -24,17 +24,17 @@
 -public abstract class EntityMinecartContainer extends EntityMinecart implements ILockableContainer, ILootContainer
 +public abstract class EntityMinecartContainer extends EntityMinecart implements ICBLockableContainer, ILootContainer
  {
--    private ItemStack[] field_94113_a = new ItemStack[36];
-+    private ItemStack[] field_94113_a = new ItemStack[27]; // CB - 36 -> 27
-     public boolean field_94112_b = true;
-     private ResourceLocation field_184290_c;
-     private long field_184291_d;
+-    private ItemStack[] minecartContainerItems = new ItemStack[36];
++    private ItemStack[] minecartContainerItems = new ItemStack[27]; // CB - 36 -> 27
+     public boolean dropContentsWhenDead = true;
+     private ResourceLocation lootTable;
+     private long lootTableSeed;
 +    // CraftBukkit start
 +    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
 +    private int maxStack = MAX_STACK;
 +    
 +    public ItemStack[] getContents() {
-+    	return this.field_94113_a;
++    	return this.minecartContainerItems;
 +    }
 +    
 +    public void onOpen(CraftHumanEntity who) {
@@ -65,5 +65,5 @@
 +    }
 +    // CraftBukkit end
  
-     public EntityMinecartContainer(World p_i1716_1_)
+     public EntityMinecartContainer(World worldIn)
      {

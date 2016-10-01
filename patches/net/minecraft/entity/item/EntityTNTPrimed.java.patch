@@ -8,11 +8,11 @@
  
  public class EntityTNTPrimed extends Entity
  {
-     private static final DataParameter<Integer> field_184537_a = EntityDataManager.<Integer>func_187226_a(EntityTNTPrimed.class, DataSerializers.field_187192_b);
-     private EntityLivingBase field_94084_b;
-     private int field_70516_a;
+     private static final DataParameter<Integer> FUSE = EntityDataManager.<Integer>createKey(EntityTNTPrimed.class, DataSerializers.VARINT);
+     private EntityLivingBase tntPlacedBy;
+     private int fuse;
 +    public float yield = 4; // CraftBukkit - add field
 +    public boolean isIncendiary = false; // CraftBukkit - add field
  
-     public EntityTNTPrimed(World p_i1729_1_)
+     public EntityTNTPrimed(World worldIn)
      {

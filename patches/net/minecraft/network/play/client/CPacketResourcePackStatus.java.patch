@@ -4,8 +4,8 @@
  
  public class CPacketResourcePackStatus implements Packet<INetHandlerPlayServer>
  {
--    private CPacketResourcePackStatus.Action field_179719_b;
-+    public CPacketResourcePackStatus.Action field_179719_b;
+-    private CPacketResourcePackStatus.Action action;
++    public CPacketResourcePackStatus.Action action;
  
      public CPacketResourcePackStatus()
      {

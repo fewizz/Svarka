@@ -16,26 +16,26 @@
  import net.minecraftforge.fml.relauncher.SideOnly;
  
 @@ -23,6 +27,7 @@
-     private double field_177760_j;
-     private int field_177761_k;
-     private int field_177759_l;
+     private double damageBuffer;
+     private int warningTime;
+     private int warningDistance;
 +    public WorldServer world; // CraftBukkit
  
      public WorldBorder()
      {
 @@ -39,10 +44,21 @@
-         return (double)(p_177746_1_.func_177958_n() + 1) > this.func_177726_b() && (double)p_177746_1_.func_177958_n() < this.func_177728_d() && (double)(p_177746_1_.func_177952_p() + 1) > this.func_177736_c() && (double)p_177746_1_.func_177952_p() < this.func_177733_e();
+         return (double)(pos.getX() + 1) > this.minX() && (double)pos.getX() < this.maxX() && (double)(pos.getZ() + 1) > this.minZ() && (double)pos.getZ() < this.maxZ();
      }
  
--    public boolean func_177730_a(ChunkPos p_177730_1_)
+-    public boolean contains(ChunkPos range)
 -    {
--        return (double)p_177730_1_.func_180332_e() > this.func_177726_b() && (double)p_177730_1_.func_180334_c() < this.func_177728_d() && (double)p_177730_1_.func_180330_f() > this.func_177736_c() && (double)p_177730_1_.func_180333_d() < this.func_177733_e();
+-        return (double)range.getXEnd() > this.minX() && (double)range.getXStart() < this.maxX() && (double)range.getZEnd() > this.minZ() && (double)range.getZStart() < this.maxZ();
 +    ///public boolean contains(ChunkPos range)
 +    //{
 +    //    return (double)range.getXEnd() > this.minX() && (double)range.getXStart() < this.maxX() && (double)range.getZEnd() > this.minZ() && (double)range.getZStart() < this.maxZ();
 +    //} // CB start
-+    public boolean func_177730_a(final ChunkPos p_177730_1_) {
-+        return this.isInBounds(p_177730_1_.field_77276_a, p_177730_1_.field_77275_b);
++    public boolean contains(final ChunkPos range) {
++        return this.isInBounds(range.chunkXPos, range.chunkZPos);
      }
 +    
 +    public boolean isInBounds(final long chunkcoords) {
@@ -43,16 +43,16 @@
 +    }
 +    
 +    public boolean isInBounds(final int x, final int z) {
-+        return (x << 4) + 15 > this.func_177726_b() && x << 4 < this.func_177728_d() && (z << 4) + 15 > this.func_177736_c() && x << 4 < this.func_177733_e();
++        return (x << 4) + 15 > this.minX() && x << 4 < this.maxX() && (z << 4) + 15 > this.minZ() && x << 4 < this.maxZ();
 +    } // CB end
  
-     public boolean func_177743_a(AxisAlignedBB p_177743_1_)
+     public boolean contains(AxisAlignedBB bb)
      {
 @@ -199,6 +215,7 @@
  
-     public void func_177737_a(IBorderListener p_177737_1_)
+     public void addListener(IBorderListener listener)
      {
-+    	if(this.field_177758_a.contains(p_177737_1_))
-         this.field_177758_a.add(p_177737_1_);
++    	if(this.listeners.contains(listener))
+         this.listeners.add(listener);
      }
  

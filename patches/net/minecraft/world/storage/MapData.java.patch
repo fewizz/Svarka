@@ -16,33 +16,33 @@
 +
  public class MapData extends WorldSavedData
  {
-     public int field_76201_a;
+     public int xCenter;
 @@ -29,10 +38,19 @@
-     public List<MapData.MapInfo> field_76196_g = Lists.<MapData.MapInfo>newArrayList();
-     private final Map<EntityPlayer, MapData.MapInfo> field_76202_j = Maps.<EntityPlayer, MapData.MapInfo>newHashMap();
-     public Map<String, Vec4b> field_76203_h = Maps.<String, Vec4b>newLinkedHashMap();
+     public List<MapData.MapInfo> playersArrayList = Lists.<MapData.MapInfo>newArrayList();
+     private final Map<EntityPlayer, MapData.MapInfo> playersHashMap = Maps.<EntityPlayer, MapData.MapInfo>newHashMap();
+     public Map<String, Vec4b> mapDecorations = Maps.<String, Vec4b>newLinkedHashMap();
 +    // CraftBukkit start
 +    public final CraftMapView mapView;
 +    //private CraftServer server;
 +    //private UUID uniqueId = null;
 +    // CraftBukkit end
  
-     public MapData(String p_i2140_1_)
+     public MapData(String mapname)
      {
-         super(p_i2140_1_);
+         super(mapname);
 +        // CraftBukkit start
 +        mapView = new CraftMapView(this);
 +        //server = (CraftServer) org.bukkit.Bukkit.getServer();
 +        // CraftBukkit end
      }
  
-     public void func_176054_a(double p_176054_1_, double p_176054_3_, int p_176054_5_)
+     public void calculateMapCenter(double x, double z, int mapScale)
 @@ -278,14 +296,27 @@
  
-         public Packet<?> func_176101_a(ItemStack p_176101_1_)
+         public Packet<?> getPacket(ItemStack stack)
          {
 +        	// CraftBukkit start
-+        	org.bukkit.craftbukkit.map.RenderData render = MapData.this.mapView.render((org.bukkit.craftbukkit.entity.CraftPlayer) this.field_76211_a.getBukkitEntity()); // CraftBukkit
++        	org.bukkit.craftbukkit.map.RenderData render = MapData.this.mapView.render((org.bukkit.craftbukkit.entity.CraftPlayer) this.entityplayerObj.getBukkitEntity()); // CraftBukkit
 +        	
 +        	java.util.Collection<Vec4b> icons = new java.util.ArrayList<Vec4b>();
 +        	
@@ -52,18 +52,18 @@
 +        			icons.add(new Vec4b(cursor.getRawType(), cursor.getX(), cursor.getY(), cursor.getDirection()));
 +        		}
 +        	}
-             if (this.field_176105_d)
+             if (this.isDirty)
              {
-                 this.field_176105_d = false;
--                return new SPacketMaps(p_176101_1_.func_77960_j(), MapData.this.field_76197_d, MapData.this.field_186210_e, MapData.this.field_76203_h.values(), MapData.this.field_76198_e, this.field_176106_e, this.field_176103_f, this.field_176104_g + 1 - this.field_176106_e, this.field_176108_h + 1 - this.field_176103_f);
+                 this.isDirty = false;
+-                return new SPacketMaps(stack.getMetadata(), MapData.this.scale, MapData.this.trackingPosition, MapData.this.mapDecorations.values(), MapData.this.colors, this.minX, this.minY, this.maxX + 1 - this.minX, this.maxY + 1 - this.minY);
 +                //return new SPacketMaps(stack.getMetadata(), MapData.this.scale, MapData.this.trackingPosition, MapData.this.mapDecorations.values(), MapData.this.colors, this.minX, this.minY, this.maxX + 1 - this.minX, this.maxY + 1 - this.minY);
-+                return new SPacketMaps(p_176101_1_.func_77960_j(), MapData.this.field_76197_d, MapData.this.field_186210_e, icons, render.buffer, this.field_176106_e, this.field_176103_f, this.field_176104_g + 1 - this.field_176106_e, this.field_176108_h + 1 - this.field_176103_f);
++                return new SPacketMaps(stack.getMetadata(), MapData.this.scale, MapData.this.trackingPosition, icons, render.buffer, this.minX, this.minY, this.maxX + 1 - this.minX, this.maxY + 1 - this.minY);
              }
              else
              {
--                return this.field_176109_i++ % 5 == 0 ? new SPacketMaps(p_176101_1_.func_77960_j(), MapData.this.field_76197_d, MapData.this.field_186210_e, MapData.this.field_76203_h.values(), MapData.this.field_76198_e, 0, 0, 0, 0) : null;
+-                return this.tick++ % 5 == 0 ? new SPacketMaps(stack.getMetadata(), MapData.this.scale, MapData.this.trackingPosition, MapData.this.mapDecorations.values(), MapData.this.colors, 0, 0, 0, 0) : null;
 +                //return this.tick++ % 5 == 0 ? new SPacketMaps(stack.getMetadata(), MapData.this.scale, MapData.this.trackingPosition, MapData.this.mapDecorations.values(), MapData.this.colors, 0, 0, 0, 0) : null;
-+            	return (this.field_176109_i++ % 5 == 0) ? new SPacketMaps(p_176101_1_.func_77960_j(), MapData.this.field_76197_d, MapData.this.field_186210_e, icons, render.buffer, 0, 0, 0, 0) : null;
++            	return (this.tick++ % 5 == 0) ? new SPacketMaps(stack.getMetadata(), MapData.this.scale, MapData.this.trackingPosition, icons, render.buffer, 0, 0, 0, 0) : null;
              }
          }
  

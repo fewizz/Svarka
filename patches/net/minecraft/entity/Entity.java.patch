@@ -69,130 +69,130 @@
 +	// CraftBukkit start
 +	private static final int CURRENT_LEVEL = 2;
 +	static boolean isLevelAtLeast(NBTTagCompound tag, int level) {
-+		return tag.func_74764_b("Bukkit.updateLevel") && tag.func_74762_e("Bukkit.updateLevel") >= level;
++		return tag.hasKey("Bukkit.updateLevel") && tag.getInteger("Bukkit.updateLevel") >= level;
 +	}
 +	
 +	protected CraftEntity bukkitEntity;
 +	
 +	public CraftEntity getBukkitEntity() {
 +		if (bukkitEntity == null) {
-+			bukkitEntity = CraftEntity.getEntity(field_70170_p.getServer(), this);
++			bukkitEntity = CraftEntity.getEntity(worldObj.getServer(), this);
 +		}
 +		return bukkitEntity;
 +	}
 +	// CraftBukikt end
-     private static final Logger field_184243_a = LogManager.getLogger();
-     private static final AxisAlignedBB field_174836_a = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D);
-     private static double field_70155_l = 1.0D;
-     private static int field_70152_a;
-     private int field_145783_c;
-     public boolean field_70156_m;
--    private final List<Entity> field_184244_h;
-+    public final List<Entity> field_184244_h;
-     protected int field_184245_j;
-     private Entity field_184239_as;
-     public boolean field_98038_p;
+     private static final Logger LOGGER = LogManager.getLogger();
+     private static final AxisAlignedBB ZERO_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D);
+     private static double renderDistanceWeight = 1.0D;
+     private static int nextEntityID;
+     private int entityId;
+     public boolean preventEntitySpawning;
+-    private final List<Entity> riddenByEntities;
++    public final List<Entity> riddenByEntities;
+     protected int rideCooldown;
+     private Entity ridingEntity;
+     public boolean forceSpawn;
 @@ -129,12 +196,12 @@
-     protected Random field_70146_Z;
-     public int field_70173_aa;
-     public int field_70174_ab;
--    private int field_70151_c;
-+    public int field_70151_c;
-     protected boolean field_70171_ac;
-     public int field_70172_ad;
-     protected boolean field_70148_d;
-     protected boolean field_70178_ae;
--    protected EntityDataManager field_70180_af;
-+    public EntityDataManager field_70180_af;
-     protected static final DataParameter<Byte> field_184240_ax = EntityDataManager.<Byte>func_187226_a(Entity.class, DataSerializers.field_187191_a);
-     private static final DataParameter<Integer> field_184241_ay = EntityDataManager.<Integer>func_187226_a(Entity.class, DataSerializers.field_187192_b);
-     private static final DataParameter<String> field_184242_az = EntityDataManager.<String>func_187226_a(Entity.class, DataSerializers.field_187194_d);
+     protected Random rand;
+     public int ticksExisted;
+     public int fireResistance;
+-    private int fire;
++    public int fire;
+     protected boolean inWater;
+     public int hurtResistantTime;
+     protected boolean firstUpdate;
+     protected boolean isImmuneToFire;
+-    protected EntityDataManager dataManager;
++    public EntityDataManager dataManager;
+     protected static final DataParameter<Byte> FLAGS = EntityDataManager.<Byte>createKey(Entity.class, DataSerializers.BYTE);
+     private static final DataParameter<Integer> AIR = EntityDataManager.<Integer>createKey(Entity.class, DataSerializers.VARINT);
+     private static final DataParameter<String> CUSTOM_NAME = EntityDataManager.<String>createKey(Entity.class, DataSerializers.STRING);
 @@ -165,9 +232,12 @@
-     protected String field_189513_ar;
-     private final CommandResultStats field_174837_as;
-     private final List<ItemStack> field_184235_aE;
--    protected boolean field_184238_ar;
-+    public boolean field_184238_ar;
-     private final Set<String> field_184236_aF;
-     private boolean field_184237_aG;
+     protected String cachedUniqueIdString;
+     private final CommandResultStats cmdResultStats;
+     private final List<ItemStack> emptyItemStackList;
+-    protected boolean glowing;
++    public boolean glowing;
+     private final Set<String> tags;
+     private boolean isPositionDirty;
 +    public boolean valid; // CraftBukkit
 +    public org.bukkit.projectiles.ProjectileSource projectileSource; // CraftBukkit - For projectiles only
 +    public boolean forceExplosionKnockback; // CraftBukkit - SPIGOT-949
  
-     public Entity(World p_i1582_1_)
+     public Entity(World worldIn)
      {
 @@ -299,7 +369,7 @@
      {
      }
  
--    protected void func_70105_a(float p_70105_1_, float p_70105_2_)
-+    public void func_70105_a(float p_70105_1_, float p_70105_2_)
+-    protected void setSize(float width, float height)
++    public void setSize(float width, float height)
      {
-         if (p_70105_1_ != this.field_70130_N || p_70105_2_ != this.field_70131_O)
+         if (width != this.width || height != this.height)
          {
 @@ -318,6 +388,28 @@
  
-     protected void func_70101_b(float p_70101_1_, float p_70101_2_)
+     protected void setRotation(float yaw, float pitch)
      {
 +    	// CB start
-+    	if (Float.isNaN(p_70101_1_)) {
-+    		p_70101_1_ = 0.0f;
++    	if (Float.isNaN(yaw)) {
++    		yaw = 0.0f;
 +        }
-+        if (p_70101_1_ == Float.POSITIVE_INFINITY || p_70101_1_ == Float.NEGATIVE_INFINITY) {
++        if (yaw == Float.POSITIVE_INFINITY || yaw == Float.NEGATIVE_INFINITY) {
 +            if (this instanceof EntityPlayerMP) {
-+                this.field_70170_p.getServer().getLogger().warning(String.valueOf(this.func_70005_c_()) + " was caught trying to crash the server with an invalid yaw");
++                this.worldObj.getServer().getLogger().warning(String.valueOf(this.getName()) + " was caught trying to crash the server with an invalid yaw");
 +                ((CraftPlayer)this.getBukkitEntity()).kickPlayer("Nope");
 +            }
-+            p_70101_1_ = 0.0f;
++            yaw = 0.0f;
 +        }
-+        if (Float.isNaN(p_70101_2_)) {
-+        	p_70101_2_ = 0.0f;
++        if (Float.isNaN(pitch)) {
++        	pitch = 0.0f;
 +        }
-+        if (p_70101_2_ == Float.POSITIVE_INFINITY || p_70101_2_ == Float.NEGATIVE_INFINITY) {
++        if (pitch == Float.POSITIVE_INFINITY || pitch == Float.NEGATIVE_INFINITY) {
 +            if (this instanceof EntityPlayerMP) {
-+                this.field_70170_p.getServer().getLogger().warning(String.valueOf(this.func_70005_c_()) + " was caught trying to crash the server with an invalid pitch");
++                this.worldObj.getServer().getLogger().warning(String.valueOf(this.getName()) + " was caught trying to crash the server with an invalid pitch");
 +                ((CraftPlayer)this.getBukkitEntity()).kickPlayer("Nope");
 +            }
-+            p_70101_2_ = 0.0f;
++            pitch = 0.0f;
 +        }
 +        // CB end
-         this.field_70177_z = p_70101_1_ % 360.0F;
-         this.field_70125_A = p_70101_2_ % 360.0F;
+         this.rotationYaw = yaw % 360.0F;
+         this.rotationPitch = pitch % 360.0F;
      }
 @@ -386,9 +478,9 @@
  
-             if (this.field_71087_bX)
+             if (this.inPortal)
              {
--                MinecraftServer minecraftserver = this.field_70170_p.func_73046_m();
+-                MinecraftServer minecraftserver = this.worldObj.getMinecraftServer();
 +                /*MinecraftServer minecraftserver = this.worldObj.getMinecraftServer();*/ // CB
  
--                if (minecraftserver.func_71255_r())
+-                if (minecraftserver.getAllowNether())
 +                if (true/* || minecraftserver.getAllowNether()*/) // CB
                  {
-                     if (!this.func_184218_aH())
+                     if (!this.isRiding())
                      {
 @@ -500,6 +592,23 @@
-         if (!this.field_70178_ae)
+         if (!this.isImmuneToFire)
          {
-             this.func_70097_a(DamageSource.field_76371_c, 4.0F);
+             this.attackEntityFrom(DamageSource.lava, 4.0F);
 +            // CB start
 +            if (this instanceof EntityLivingBase) {
-+                if (this.field_70151_c <= 0) {
++                if (this.fire <= 0) {
 +                    final org.bukkit.block.Block damager = null;
 +                    final org.bukkit.entity.Entity damagee = this.getBukkitEntity();
 +                    final EntityCombustEvent combustEvent = new EntityCombustByBlockEvent(damager, damagee, 15);
-+                    this.field_70170_p.getServer().getPluginManager().callEvent(combustEvent);
++                    this.worldObj.getServer().getPluginManager().callEvent(combustEvent);
 +                    if (!combustEvent.isCancelled()) {
-+                        this.func_70015_d(combustEvent.getDuration());
++                        this.setFire(combustEvent.getDuration());
 +                    }
 +                }
 +                else {
-+                    this.func_70015_d(15);
++                    this.setFire(15);
 +                }
 +                return;
 +            }
 +            // CB end
-             this.func_70015_d(15);
+             this.setFire(15);
          }
      }
 @@ -549,6 +658,21 @@
@@ -202,30 +202,30 @@
 +        	// CraftBukkit start - Don't do anything if we aren't moving
 +        	// We need to do this regardless of whether or not we are moving thanks to portals
 +        	try {
-+                this.func_145775_I();
++                this.doBlockCollisions();
 +            }
 +            catch (Throwable throwable) {
-+                final CrashReport crashreport = CrashReport.func_85055_a(throwable, "Checking entity block collision");
-+                final CrashReportCategory crashreportsystemdetails = crashreport.func_85058_a("Entity being checked for collision");
-+                this.func_85029_a(crashreportsystemdetails);
++                final CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Checking entity block collision");
++                final CrashReportCategory crashreportsystemdetails = crashreport.makeCategory("Entity being checked for collision");
++                this.addEntityCrashInfo(crashreportsystemdetails);
 +                throw new ReportedException(crashreport);
 +            }
-+            if (p_70091_1_ == 0.0 && p_70091_3_ == 0.0 && p_70091_5_ == 0.0 && this.func_184207_aI() && this.func_184218_aH()) {
++            if (x == 0.0 && y == 0.0 && z == 0.0 && this.isBeingRidden() && this.isRiding()) {
 +                return;
 +            }
 +            // CB end
-             this.field_70170_p.field_72984_F.func_76320_a("move");
-             double d0 = this.field_70165_t;
-             double d1 = this.field_70163_u;
+             this.worldObj.theProfiler.startSection("move");
+             double d0 = this.posX;
+             double d1 = this.posY;
 @@ -810,7 +934,26 @@
              {
-                 block.func_176216_a(this.field_70170_p, this);
+                 block.onLanded(this.worldObj, this);
              }
 -
 +            // CB start
-+            if (this.field_70123_F && this.getBukkitEntity() instanceof Vehicle) {
++            if (this.isCollidedHorizontally && this.getBukkitEntity() instanceof Vehicle) {
 +                final Vehicle vehicle = (Vehicle)this.getBukkitEntity();
-+                org.bukkit.block.Block bl = this.field_70170_p.getWorld().getBlockAt(MathHelper.func_76128_c(this.field_70165_t), MathHelper.func_76128_c(this.field_70163_u), MathHelper.func_76128_c(this.field_70161_v));
++                org.bukkit.block.Block bl = this.worldObj.getWorld().getBlockAt(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ));
 +                if (d3 > d0) {
 +                    bl = bl.getRelative(BlockFace.EAST);
 +                }
@@ -239,14 +239,14 @@
 +                    bl = bl.getRelative(BlockFace.NORTH);
 +                }
 +                final VehicleBlockCollisionEvent event = new VehicleBlockCollisionEvent(vehicle, bl);
-+                this.field_70170_p.getServer().getPluginManager().callEvent(event);
++                this.worldObj.getServer().getPluginManager().callEvent(event);
 +            }
 +            // CB end
-             if (this.func_70041_e_() && !flag && !this.func_184218_aH())
+             if (this.canTriggerWalking() && !flag && !this.isRiding())
              {
-                 double d12 = this.field_70165_t - d0;
-@@ -849,18 +992,21 @@
-                     this.func_180429_a(blockpos, block);
+                 double d12 = this.posX - d0;
+@@ -849,7 +992,8 @@
+                     this.playStepSound(blockpos, block);
                  }
              }
 -
@@ -254,41 +254,33 @@
 +            /*
              try
              {
--                this.func_145775_I();
-+                this.doBlockCollisions();
-             }
-             catch (Throwable throwable)
-             {
--                CrashReport crashreport = CrashReport.func_85055_a(throwable, "Checking entity block collision");
--                CrashReportCategory crashreportcategory = crashreport.func_85058_a("Entity being checked for collision");
--                this.func_85029_a(crashreportcategory);
-+                CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Checking entity block collision");
-+                CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being checked for collision");
-+                this.addEntityCrashInfo(crashreportcategory);
+                 this.doBlockCollisions();
+@@ -861,6 +1005,8 @@
+                 this.addEntityCrashInfo(crashreportcategory);
                  throw new ReportedException(crashreport);
              }
 +            */
 +            // CraftBukkit end
  
-             boolean flag1 = this.func_70026_G();
+             boolean flag1 = this.isWet();
  
 @@ -871,11 +1017,22 @@
                  if (!flag1)
                  {
-                     ++this.field_70151_c;
+                     ++this.fire;
 -
--                    if (this.field_70151_c == 0)
+-                    if (this.fire == 0)
 -                    {
 +                    // CB start
-+                    if (this.field_70151_c <= 0) {
++                    if (this.fire <= 0) {
 +                        final EntityCombustEvent event2 = new EntityCombustByBlockEvent(null, this.getBukkitEntity(), 8);
-+                        this.field_70170_p.getServer().getPluginManager().callEvent(event2);
++                        this.worldObj.getServer().getPluginManager().callEvent(event2);
 +                        if (!event2.isCancelled()) {
-+                            this.func_70015_d(event2.getDuration());
++                            this.setFire(event2.getDuration());
 +                        }
 +                    }
 +                    else {
-                         this.func_70015_d(8);
+                         this.setFire(8);
                      }
 +                    //if (this.fire == 0)
 +                    //{
@@ -297,124 +289,111 @@
 +                    // CB end
                  }
              }
-             else if (this.field_70151_c <= 0)
+             else if (this.fire <= 0)
 @@ -1028,6 +1185,14 @@
-             this.func_70097_a(DamageSource.field_76372_a, (float)p_70081_1_);
+             this.attackEntityFrom(DamageSource.inFire, (float)amount);
          }
      }
 +    // CB float variant
 +    protected void dealFireDamage(float amount)
 +    {
-+        if (!this.field_70178_ae)
++        if (!this.isImmuneToFire)
 +        {
-+            this.func_70097_a(DamageSource.field_76372_a, amount);
++            this.attackEntityFrom(DamageSource.inFire, amount);
 +        }
 +    }
  
-     public final boolean func_70045_F()
+     public final boolean isImmuneToFire()
      {
 @@ -1234,6 +1399,13 @@
  
-     public void func_70029_a(World p_70029_1_)
+     public void setWorld(World worldIn)
      {
 +    	// CB start
-+    	if (p_70029_1_ == null) {
-+            this.func_70106_y();
-+            this.field_70170_p = ((CraftWorld)Bukkit.getServer().getWorlds().get(0)).getHandle();
++    	if (worldIn == null) {
++            this.setDead();
++            this.worldObj = ((CraftWorld)Bukkit.getServer().getWorlds().get(0)).getHandle();
 +            return;
 +        }
 +    	// CB end
-         this.field_70170_p = p_70029_1_;
+         this.worldObj = worldIn;
      }
  
 @@ -1527,6 +1699,14 @@
          {
-             p_189511_1_.func_74782_a("Pos", this.func_70087_a(new double[] {this.field_70165_t, this.field_70163_u, this.field_70161_v}));
-             p_189511_1_.func_74782_a("Motion", this.func_70087_a(new double[] {this.field_70159_w, this.field_70181_x, this.field_70179_y}));
+             p_189511_1_.setTag("Pos", this.newDoubleNBTList(new double[] {this.posX, this.posY, this.posZ}));
+             p_189511_1_.setTag("Motion", this.newDoubleNBTList(new double[] {this.motionX, this.motionY, this.motionZ}));
 +            // CB start
-+            if (Float.isNaN(this.field_70177_z)) {
-+                this.field_70177_z = 0.0f;
++            if (Float.isNaN(this.rotationYaw)) {
++                this.rotationYaw = 0.0f;
 +            }
-+            if (Float.isNaN(this.field_70125_A)) {
-+                this.field_70125_A = 0.0f;
++            if (Float.isNaN(this.rotationPitch)) {
++                this.rotationPitch = 0.0f;
 +            }
 +            // CB start
-             p_189511_1_.func_74782_a("Rotation", this.func_70049_a(new float[] {this.field_70177_z, this.field_70125_A}));
-             p_189511_1_.func_74776_a("FallDistance", this.field_70143_R);
-             p_189511_1_.func_74777_a("Fire", (short)this.field_70151_c);
+             p_189511_1_.setTag("Rotation", this.newFloatNBTList(new float[] {this.rotationYaw, this.rotationPitch}));
+             p_189511_1_.setFloat("FallDistance", this.fallDistance);
+             p_189511_1_.setShort("Fire", (short)this.fire);
 @@ -1536,7 +1716,11 @@
-             p_189511_1_.func_74757_a("Invulnerable", this.field_83001_bt);
-             p_189511_1_.func_74768_a("PortalCooldown", this.field_71088_bW);
-             p_189511_1_.func_186854_a("UUID", this.func_110124_au());
+             p_189511_1_.setBoolean("Invulnerable", this.invulnerable);
+             p_189511_1_.setInteger("PortalCooldown", this.timeUntilPortal);
+             p_189511_1_.setUniqueId("UUID", this.getUniqueID());
 -
 +            // BC start
-+            p_189511_1_.func_74772_a("WorldUUIDLeast", this.field_70170_p.func_72860_G().getUUID().getLeastSignificantBits());
-+            p_189511_1_.func_74772_a("WorldUUIDMost", this.field_70170_p.func_72860_G().getUUID().getMostSignificantBits());
-+            p_189511_1_.func_74768_a("Bukkit.updateLevel", 2);
++            p_189511_1_.setLong("WorldUUIDLeast", this.worldObj.getSaveHandler().getUUID().getLeastSignificantBits());
++            p_189511_1_.setLong("WorldUUIDMost", this.worldObj.getSaveHandler().getUUID().getMostSignificantBits());
++            p_189511_1_.setInteger("Bukkit.updateLevel", 2);
 +            // BC end
-             if (this.func_95999_t() != null && !this.func_95999_t().isEmpty())
+             if (this.getCustomNameTag() != null && !this.getCustomNameTag().isEmpty())
              {
-                 p_189511_1_.func_74778_a("CustomName", this.func_95999_t());
-@@ -1622,22 +1806,22 @@
-             this.field_70159_w = nbttaglist2.func_150309_d(0);
-             this.field_70181_x = nbttaglist2.func_150309_d(1);
-             this.field_70179_y = nbttaglist2.func_150309_d(2);
+                 p_189511_1_.setString("CustomName", this.getCustomNameTag());
+@@ -1622,7 +1806,7 @@
+             this.motionX = nbttaglist2.getDoubleAt(0);
+             this.motionY = nbttaglist2.getDoubleAt(1);
+             this.motionZ = nbttaglist2.getDoubleAt(2);
 -
--            if (Math.abs(this.field_70159_w) > 10.0D)
 +            /* CraftBukkit start - Moved section down
-+            if (Math.abs(this.motionX) > 10.0D)
+             if (Math.abs(this.motionX) > 10.0D)
              {
--                this.field_70159_w = 0.0D;
-+                this.motionX = 0.0D;
-             }
- 
--            if (Math.abs(this.field_70181_x) > 10.0D)
-+            if (Math.abs(this.motionY) > 10.0D)
+                 this.motionX = 0.0D;
+@@ -1637,7 +1821,7 @@
              {
--                this.field_70181_x = 0.0D;
-+                this.motionY = 0.0D;
-             }
- 
--            if (Math.abs(this.field_70179_y) > 10.0D)
-+            if (Math.abs(this.motionZ) > 10.0D)
-             {
--                this.field_70179_y = 0.0D;
-+                this.motionZ = 0.0D;
+                 this.motionZ = 0.0D;
              }
 -
 +			// CraftBukkit end */
-             this.field_70165_t = nbttaglist.func_150309_d(0);
-             this.field_70163_u = nbttaglist.func_150309_d(1);
-             this.field_70161_v = nbttaglist.func_150309_d(2);
+             this.posX = nbttaglist.getDoubleAt(0);
+             this.posY = nbttaglist.getDoubleAt(1);
+             this.posZ = nbttaglist.getDoubleAt(2);
 @@ -1707,6 +1891,43 @@
              {
-                 this.func_70107_b(this.field_70165_t, this.field_70163_u, this.field_70161_v);
+                 this.setPosition(this.posX, this.posY, this.posZ);
              }
 +            // BC start
 +            if (this instanceof EntityLivingBase) {
 +                final EntityLivingBase entity = (EntityLivingBase)this;
-+                if (entity instanceof EntityTameable && !isLevelAtLeast(p_70020_1_, 2) && !p_70020_1_.func_74767_n("PersistenceRequired")) {
++                if (entity instanceof EntityTameable && !isLevelAtLeast(compound, 2) && !compound.getBoolean("PersistenceRequired")) {
 +                    final EntityLiving entityinsentient = (EntityLiving)entity;
-+                    entityinsentient.field_82179_bU = !entityinsentient.func_70692_ba();
++                    entityinsentient.persistenceRequired = !entityinsentient.canDespawn();
 +                }
 +            }
 +            if (!(this.getBukkitEntity() instanceof Vehicle)) {
-+                if (Math.abs(this.field_70159_w) > 10.0) {
-+                    this.field_70159_w = 0.0;
++                if (Math.abs(this.motionX) > 10.0) {
++                    this.motionX = 0.0;
 +                }
-+                if (Math.abs(this.field_70181_x) > 10.0) {
-+                    this.field_70181_x = 0.0;
++                if (Math.abs(this.motionY) > 10.0) {
++                    this.motionY = 0.0;
 +                }
-+                if (Math.abs(this.field_70179_y) > 10.0) {
-+                    this.field_70179_y = 0.0;
++                if (Math.abs(this.motionZ) > 10.0) {
++                    this.motionZ = 0.0;
 +                }
 +            }
 +            if (this instanceof EntityPlayerMP) {
 +                final Server server = Bukkit.getServer();
 +                org.bukkit.World bworld = null;
-+                final String worldName = p_70020_1_.func_74779_i("world");
-+                if (p_70020_1_.func_74764_b("WorldUUIDMost") && p_70020_1_.func_74764_b("WorldUUIDLeast")) {
-+                    final UUID uid = new UUID(p_70020_1_.func_74763_f("WorldUUIDMost"), p_70020_1_.func_74763_f("WorldUUIDLeast"));
++                final String worldName = compound.getString("world");
++                if (compound.hasKey("WorldUUIDMost") && compound.hasKey("WorldUUIDLeast")) {
++                    final UUID uid = new UUID(compound.getLong("WorldUUIDMost"), compound.getLong("WorldUUIDLeast"));
 +                    bworld = server.getWorld(uid);
 +                }
 +                else {
@@ -422,9 +401,9 @@
 +                }
 +                if (bworld == null) {
 +                    final EntityPlayerMP entityPlayer = (EntityPlayerMP)this;
-+                    bworld = MinecraftServer.getServerInst().field_71305_c[entityPlayer.field_71093_bK].getWorld();//((CraftServer)server).getServer().getWorldServer(entityPlayer.dimension).getWorld();
++                    bworld = MinecraftServer.getServerInst().worldServers[entityPlayer.dimension].getWorld();//((CraftServer)server).getServer().getWorldServer(entityPlayer.dimension).getWorld();
 +                }
-+                this.func_70029_a((bworld == null) ? null : ((CraftWorld)bworld).getHandle());
++                this.setWorld((bworld == null) ? null : ((CraftWorld)bworld).getHandle());
 +            }
 +            // BC end
          }
@@ -432,93 +411,93 @@
          {
 @@ -1769,6 +1990,12 @@
      {
-         if (p_70099_1_.field_77994_a != 0 && p_70099_1_.func_77973_b() != null)
+         if (stack.stackSize != 0 && stack.getItem() != null)
          {
 +        	// CB start
 +        	if (this instanceof EntityLivingBase && !((EntityLivingBase)this).forceDrops) {
-+                ((EntityLivingBase)this).drops.add(CraftItemStack.asBukkitCopy(p_70099_1_));
++                ((EntityLivingBase)this).drops.add(CraftItemStack.asBukkitCopy(stack));
 +                return null;
 +            }
 +        	// CB start
-             EntityItem entityitem = new EntityItem(this.field_70170_p, this.field_70165_t, this.field_70163_u + (double)p_70099_2_, this.field_70161_v, p_70099_1_);
-             entityitem.func_174869_p();
+             EntityItem entityitem = new EntityItem(this.worldObj, this.posX, this.posY + (double)offsetY, this.posZ, stack);
+             entityitem.setDefaultPickupDelay();
              if (captureDrops)
-@@ -1933,6 +2160,20 @@
+@@ -1934,6 +2161,20 @@
          }
          else
          {
 +        	// CB start
-+        	com.google.common.base.Preconditions.checkState(!p_184200_1_.field_184244_h.contains(this), "Circular entity riding! %s %s", new Object[] { this, p_184200_1_ });
-+            final CraftEntity craft = (CraftEntity)p_184200_1_.getBukkitEntity().getVehicle();
++        	com.google.common.base.Preconditions.checkState(!passenger.riddenByEntities.contains(this), "Circular entity riding! %s %s", new Object[] { this, passenger });
++            final CraftEntity craft = (CraftEntity)passenger.getBukkitEntity().getVehicle();
 +            final Entity orig = (craft == null) ? null : craft.getHandle();
-+            if (this.getBukkitEntity() instanceof Vehicle && p_184200_1_.getBukkitEntity() instanceof LivingEntity && p_184200_1_.field_70170_p.func_175680_a((int)p_184200_1_.field_70165_t >> 4, (int)p_184200_1_.field_70161_v >> 4, false)) {
-+                final VehicleEnterEvent event = new VehicleEnterEvent((Vehicle)this.getBukkitEntity(), p_184200_1_.getBukkitEntity());
++            if (this.getBukkitEntity() instanceof Vehicle && passenger.getBukkitEntity() instanceof LivingEntity && passenger.worldObj.isChunkLoaded((int)passenger.posX >> 4, (int)passenger.posZ >> 4, false)) {
++                final VehicleEnterEvent event = new VehicleEnterEvent((Vehicle)this.getBukkitEntity(), passenger.getBukkitEntity());
 +                Bukkit.getPluginManager().callEvent(event);
-+                final CraftEntity craftn = (CraftEntity)p_184200_1_.getBukkitEntity().getVehicle();
++                final CraftEntity craftn = (CraftEntity)passenger.getBukkitEntity().getVehicle();
 +                final Entity n = (craftn == null) ? null : craftn.getHandle();
 +                if (event.isCancelled() || n != orig) {
 +                    return;
 +                }
 +            }
 +            // CB end
-             if (!this.field_70170_p.field_72995_K && p_184200_1_ instanceof EntityPlayer && !(this.func_184179_bs() instanceof EntityPlayer))
+             if (!this.worldObj.isRemote && passenger instanceof EntityPlayer && !(this.getControllingPassenger() instanceof EntityPlayer))
              {
-                 this.field_184244_h.add(0, p_184200_1_);
-@@ -1952,6 +2193,19 @@
+                 this.riddenByEntities.add(0, passenger);
+@@ -1953,6 +2194,19 @@
          }
          else
          {
 +        	// CB start
-+        	final CraftEntity craft = (CraftEntity)p_184225_1_.getBukkitEntity().getVehicle();
++        	final CraftEntity craft = (CraftEntity)passenger.getBukkitEntity().getVehicle();
 +            final Entity orig = (craft == null) ? null : craft.getHandle();
-+            if (this.getBukkitEntity() instanceof Vehicle && p_184225_1_.getBukkitEntity() instanceof LivingEntity) {
-+                final VehicleExitEvent event = new VehicleExitEvent((Vehicle)this.getBukkitEntity(), (LivingEntity)p_184225_1_.getBukkitEntity());
++            if (this.getBukkitEntity() instanceof Vehicle && passenger.getBukkitEntity() instanceof LivingEntity) {
++                final VehicleExitEvent event = new VehicleExitEvent((Vehicle)this.getBukkitEntity(), (LivingEntity)passenger.getBukkitEntity());
 +                Bukkit.getPluginManager().callEvent(event);
-+                final CraftEntity craftn = (CraftEntity)p_184225_1_.getBukkitEntity().getVehicle();
++                final CraftEntity craftn = (CraftEntity)passenger.getBukkitEntity().getVehicle();
 +                final Entity n = (craftn == null) ? null : craftn.getHandle();
 +                if (event.isCancelled() || n != orig) {
 +                    return;
 +                }
 +            }
 +            // CB end
-             this.field_184244_h.remove(p_184225_1_);
-             p_184225_1_.field_184245_j = 60;
+             this.riddenByEntities.remove(passenger);
+             passenger.rideCooldown = 60;
          }
-@@ -2149,12 +2403,12 @@
-         this.func_70052_a(5, p_82142_1_);
+@@ -2150,12 +2404,12 @@
+         this.setFlag(5, invisible);
      }
  
--    protected boolean func_70083_f(int p_70083_1_)
-+    public boolean func_70083_f(int p_70083_1_)
+-    protected boolean getFlag(int flag)
++    public boolean getFlag(int flag)
      {
-         return (((Byte)this.field_70180_af.func_187225_a(field_184240_ax)).byteValue() & 1 << p_70083_1_) != 0;
+         return (((Byte)this.dataManager.get(FLAGS)).byteValue() & 1 << flag) != 0;
      }
  
--    protected void func_70052_a(int p_70052_1_, boolean p_70052_2_)
-+    public void func_70052_a(int p_70052_1_, boolean p_70052_2_)
+-    protected void setFlag(int flag, boolean set)
++    public void setFlag(int flag, boolean set)
      {
-         byte b0 = ((Byte)this.field_70180_af.func_187225_a(field_184240_ax)).byteValue();
+         byte b0 = ((Byte)this.dataManager.get(FLAGS)).byteValue();
  
-@@ -2175,17 +2429,50 @@
+@@ -2176,17 +2430,50 @@
  
-     public void func_70050_g(int p_70050_1_)
+     public void setAir(int air)
      {
 +    	// CB start
-+    	final org.bukkit.event.entity.EntityAirChangeEvent event = new org.bukkit.event.entity.EntityAirChangeEvent(this.getBukkitEntity(), p_70050_1_);
++    	final org.bukkit.event.entity.EntityAirChangeEvent event = new org.bukkit.event.entity.EntityAirChangeEvent(this.getBukkitEntity(), air);
 +        if (event.isCancelled()) {
 +            return;
 +        }
 +        // CB end
-         this.field_70180_af.func_187227_b(field_184241_ay, Integer.valueOf(p_70050_1_));
+         this.dataManager.set(AIR, Integer.valueOf(air));
      }
  
-     public void func_70077_a(EntityLightningBolt p_70077_1_)
+     public void onStruckByLightning(EntityLightningBolt lightningBolt)
      {
--        this.func_70097_a(DamageSource.field_180137_b, 5.0F);
+-        this.attackEntityFrom(DamageSource.lightningBolt, 5.0F);
 +    	// CB start
 +        //this.attackEntityFrom(DamageSource.lightningBolt, 5.0F);
 +    	final org.bukkit.entity.Entity thisBukkitEntity = this.getBukkitEntity();
-+        final org.bukkit.entity.Entity stormBukkitEntity = p_70077_1_.getBukkitEntity();
++        final org.bukkit.entity.Entity stormBukkitEntity = lightningBolt.getBukkitEntity();
 +        final PluginManager pluginManager = Bukkit.getPluginManager();
 +        if (thisBukkitEntity instanceof Hanging) {
 +            final HangingBreakByEntityEvent hangingEvent = new HangingBreakByEntityEvent((Hanging)thisBukkitEntity, stormBukkitEntity);
@@ -527,49 +506,49 @@
 +                return;
 +            }
 +        }
-+        if (this.field_70178_ae) {
++        if (this.isImmuneToFire) {
 +            return;
 +        }
-+        CraftEventFactory.entityDamage = p_70077_1_;
-+        if (!this.func_70097_a(DamageSource.field_180137_b, 5.0f)) {
++        CraftEventFactory.entityDamage = lightningBolt;
++        if (!this.attackEntityFrom(DamageSource.lightningBolt, 5.0f)) {
 +            CraftEventFactory.entityDamage = null;
 +            return;
 +        }
 +        // CB end
-         ++this.field_70151_c;
+         ++this.fire;
  
-         if (this.field_70151_c == 0)
+         if (this.fire == 0)
          {
--            this.func_70015_d(8);
+-            this.setFire(8);
 +        	// CB start
 +            //this.setFire(8);
 +        	final EntityCombustByEntityEvent entityCombustEvent = new EntityCombustByEntityEvent(stormBukkitEntity, thisBukkitEntity, 8);
 +            pluginManager.callEvent(entityCombustEvent);
 +            if (!entityCombustEvent.isCancelled()) {
-+                this.func_70015_d(entityCombustEvent.getDuration());
++                this.setFire(entityCombustEvent.getDuration());
 +            }
 +        	// CB end
          }
      }
  
-@@ -2357,88 +2644,143 @@
-             if (!net.minecraftforge.common.ForgeHooks.onTravelToDimension(this, p_184204_1_)) return null;
-             this.field_70170_p.field_72984_F.func_76320_a("changeDimension");
-             MinecraftServer minecraftserver = this.func_184102_h();
--            int i = this.field_71093_bK;
--            WorldServer worldserver = minecraftserver.func_71218_a(i);
--            WorldServer worldserver1 = minecraftserver.func_71218_a(p_184204_1_);
--            this.field_71093_bK = p_184204_1_;
+@@ -2358,21 +2645,63 @@
+             if (!net.minecraftforge.common.ForgeHooks.onTravelToDimension(this, dimensionIn)) return null;
+             this.worldObj.theProfiler.startSection("changeDimension");
+             MinecraftServer minecraftserver = this.getServer();
+-            int i = this.dimension;
+-            WorldServer worldserver = minecraftserver.worldServerForDimension(i);
+-            WorldServer worldserver1 = minecraftserver.worldServerForDimension(dimensionIn);
+-            this.dimension = dimensionIn;
 -
--            if (i == 1 && p_184204_1_ == 1)
+-            if (i == 1 && dimensionIn == 1)
 -            {
--                worldserver1 = minecraftserver.func_71218_a(0);
--                this.field_71093_bK = 0;
+-                worldserver1 = minecraftserver.worldServerForDimension(0);
+-                this.dimension = 0;
 +            // CB start
 +            //int i = this.dimension;
 +            //WorldServer worldserver = minecraftserver.worldServerForDimension(i);
 +            //WorldServer worldserver1 = minecraftserver.worldServerForDimension(dimensionIn);
-+            WorldServer exitWorld = minecraftserver.field_71305_c[p_184204_1_];
++            WorldServer exitWorld = minecraftserver.worldServers[dimensionIn];
 +            //if (this.dimension < 10) {
 +            //    for (final WorldServer world : minecraftserver.worldServers) {
 +            //        if (world.dimension == dimensionIn) {
@@ -585,18 +564,18 @@
 +                //    exit = new Location(exitWorld.getWorld(), blockposition.getX(), blockposition.getY(), blockposition.getZ());
 +                //}
 +                //else {
-+                    exit = minecraftserver.func_184103_al().calculateTarget(enter, minecraftserver.func_71218_a(p_184204_1_));
++                    exit = minecraftserver.getPlayerList().calculateTarget(enter, minecraftserver.worldServerForDimension(dimensionIn));
 +                //}
              }
 +            else {
 +                exit = null;
 +            }
-+            final boolean useTravelAgent = exitWorld != null && (this.field_71093_bK != 1 || exitWorld.dimension != 1);
-+            final TravelAgent agent = (TravelAgent)((exit != null) ? ((CraftWorld)exit.getWorld()).getHandle().func_85176_s() : CraftTravelAgent.DEFAULT);
++            final boolean useTravelAgent = exitWorld != null && (this.dimension != 1 || exitWorld.dimension != 1);
++            final TravelAgent agent = (TravelAgent)((exit != null) ? ((CraftWorld)exit.getWorld()).getHandle().getDefaultTeleporter() : CraftTravelAgent.DEFAULT);
 +            final EntityPortalEvent event = new EntityPortalEvent(this.getBukkitEntity(), enter, exit, agent);
 +            event.useTravelAgent(useTravelAgent);
 +            event.getEntity().getServer().getPluginManager().callEvent(event);
-+            if (event.isCancelled() || event.getTo() == null || event.getTo().getWorld() == null || !this.func_70089_S()) {
++            if (event.isCancelled() || event.getTo() == null || event.getTo().getWorld() == null || !this.isEntityAlive()) {
 +                return null;
 +            }
 +            exit = (event.useTravelAgent() ? event.getPortalTravelAgent().findOrCreate(event.getTo()) : event.getTo());
@@ -610,7 +589,7 @@
 +            final WorldServer worldserver2 = ((CraftWorld)exit.getWorld()).getHandle();
 +            final int dimensionIn = worldserver2.dimension;
 +         	// CB end
-+    		this.field_71093_bK = dimensionIn;
++    		this.dimension = dimensionIn;
 +    		/*
 +    		if (i == 1 && dimensionIn == 1)
 +    		{
@@ -618,115 +597,70 @@
 +    			this.dimension = 0;
 +    		}*/
  
--            this.field_70170_p.func_72900_e(this);
--            this.field_70128_L = false;
--            this.field_70170_p.field_72984_F.func_76320_a("reposition");
+-            this.worldObj.removeEntity(this);
+-            this.isDead = false;
+-            this.worldObj.theProfiler.startSection("reposition");
 -            BlockPos blockpos;
-+    		this.field_70170_p.func_72900_e(this);
-+    		this.field_70128_L = false;
-+    		this.field_70170_p.field_72984_F.func_76320_a("reposition");/*
++    		this.worldObj.removeEntity(this);
++    		this.isDead = false;
++    		this.worldObj.theProfiler.startSection("reposition");/*
 +    		BlockPos blockpos;
  
--            if (p_184204_1_ == 1)
-+            if (dimensionIn == 1)
+             if (dimensionIn == 1)
              {
--                blockpos = worldserver1.func_180504_m();
-+                blockpos = worldserver1.getSpawnCoordinate();
-             }
-             else
-             {
--                double d0 = this.field_70165_t;
--                double d1 = this.field_70161_v;
-+                double d0 = this.posX;
-+                double d1 = this.posZ;
-                 double d2 = 8.0D;
- 
--                if (p_184204_1_ == -1)
-+                if (dimensionIn == -1)
-                 {
--                    d0 = MathHelper.func_151237_a(d0 / 8.0D, worldserver1.func_175723_af().func_177726_b() + 16.0D, worldserver1.func_175723_af().func_177728_d() - 16.0D);
--                    d1 = MathHelper.func_151237_a(d1 / 8.0D, worldserver1.func_175723_af().func_177736_c() + 16.0D, worldserver1.func_175723_af().func_177733_e() - 16.0D);
-+                    d0 = MathHelper.clamp_double(d0 / 8.0D, worldserver1.getWorldBorder().minX() + 16.0D, worldserver1.getWorldBorder().maxX() - 16.0D);
-+                    d1 = MathHelper.clamp_double(d1 / 8.0D, worldserver1.getWorldBorder().minZ() + 16.0D, worldserver1.getWorldBorder().maxZ() - 16.0D);
-                 }
--                else if (p_184204_1_ == 0)
-+                else if (dimensionIn == 0)
-                 {
--                    d0 = MathHelper.func_151237_a(d0 * 8.0D, worldserver1.func_175723_af().func_177726_b() + 16.0D, worldserver1.func_175723_af().func_177728_d() - 16.0D);
--                    d1 = MathHelper.func_151237_a(d1 * 8.0D, worldserver1.func_175723_af().func_177736_c() + 16.0D, worldserver1.func_175723_af().func_177733_e() - 16.0D);
-+                    d0 = MathHelper.clamp_double(d0 * 8.0D, worldserver1.getWorldBorder().minX() + 16.0D, worldserver1.getWorldBorder().maxX() - 16.0D);
-+                    d1 = MathHelper.clamp_double(d1 * 8.0D, worldserver1.getWorldBorder().minZ() + 16.0D, worldserver1.getWorldBorder().maxZ() - 16.0D);
-                 }
- 
--                d0 = (double)MathHelper.func_76125_a((int)d0, -29999872, 29999872);
--                d1 = (double)MathHelper.func_76125_a((int)d1, -29999872, 29999872);
--                float f = this.field_70177_z;
--                this.func_70012_b(d0, this.field_70163_u, d1, 90.0F, 0.0F);
--                Teleporter teleporter = worldserver1.func_85176_s();
--                teleporter.func_180620_b(this, f);
-+                d0 = (double)MathHelper.clamp_int((int)d0, -29999872, 29999872);
-+                d1 = (double)MathHelper.clamp_int((int)d1, -29999872, 29999872);
-+                float f = this.rotationYaw;
-+                this.setLocationAndAngles(d0, this.posY, d1, 90.0F, 0.0F);
-+                Teleporter teleporter = worldserver1.getDefaultTeleporter();
-+                teleporter.placeInExistingPortal(this, f);
+@@ -2404,14 +2733,20 @@
                  blockpos = new BlockPos(this);
              }
  
--            worldserver.func_72866_a(this, false);
+-            worldserver.updateEntityWithOptionalForce(this, false);
 +            worldserver.updateEntityWithOptionalForce(this, false);*/
 +    		// CraftBukkit end */
 +    		// CraftBukkit start - Ensure chunks are loaded in case TravelAgent is not used which would initially cause chunks to load during find/create
 +    		// minecraftserver.getPlayerList().changeWorld(this, j, worldserver, worldserver1);
-+    		worldserver2.func_73046_m().func_184103_al().repositionEntity(this, exit, portal);
++    		worldserver2.getMinecraftServer().getPlayerList().repositionEntity(this, exit, portal);
 +    		// worldserver.entityJoinedWorld(this, false); // Handled in repositionEntity
 +    		// CraftBukkit end
-             this.field_70170_p.field_72984_F.func_76318_c("reloading");
--            Entity entity = EntityList.func_75620_a(EntityList.func_75621_b(this), worldserver1);
-+            Entity entity = EntityList.func_75620_a(EntityList.func_75621_b(this), worldserver2);
+             this.worldObj.theProfiler.endStartSection("reloading");
+-            Entity entity = EntityList.createEntityByName(EntityList.getEntityString(this), worldserver1);
++            Entity entity = EntityList.createEntityByName(EntityList.getEntityString(this), worldserver2);
  
              if (entity != null)
              {
-                 entity.func_180432_n(this);
+                 entity.copyDataFromOld(this);
 -
--                if (i == 1 && p_184204_1_ == 1)
 +                /*
-+                if (i == 1 && dimensionIn == 1)
+                 if (i == 1 && dimensionIn == 1)
                  {
--                    BlockPos blockpos1 = worldserver1.func_175672_r(worldserver1.func_175694_M());
--                    entity.func_174828_a(blockpos1, entity.field_70177_z, entity.field_70125_A);
-+                    BlockPos blockpos1 = worldserver1.getTopSolidOrLiquidBlock(worldserver1.getSpawnPoint());
-+                    entity.moveToBlockPosAndAngles(blockpos1, entity.rotationYaw, entity.rotationPitch);
-                 }
+                     BlockPos blockpos1 = worldserver1.getTopSolidOrLiquidBlock(worldserver1.getSpawnPoint());
+@@ -2420,26 +2755,33 @@
                  else
                  {
--                    entity.func_174828_a(blockpos, entity.field_70177_z, entity.field_70125_A);
+                     entity.moveToBlockPosAndAngles(blockpos, entity.rotationYaw, entity.rotationPitch);
 -                }
-+                    entity.moveToBlockPosAndAngles(blockpos, entity.rotationYaw, entity.rotationPitch);
 +                }*/
  
-                 boolean flag = entity.field_98038_p;
-                 entity.field_98038_p = true;
--                worldserver1.func_72838_d(entity);
-+                worldserver2.func_72838_d(entity);
-                 entity.field_98038_p = flag;
--                worldserver1.func_72866_a(entity, false);
-+                worldserver2.func_72866_a(entity, false);
+                 boolean flag = entity.forceSpawn;
+                 entity.forceSpawn = true;
+-                worldserver1.spawnEntityInWorld(entity);
++                worldserver2.spawnEntityInWorld(entity);
+                 entity.forceSpawn = flag;
+-                worldserver1.updateEntityWithOptionalForce(entity, false);
++                worldserver2.updateEntityWithOptionalForce(entity, false);
 +                // CraftBukkit start - Forward the CraftEntity to the new entity
 +                this.getBukkitEntity().setHandle(entity);
 +                entity.bukkitEntity = this.getBukkitEntity();
 +                if (this instanceof EntityLiving) {
-+                    ((EntityLiving)this).func_110160_i(true, false);
++                    ((EntityLiving)this).clearLeashed(true, false);
 +                }
 +                // CraftBukkit end
              }
  
-             this.field_70128_L = true;
-             this.field_70170_p.field_72984_F.func_76319_b();
-             worldserver.func_82742_i();
--            worldserver1.func_82742_i();
-+            worldserver2.func_82742_i();
-             this.field_70170_p.field_72984_F.func_76319_b();
+             this.isDead = true;
+             this.worldObj.theProfiler.endSection();
+             worldserver.resetUpdateEntityTick();
+-            worldserver1.resetUpdateEntityTick();
++            worldserver2.resetUpdateEntityTick();
+             this.worldObj.theProfiler.endSection();
              return entity;
 -        }
 -        else
@@ -740,55 +674,55 @@
 +        //}
      }
  
-     public boolean func_184222_aU()
-@@ -2561,6 +2903,11 @@
+     public boolean isNonBoss()
+@@ -2562,6 +2904,11 @@
  
-     public void func_96094_a(String p_96094_1_)
+     public void setCustomNameTag(String name)
      {
 +    	// CB start
-+    	if (p_96094_1_.length() > 256) {
-+    		p_96094_1_ = p_96094_1_.substring(0, 256);
++    	if (name.length() > 256) {
++    		name = name.substring(0, 256);
 +        }
 +    	// CB end
-         this.field_70180_af.func_187227_b(field_184242_az, p_96094_1_);
+         this.dataManager.set(CUSTOM_NAME, name);
      }
  
-@@ -2644,7 +2991,37 @@
+@@ -2645,7 +2992,37 @@
  
-     public void func_174826_a(AxisAlignedBB p_174826_1_)
+     public void setEntityBoundingBox(AxisAlignedBB bb)
      {
--        this.field_70121_D = p_174826_1_;
+-        this.boundingBox = bb;
 +    	// CB start
 +        //this.boundingBox = bb;
-+    	final double a = p_174826_1_.field_72340_a;
-+        final double b = p_174826_1_.field_72338_b;
-+        final double c = p_174826_1_.field_72339_c;
-+        double d = p_174826_1_.field_72336_d;
-+        double e = p_174826_1_.field_72337_e;
-+        double f = p_174826_1_.field_72334_f;
-+        double len = p_174826_1_.field_72336_d - p_174826_1_.field_72340_a;
++    	final double a = bb.minX;
++        final double b = bb.minY;
++        final double c = bb.minZ;
++        double d = bb.maxX;
++        double e = bb.maxY;
++        double f = bb.maxZ;
++        double len = bb.maxX - bb.minX;
 +        if (len < 0.0) {
 +            d = a;
 +        }
 +        if (len > 64.0) {
 +            d = a + 64.0;
 +        }
-+        len = p_174826_1_.field_72337_e - p_174826_1_.field_72338_b;
++        len = bb.maxY - bb.minY;
 +        if (len < 0.0) {
 +            e = b;
 +        }
 +        if (len > 64.0) {
 +            e = b + 64.0;
 +        }
-+        len = p_174826_1_.field_72334_f - p_174826_1_.field_72339_c;
++        len = bb.maxZ - bb.minZ;
 +        if (len < 0.0) {
 +            f = c;
 +        }
 +        if (len > 64.0) {
 +            f = c + 64.0;
 +        }
-+        this.field_70121_D = new AxisAlignedBB(a, b, c, d, e, f);
++        this.boundingBox = new AxisAlignedBB(a, b, c, d, e, f);
 +    	// CB end
      }
  
-     public float func_70047_e()
+     public float getEyeHeight()

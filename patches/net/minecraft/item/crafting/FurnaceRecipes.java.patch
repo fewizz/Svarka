@@ -3,27 +3,27 @@
 @@ -16,15 +16,18 @@
  public class FurnaceRecipes
  {
-     private static final FurnaceRecipes field_77606_a = new FurnaceRecipes();
--    private final Map<ItemStack, ItemStack> field_77604_b = Maps.<ItemStack, ItemStack>newHashMap();
-+    public Map<ItemStack, ItemStack> field_77604_b = Maps.<ItemStack, ItemStack>newHashMap(); //CB - final -> non-final
-     private final Map<ItemStack, Float> field_77605_c = Maps.<ItemStack, Float>newHashMap();
+     private static final FurnaceRecipes SMELTING_BASE = new FurnaceRecipes();
+-    private final Map<ItemStack, ItemStack> smeltingList = Maps.<ItemStack, ItemStack>newHashMap();
++    public Map<ItemStack, ItemStack> smeltingList = Maps.<ItemStack, ItemStack>newHashMap(); //CB - final -> non-final
+     private final Map<ItemStack, Float> experienceList = Maps.<ItemStack, Float>newHashMap();
 +    public Map<ItemStack,ItemStack> customRecipes = Maps.newHashMap(); // CraftBukkit - add field
 +    public int customRecipesSize = 0;
 +    public Map<ItemStack,Float> customExperience = Maps.newHashMap(); // CraftBukkit - add field
  
-     public static FurnaceRecipes func_77602_a()
+     public static FurnaceRecipes instance()
      {
-         return field_77606_a;
+         return SMELTING_BASE;
      }
  
 -    private FurnaceRecipes()
 +    public FurnaceRecipes()
      {
-         this.func_151393_a(Blocks.field_150366_p, new ItemStack(Items.field_151042_j), 0.7F);
-         this.func_151393_a(Blocks.field_150352_o, new ItemStack(Items.field_151043_k), 1.0F);
+         this.addSmeltingRecipeForBlock(Blocks.IRON_ORE, new ItemStack(Items.IRON_INGOT), 0.7F);
+         this.addSmeltingRecipeForBlock(Blocks.GOLD_ORE, new ItemStack(Items.GOLD_INGOT), 1.0F);
 @@ -61,6 +64,13 @@
-         this.func_151393_a(Blocks.field_150369_x, new ItemStack(Items.field_151100_aR, 1, EnumDyeColor.BLUE.func_176767_b()), 0.2F);
-         this.func_151393_a(Blocks.field_150449_bY, new ItemStack(Items.field_151128_bU), 0.2F);
+         this.addSmeltingRecipeForBlock(Blocks.LAPIS_ORE, new ItemStack(Items.DYE, 1, EnumDyeColor.BLUE.getDyeDamage()), 0.2F);
+         this.addSmeltingRecipeForBlock(Blocks.QUARTZ_ORE, new ItemStack(Items.QUARTZ), 0.2F);
      }
 +    
 +    // CraftBukkit start - add method
@@ -33,23 +33,23 @@
 +    }
 +    // CraftBukkit end
  
-     public void func_151393_a(Block p_151393_1_, ItemStack p_151393_2_, float p_151393_3_)
+     public void addSmeltingRecipeForBlock(Block input, ItemStack stack, float experience)
      {
 @@ -82,6 +92,17 @@
      @Nullable
-     public ItemStack func_151395_a(ItemStack p_151395_1_)
+     public ItemStack getSmeltingResult(ItemStack stack)
      {
 +    	// CB start
 +    	if(customRecipesSize > 0)
 +    		for (Entry<ItemStack, ItemStack> entry : this.customRecipes.entrySet())
 +    		{
-+    			if (this.func_151397_a(p_151395_1_, (ItemStack)entry.getKey()))
++    			if (this.compareItemStacks(stack, (ItemStack)entry.getKey()))
 +    			{
 +    				return (ItemStack)entry.getValue();
 +    			}
 +    		}
 +    	// CB end
 +    	
-         for (Entry<ItemStack, ItemStack> entry : this.field_77604_b.entrySet())
+         for (Entry<ItemStack, ItemStack> entry : this.smeltingList.entrySet())
          {
-             if (this.func_151397_a(p_151395_1_, (ItemStack)entry.getKey()))
+             if (this.compareItemStacks(stack, (ItemStack)entry.getKey()))

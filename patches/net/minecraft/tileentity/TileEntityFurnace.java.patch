@@ -36,7 +36,7 @@
 +	public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
 +	
 +	public ItemStack[] getContents() {
-+		return this.field_145957_n;
++		return this.furnaceItemStacks;
 +	}
 +	
 +	public void onOpen(CraftHumanEntity who) {
@@ -55,6 +55,6 @@
 +		maxStack = size;
 +	}
 +	// CraftBukkit end
-     private static final int[] field_145962_k = new int[] {0};
-     private static final int[] field_145959_l = new int[] {2, 1};
-     private static final int[] field_145960_m = new int[] {1};
+     private static final int[] SLOTS_TOP = new int[] {0};
+     private static final int[] SLOTS_BOTTOM = new int[] {2, 1};
+     private static final int[] SLOTS_SIDES = new int[] {1};

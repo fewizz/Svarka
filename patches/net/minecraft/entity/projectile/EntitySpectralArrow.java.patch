@@ -4,8 +4,8 @@
  
  public class EntitySpectralArrow extends EntityArrow
  {
--    private int field_184562_f = 200;
-+    public int field_184562_f = 200;
+-    private int duration = 200;
++    public int duration = 200;
  
-     public EntitySpectralArrow(World p_i46767_1_)
+     public EntitySpectralArrow(World worldIn)
      {

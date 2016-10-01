@@ -4,11 +4,11 @@
  
  public class EntityFireworkRocket extends Entity
  {
--    private static final DataParameter<Optional<ItemStack>> field_184566_a = EntityDataManager.<Optional<ItemStack>>func_187226_a(EntityFireworkRocket.class, DataSerializers.field_187196_f);
-+    public static final DataParameter<Optional<ItemStack>> field_184566_a = EntityDataManager.<Optional<ItemStack>>func_187226_a(EntityFireworkRocket.class, DataSerializers.field_187196_f);
-     private int field_92056_a;
--    private int field_92055_b;
-+    public int field_92055_b;
+-    private static final DataParameter<Optional<ItemStack>> FIREWORK_ITEM = EntityDataManager.<Optional<ItemStack>>createKey(EntityFireworkRocket.class, DataSerializers.OPTIONAL_ITEM_STACK);
++    public static final DataParameter<Optional<ItemStack>> FIREWORK_ITEM = EntityDataManager.<Optional<ItemStack>>createKey(EntityFireworkRocket.class, DataSerializers.OPTIONAL_ITEM_STACK);
+     private int fireworkAge;
+-    private int lifetime;
++    public int lifetime;
  
-     public EntityFireworkRocket(World p_i1762_1_)
+     public EntityFireworkRocket(World worldIn)
      {

@@ -17,20 +17,20 @@
 +
 +public class ShapedRecipes implements ICBRecipe
  {
-     public final int field_77576_b;
-     public final int field_77577_c;
+     public final int recipeWidth;
+     public final int recipeHeight;
 @@ -20,7 +29,61 @@
-         this.field_77574_d = p_i1917_3_;
-         this.field_77575_e = p_i1917_4_;
+         this.recipeItems = p_i1917_3_;
+         this.recipeOutput = output;
      }
 -
 +    // CraftBukkit start
 +    public org.bukkit.inventory.ShapedRecipe toBukkitRecipe() {
-+    	CraftItemStack result = CraftItemStack.asCraftMirror(this.field_77575_e);
++    	CraftItemStack result = CraftItemStack.asCraftMirror(this.recipeOutput);
 +    	CraftShapedRecipe recipe = new CraftShapedRecipe(result, this);
-+    	switch (this.field_77577_c) {
++    	switch (this.recipeHeight) {
 +    	case 1:
-+    		switch (this.field_77576_b) {
++    		switch (this.recipeWidth) {
 +    		case 1:
 +    			recipe.shape("a");
 +    			break;
@@ -43,7 +43,7 @@
 +    		}
 +    		break;
 +    	case 2:
-+    		switch (this.field_77576_b) {
++    		switch (this.recipeWidth) {
 +    		case 1:
 +    			recipe.shape("a","b");
 +    			break;
@@ -56,7 +56,7 @@
 +    		}
 +                break;
 +    	case 3:
-+    		switch (this.field_77576_b) {
++    		switch (this.recipeWidth) {
 +    		case 1:
 +    			recipe.shape("a","b","c");
 +    			break;
@@ -70,9 +70,9 @@
 +    		break;
 +    	}
 +    	char c = 'a';
-+    	for (ItemStack stack : this.field_77574_d) {
++    	for (ItemStack stack : this.recipeItems) {
 +    		if (stack != null) {
-+    			recipe.setIngredient(c, org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(stack.func_77973_b()), stack.func_77960_j());
++    			recipe.setIngredient(c, org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(stack.getItem()), stack.getMetadata());
 +    		}
 +    		c++;
 +    	}
@@ -80,5 +80,5 @@
 +    }
 +    // CraftBukkit end
      @Nullable
-     public ItemStack func_77571_b()
+     public ItemStack getRecipeOutput()
      {

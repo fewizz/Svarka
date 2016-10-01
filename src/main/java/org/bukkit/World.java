@@ -1411,7 +1411,8 @@ public interface World extends PluginMessageRecipient, Metadatable {
         /**
          * Represents the "end" map
          */
-        THE_END(1);
+        THE_END(1),
+        CUSTOM(0xFF); // Svarka
 
         private final int id;
         private static final Map<Integer, Environment> lookup = new HashMap<Integer, Environment>();
@@ -1440,7 +1441,8 @@ public interface World extends PluginMessageRecipient, Metadatable {
          */
         @Deprecated
         public static Environment getEnvironment(int id) {
-            return lookup.get(id);
+        	Environment env = lookup.get(id);
+            return env == null ? CUSTOM : env;
         }
 
         static {

@@ -17,88 +17,75 @@
 +
  public class WorldServer extends World implements IThreadListener
  {
-     private static final Logger field_147491_a = LogManager.getLogger();
-     private final MinecraftServer field_73061_a;
--    private final EntityTracker field_73062_L;
-+    public final EntityTracker field_73062_L;
-     private final PlayerChunkMap field_73063_M;
-     private final Set<NextTickListEntry> field_73064_N = Sets.<NextTickListEntry>newHashSet();
--    private final TreeSet<NextTickListEntry> field_73065_O = new TreeSet();
-+    private final TreeSet<NextTickListEntry> field_73065_O = new TreeSet<NextTickListEntry>();
-     private final Map<UUID, Entity> field_175741_N = Maps.<UUID, Entity>newHashMap();
-     public boolean field_73058_d;
-     private boolean field_73068_P;
-@@ -101,11 +111,14 @@
+     private static final Logger LOGGER = LogManager.getLogger();
+     private final MinecraftServer mcServer;
+-    private final EntityTracker theEntityTracker;
++    public final EntityTracker theEntityTracker;
+     private final PlayerChunkMap thePlayerManager;
+     private final Set<NextTickListEntry> pendingTickListEntriesHashSet = Sets.<NextTickListEntry>newHashSet();
+-    private final TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet = new TreeSet();
++    private final TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet = new TreeSet<NextTickListEntry>();
+     private final Map<UUID, Entity> entitiesByUuid = Maps.<UUID, Entity>newHashMap();
+     public boolean disableLevelSaving;
+     private boolean allPlayersSleeping;
+@@ -101,10 +111,13 @@
      /** Stores the recently processed (lighting) chunks */
      protected Set<ChunkPos> doneChunks = new java.util.HashSet<ChunkPos>();
      public List<Teleporter> customTeleporters = new ArrayList<Teleporter>();
 +    public final int dimension;
  
--    public WorldServer(MinecraftServer p_i45921_1_, ISaveHandler p_i45921_2_, WorldInfo p_i45921_3_, int p_i45921_4_, Profiler p_i45921_5_)
+-    public WorldServer(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn)
 +    public WorldServer(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn, org.bukkit.World.Environment env, org.bukkit.generator.ChunkGenerator gen)
      {
--        super(p_i45921_2_, p_i45921_3_, net.minecraftforge.common.DimensionManager.createProviderFor(p_i45921_4_), p_i45921_5_, false);
--        this.field_73061_a = p_i45921_1_;
+-        super(saveHandlerIn, info, net.minecraftforge.common.DimensionManager.createProviderFor(dimensionId), profilerIn, false);
 +        super(saveHandlerIn, info, net.minecraftforge.common.DimensionManager.createProviderFor(dimensionId), profilerIn, false, gen, env);
 +        this.dimension = dimensionId;
-+        this.pvpMode = server.func_71219_W();
-+        this.field_73061_a = server;
-         this.field_73062_L = new EntityTracker(this);
-         this.field_73063_M = new PlayerChunkMap(this);
-         // Guarantee the dimension ID was not reset by the provider
-@@ -113,12 +126,13 @@
-         this.field_73011_w.func_76558_a(this);
-         this.field_73011_w.setDimension(providerDim);
-         this.field_73020_y = this.func_72970_h();
--        perWorldStorage = new MapStorage(new net.minecraftforge.common.WorldSpecificSaveHandler((WorldServer)this, p_i45921_2_));
--        this.field_85177_Q = new Teleporter(this);
-+        perWorldStorage = new MapStorage(new net.minecraftforge.common.WorldSpecificSaveHandler((WorldServer)this, saveHandlerIn));
++        this.pvpMode = server.isPVPEnabled();
+         this.mcServer = server;
+         this.theEntityTracker = new EntityTracker(this);
+         this.thePlayerManager = new PlayerChunkMap(this);
+@@ -114,7 +127,8 @@
+         this.provider.setDimension(providerDim);
+         this.chunkProvider = this.createChunkProvider();
+         perWorldStorage = new MapStorage(new net.minecraftforge.common.WorldSpecificSaveHandler((WorldServer)this, saveHandlerIn));
+-        this.worldTeleporter = new Teleporter(this);
 +        //this.worldTeleporter = new Teleporter(this);
-+        this.field_85177_Q = new org.bukkit.craftbukkit.CraftTravelAgent(this); // CraftBukkit
-         this.func_72966_v();
-         this.func_72947_a();
--        this.func_175723_af().func_177725_a(p_i45921_1_.func_175580_aG());
--        net.minecraftforge.common.DimensionManager.setWorld(p_i45921_4_, this, field_73061_a);
-+        this.func_175723_af().func_177725_a(server.func_175580_aG());
-+        net.minecraftforge.common.DimensionManager.setWorld(dimensionId, this, field_73061_a);
++        this.worldTeleporter = new org.bukkit.craftbukkit.CraftTravelAgent(this); // CraftBukkit
+         this.calculateInitialSkylight();
+         this.calculateInitialWeather();
+         this.getWorldBorder().setSize(server.getMaxWorldSize());
+@@ -341,7 +355,7 @@
+         this.worldInfo.setSpawnZ(j);
      }
  
-     public World func_175643_b()
-@@ -340,7 +354,7 @@
-         this.field_72986_A.func_76087_c(j);
-     }
- 
--    protected boolean func_175680_a(int p_175680_1_, int p_175680_2_, boolean p_175680_3_)
-+    public boolean func_175680_a(int p_175680_1_, int p_175680_2_, boolean p_175680_3_)
+-    protected boolean isChunkLoaded(int x, int z, boolean allowEmpty)
++    public boolean isChunkLoaded(int x, int z, boolean allowEmpty)
      {
-         return this.func_72863_F().func_73149_a(p_175680_1_, p_175680_2_);
+         return this.getChunkProvider().chunkExists(x, z);
      }
-@@ -1302,12 +1316,25 @@
+@@ -1303,12 +1317,25 @@
  
-     public void func_180505_a(EnumParticleTypes p_180505_1_, boolean p_180505_2_, double p_180505_3_, double p_180505_5_, double p_180505_7_, int p_180505_9_, double p_180505_10_, double p_180505_12_, double p_180505_14_, double p_180505_16_, int... p_180505_18_)
+     public void spawnParticle(EnumParticleTypes particleType, boolean longDistance, double xCoord, double yCoord, double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed, int... particleArguments)
      {
--        SPacketParticles spacketparticles = new SPacketParticles(p_180505_1_, p_180505_2_, (float)p_180505_3_, (float)p_180505_5_, (float)p_180505_7_, (float)p_180505_10_, (float)p_180505_12_, (float)p_180505_14_, (float)p_180505_16_, p_180505_9_, p_180505_18_);
+-        SPacketParticles spacketparticles = new SPacketParticles(particleType, longDistance, (float)xCoord, (float)yCoord, (float)zCoord, (float)xOffset, (float)yOffset, (float)zOffset, (float)particleSpeed, numberOfParticles, particleArguments);
 +        /*SPacketParticles spacketparticles = new SPacketParticles(particleType, longDistance, (float)xCoord, (float)yCoord, (float)zCoord, (float)xOffset, (float)yOffset, (float)zOffset, (float)particleSpeed, numberOfParticles, particleArguments);
  
--        for (int i = 0; i < this.field_73010_i.size(); ++i)
-+        for (int i = 0; i < this.playerEntities.size(); ++i)
+         for (int i = 0; i < this.playerEntities.size(); ++i)
          {
--            EntityPlayerMP entityplayermp = (EntityPlayerMP)this.field_73010_i.get(i);
--            this.func_184159_a(entityplayermp, p_180505_2_, p_180505_3_, p_180505_5_, p_180505_7_, spacketparticles);
-+            EntityPlayerMP entityplayermp = (EntityPlayerMP)this.playerEntities.get(i);
-+            this.sendPacketWithinDistance(entityplayermp, longDistance, xCoord, yCoord, zCoord, spacketparticles);
+             EntityPlayerMP entityplayermp = (EntityPlayerMP)this.playerEntities.get(i);
+             this.sendPacketWithinDistance(entityplayermp, longDistance, xCoord, yCoord, zCoord, spacketparticles);
 +        }*/
-+    	sendParticles(null, p_180505_1_, p_180505_2_, p_180505_3_, p_180505_5_, p_180505_7_, p_180505_9_, p_180505_10_, p_180505_12_, p_180505_14_, p_180505_16_, p_180505_18_);
++    	sendParticles(null, particleType, longDistance, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed, particleArguments);
 +    }
 +    // CraftBukkit
 +    public void sendParticles(final EntityPlayerMP sender, final EnumParticleTypes enumparticle, final boolean flag, final double d0, final double d1, final double d2, final int i, final double d3, final double d4, final double d5, final double d6, final int... aint) {
 +        final SPacketParticles packetplayoutworldparticles = new SPacketParticles(enumparticle, flag, (float)d0, (float)d1, (float)d2, (float)d3, (float)d4, (float)d5, (float)d6, i, aint);
-+        for (int j = 0; j < this.field_73010_i.size(); ++j) {
-+            final EntityPlayerMP entityplayer = (EntityPlayerMP) this.field_73010_i.get(j);
++        for (int j = 0; j < this.playerEntities.size(); ++j) {
++            final EntityPlayerMP entityplayer = (EntityPlayerMP) this.playerEntities.get(j);
 +            if (sender == null || entityplayer.getBukkitEntity().canSee(sender.getBukkitEntity())) {
 +                //final BlockPos blockposition = entityplayer.getPosition();
 +                //blockposition.distanceSq(d0, d1, d2);
-+                this.func_184159_a(entityplayer, flag, d0, d1, d2, packetplayoutworldparticles);
++                this.sendPacketWithinDistance(entityplayer, flag, d0, d1, d2, packetplayoutworldparticles);
 +            }
          }
      }

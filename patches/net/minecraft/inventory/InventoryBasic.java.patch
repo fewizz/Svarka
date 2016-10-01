@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/inventory/InventoryBasic.java
 +++ ../src-work/minecraft/net/minecraft/inventory/InventoryBasic.java
-@@ -10,22 +10,70 @@
+@@ -10,17 +10,65 @@
  import net.minecraft.util.text.TextComponentTranslation;
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
@@ -20,18 +20,18 @@
 +
 +public class InventoryBasic implements ICBInventory
  {
-     private String field_70483_a;
-     private final int field_70481_b;
-     private final ItemStack[] field_70482_c;
-     private List<IInventoryChangedListener> field_70480_d;
-     private boolean field_94051_e;
+     private String inventoryTitle;
+     private final int slotsCount;
+     private final ItemStack[] inventoryContents;
+     private List<IInventoryChangedListener> changeListeners;
+     private boolean hasCustomName;
 +    // CraftBukkit start - add fields and methods
 +    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
 +    private int maxStack = MAX_STACK;
 +    protected org.bukkit.inventory.InventoryHolder bukkitOwner;
 +    	
 +    public ItemStack[] getContents() {
-+    	return this.field_70482_c;
++    	return this.inventoryContents;
 +    }
 +    
 +    public void onOpen(CraftHumanEntity who) {
@@ -59,20 +59,11 @@
 +    	return null;
 +    }
  
-     public InventoryBasic(String p_i1561_1_, boolean p_i1561_2_, int p_i1561_3_)
+     public InventoryBasic(String title, boolean customName, int slotCount)
      {
--        this.field_70483_a = p_i1561_1_;
--        this.field_94051_e = p_i1561_2_;
--        this.field_70481_b = p_i1561_3_;
--        this.field_70482_c = new ItemStack[p_i1561_3_];
-+    	this(p_i1561_1_, p_i1561_2_, p_i1561_3_, null);
-     }
-+    public InventoryBasic(String title, boolean customName, int slotCount, org.bukkit.inventory.InventoryHolder owner) { // Added argument
-+        this.field_70483_a = title;
-+        this.field_94051_e = customName;
-+        this.field_70481_b = slotCount;
-+        this.field_70482_c = new ItemStack[slotCount];
++    	this(title, customName, slotCount, null);
 +    }
- 
-     @SideOnly(Side.CLIENT)
-     public InventoryBasic(ITextComponent p_i45902_1_, int p_i45902_2_)
++    public InventoryBasic(String title, boolean customName, int slotCount, org.bukkit.inventory.InventoryHolder owner) { // Added argument
+         this.inventoryTitle = title;
+         this.hasCustomName = customName;
+         this.slotsCount = slotCount;

@@ -1,11 +1,11 @@
 --- ../src-base/minecraft/net/minecraft/entity/item/EntityItem.java
 +++ ../src-work/minecraft/net/minecraft/entity/item/EntityItem.java
 @@ -35,7 +35,7 @@
-     private static final Logger field_145803_d = LogManager.getLogger();
-     private static final DataParameter<Optional<ItemStack>> field_184533_c = EntityDataManager.<Optional<ItemStack>>func_187226_a(EntityItem.class, DataSerializers.field_187196_f);
-     private int field_70292_b;
--    private int field_145804_b;
-+    public int field_145804_b;
-     private int field_70291_e;
-     private String field_145801_f;
-     private String field_145802_g;
+     private static final Logger LOGGER = LogManager.getLogger();
+     private static final DataParameter<Optional<ItemStack>> ITEM = EntityDataManager.<Optional<ItemStack>>createKey(EntityItem.class, DataSerializers.OPTIONAL_ITEM_STACK);
+     private int age;
+-    private int delayBeforeCanPickup;
++    public int delayBeforeCanPickup;
+     private int health;
+     private String thrower;
+     private String owner;

@@ -1,11 +1,11 @@
 --- ../src-base/minecraft/net/minecraft/entity/item/EntityFallingBlock.java
 +++ ../src-work/minecraft/net/minecraft/entity/item/EntityFallingBlock.java
 @@ -35,7 +35,7 @@
-     public int field_145812_b;
-     public boolean field_145813_c = true;
-     private boolean field_145808_f;
--    private boolean field_145809_g;
-+    public boolean field_145809_g;
-     private int field_145815_h = 40;
-     private float field_145816_i = 2.0F;
-     public NBTTagCompound field_145810_d;
+     public int fallTime;
+     public boolean shouldDropItem = true;
+     private boolean canSetAsBlock;
+-    private boolean hurtEntities;
++    public boolean hurtEntities;
+     private int fallHurtMax = 40;
+     private float fallHurtAmount = 2.0F;
+     public NBTTagCompound tileEntityData;

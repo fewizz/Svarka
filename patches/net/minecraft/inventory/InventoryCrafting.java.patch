@@ -30,10 +30,10 @@
 +
 +public class InventoryCrafting implements ICBInventory
  {
-     private final ItemStack[] field_70466_a;
-     private final int field_70464_b;
-     private final int field_174924_c;
-     private final Container field_70465_c;
+     private final ItemStack[] stackList;
+     private final int inventoryWidth;
+     private final int inventoryHeight;
+     private final Container eventHandler;
 +    
 +    // CraftBukkit start - add fields
 +    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
@@ -44,7 +44,7 @@
 +    	
 +    @Override
 +    public ItemStack[] getContents() {
-+    	return this.field_70466_a;
++    	return this.stackList;
 +    }
 +    
 +    @Override
@@ -53,7 +53,7 @@
 +    }
 +    
 +    public InventoryType getInvType() {
-+    	return field_70466_a.length == 4 ? InventoryType.CRAFTING : InventoryType.WORKBENCH;
++    	return stackList.length == 4 ? InventoryType.CRAFTING : InventoryType.WORKBENCH;
 +    }
 +    
 +    @Override
@@ -88,5 +88,5 @@
 +    }
 +    // CraftBukkit end
  
-     public InventoryCrafting(Container p_i1807_1_, int p_i1807_2_, int p_i1807_3_)
+     public InventoryCrafting(Container eventHandlerIn, int width, int height)
      {

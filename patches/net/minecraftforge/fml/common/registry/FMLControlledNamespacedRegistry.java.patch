@@ -1,11 +1,11 @@
 --- ../src-base/minecraft/net/minecraftforge/fml/common/registry/FMLControlledNamespacedRegistry.java
 +++ ../src-work/minecraft/net/minecraftforge/fml/common/registry/FMLControlledNamespacedRegistry.java
-@@ -799,12 +799,12 @@
+@@ -800,12 +800,12 @@
      }
  
      @Override
--    public ResourceLocation func_177774_c(I p_177774_1_)
-+    public ResourceLocation func_177774_c(I value)
+-    public ResourceLocation getNameForObject(I p_177774_1_)
++    public ResourceLocation getNameForObject(I value)
      {
 -        ResourceLocation rl = super.getNameForObjectBypass(p_177774_1_);
 +        ResourceLocation rl = super.getNameForObjectBypass(value);

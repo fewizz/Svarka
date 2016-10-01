@@ -2,19 +2,19 @@
 +++ ../src-work/minecraft/net/minecraft/client/multiplayer/WorldClient.java
 @@ -60,7 +60,7 @@
  
-     public WorldClient(NetHandlerPlayClient p_i45063_1_, WorldSettings p_i45063_2_, int p_i45063_3_, EnumDifficulty p_i45063_4_, Profiler p_i45063_5_)
+     public WorldClient(NetHandlerPlayClient netHandler, WorldSettings settings, int dimension, EnumDifficulty difficulty, Profiler profilerIn)
      {
--        super(new SaveHandlerMP(), new WorldInfo(p_i45063_2_, "MpServer"), net.minecraftforge.common.DimensionManager.createProviderFor(p_i45063_3_), p_i45063_5_, true);
-+        super(new SaveHandlerMP(), new WorldInfo(p_i45063_2_, "MpServer"), net.minecraftforge.common.DimensionManager.createProviderFor(p_i45063_3_), p_i45063_5_, true, null, null);
-         this.field_184158_M = this.field_73012_v.nextInt(12000);
-         this.field_184157_a = Sets.<ChunkPos>newHashSet();
-         this.field_73035_a = p_i45063_1_;
-@@ -114,7 +114,7 @@
-         return this.field_73033_b;
+-        super(new SaveHandlerMP(), new WorldInfo(settings, "MpServer"), net.minecraftforge.common.DimensionManager.createProviderFor(dimension), profilerIn, true);
++        super(new SaveHandlerMP(), new WorldInfo(settings, "MpServer"), net.minecraftforge.common.DimensionManager.createProviderFor(dimension), profilerIn, true, null, null);
+         this.ambienceTicks = this.rand.nextInt(12000);
+         this.viewableChunks = Sets.<ChunkPos>newHashSet();
+         this.connection = netHandler;
+@@ -115,7 +115,7 @@
+         return this.clientChunkProvider;
      }
  
--    protected boolean func_175680_a(int p_175680_1_, int p_175680_2_, boolean p_175680_3_)
-+    public boolean func_175680_a(int p_175680_1_, int p_175680_2_, boolean p_175680_3_)
+-    protected boolean isChunkLoaded(int x, int z, boolean allowEmpty)
++    public boolean isChunkLoaded(int x, int z, boolean allowEmpty)
      {
-         return p_175680_3_ || !this.func_72863_F().func_186025_d(p_175680_1_, p_175680_2_).func_76621_g();
+         return allowEmpty || !this.getChunkProvider().provideChunk(x, z).isEmpty();
      }

@@ -22,19 +22,19 @@
 -public class TileEntityChest extends TileEntityLockableLoot implements ITickable, IInventory
 +public class TileEntityChest extends CBTileEntityLockableLoot implements ITickable, IInventory
  {
-     private ItemStack[] field_145985_p = new ItemStack[27];
-     public boolean field_145984_a;
+     private ItemStack[] chestContents = new ItemStack[27];
+     public boolean adjacentChestChecked;
 @@ -37,7 +44,30 @@
-     private int field_145983_q;
-     private BlockChest.Type field_145982_r;
-     private String field_145981_s;
+     private int ticksSinceSync;
+     private BlockChest.Type cachedChestType;
+     private String customName;
 -
 +    // CraftBukkit start - add fields and methods
 +    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
 +    private int maxStack = MAX_STACK;
 +    
 +    public ItemStack[] getContents() {
-+    	return this.field_145985_p;
++    	return this.chestContents;
 +    }
 +    
 +    public void onOpen(CraftHumanEntity who) {

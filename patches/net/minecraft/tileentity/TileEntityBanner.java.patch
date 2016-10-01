@@ -4,10 +4,10 @@
  
  public class TileEntityBanner extends TileEntity
  {
--    private int field_175120_a;
--    private NBTTagList field_175118_f;
-+    public int field_175120_a;
-+    public NBTTagList field_175118_f;
-     private boolean field_175119_g;
-     private List<TileEntityBanner.EnumBannerPattern> field_175122_h;
-     private List<EnumDyeColor> field_175123_i;
+-    private int baseColor;
+-    private NBTTagList patterns;
++    public int baseColor;
++    public NBTTagList patterns;
+     private boolean patternDataSet;
+     private List<TileEntityBanner.EnumBannerPattern> patternList;
+     private List<EnumDyeColor> colorList;

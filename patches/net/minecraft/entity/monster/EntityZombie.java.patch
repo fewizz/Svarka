@@ -4,17 +4,17 @@
          }
      }
  
--    protected boolean func_70692_ba()
-+    public boolean func_70692_ba()
+-    protected boolean canDespawn()
++    public boolean canDespawn()
      {
-         return !this.func_82230_o();
+         return !this.isConverting();
      }
 @@ -766,7 +766,7 @@
-         this.func_146069_a(p_146071_1_ ? 0.5F : 1.0F);
+         this.multiplySize(isChild ? 0.5F : 1.0F);
      }
  
--    protected final void func_70105_a(float p_70105_1_, float p_70105_2_)
-+    public final void func_70105_a(float p_70105_1_, float p_70105_2_)
+-    protected final void setSize(float width, float height)
++    public final void setSize(float width, float height)
      {
-         boolean flag = this.field_146074_bv > 0.0F && this.field_146073_bw > 0.0F;
-         this.field_146074_bv = p_70105_1_;
+         boolean flag = this.zombieWidth > 0.0F && this.zombieHeight > 0.0F;
+         this.zombieWidth = width;

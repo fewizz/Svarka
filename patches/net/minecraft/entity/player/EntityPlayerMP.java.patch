@@ -26,25 +26,25 @@
 +
  public class EntityPlayerMP extends EntityPlayer implements IContainerListener
  {
-     private static final Logger field_147102_bM = LogManager.getLogger();
+     private static final Logger LOGGER = LogManager.getLogger();
 @@ -124,17 +141,28 @@
-     private float field_71149_ch = -1.0E8F;
-     private int field_71146_ci = -99999999;
-     private boolean field_71147_cj = true;
--    private int field_71144_ck = -99999999;
--    private int field_147101_bU = 60;
-+    public int field_71144_ck = -99999999;
-+    public int field_147101_bU = 60;
-     private EntityPlayer.EnumChatVisibility field_71143_cn;
-     private boolean field_71140_co = true;
-     private long field_143005_bX = System.currentTimeMillis();
-     private Entity field_175401_bS;
--    private boolean field_184851_cj;
-+    public boolean field_184851_cj;
-     public int field_71139_cq;
-     public boolean field_71137_h;
-     public int field_71138_i;
-     public boolean field_71136_j;
+     private float lastHealth = -1.0E8F;
+     private int lastFoodLevel = -99999999;
+     private boolean wasHungry = true;
+-    private int lastExperience = -99999999;
+-    private int respawnInvulnerabilityTicks = 60;
++    public int lastExperience = -99999999;
++    public int respawnInvulnerabilityTicks = 60;
+     private EntityPlayer.EnumChatVisibility chatVisibility;
+     private boolean chatColours = true;
+     private long playerLastActiveTime = System.currentTimeMillis();
+     private Entity spectatingEntity;
+-    private boolean invulnerableDimensionChange;
++    public boolean invulnerableDimensionChange;
+     public int currentWindowId;
+     public boolean isChangingQuantityOnly;
+     public int ping;
+     public boolean playerConqueredTheEnd;
 +    // CraftBukkit start
 +    public String displayName;
 +    public ITextComponent listName;
@@ -58,43 +58,55 @@
 +    // CraftBukkit end
  
      @SuppressWarnings("unused")
-     public EntityPlayerMP(MinecraftServer p_i45285_1_, WorldServer p_i45285_2_, GameProfile p_i45285_3_, PlayerInteractionManager p_i45285_4_)
-@@ -742,6 +770,10 @@
+     public EntityPlayerMP(MinecraftServer server, WorldServer worldIn, GameProfile profile, PlayerInteractionManager interactionManagerIn)
+@@ -171,6 +199,11 @@
+         {
+             this.setPosition(this.posX, this.posY + 1.0D, this.posZ);
+         }
++        // CraftBukkit start
++        this.displayName = this.getName();
++        // this.canPickUpLoot = true; TODO
++        this.maxHealthCache = this.getMaxHealth();
++        // CraftBukkit end
+     }
+ 
+     public void readEntityFromNBT(NBTTagCompound compound)
+@@ -742,6 +775,10 @@
      {
-         this.field_71139_cq = this.field_71139_cq % 100 + 1;
+         this.currentWindowId = this.currentWindowId % 100 + 1;
      }
 +    public int nextContainerCounter() { // CraftBukkit - void -> int
-+        this.field_71139_cq = this.field_71139_cq % 100 + 1;
-+        return field_71139_cq; // CraftBukkit
++        this.currentWindowId = this.currentWindowId % 100 + 1;
++        return currentWindowId; // CraftBukkit
 +    }
  
-     public void func_180468_a(IInteractionObject p_180468_1_)
+     public void displayGui(IInteractionObject guiOwner)
      {
-@@ -753,7 +785,7 @@
+@@ -753,7 +790,7 @@
          {
-             this.func_71117_bO();
-             this.field_71135_a.func_147359_a(new SPacketOpenWindow(this.field_71139_cq, p_180468_1_.func_174875_k(), p_180468_1_.func_145748_c_()));
--            this.field_71070_bA = p_180468_1_.func_174876_a(this.field_71071_by, this);
-+            this.field_71070_bA = (CBContainer) p_180468_1_.func_174876_a(this.field_71071_by, this);
-             this.field_71070_bA.field_75152_c = this.field_71139_cq;
-             this.field_71070_bA.func_75132_a(this);
-             net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.PlayerContainerEvent.Open(this, this.field_71070_bA));
-@@ -988,6 +1020,12 @@
+             this.getNextWindowId();
+             this.connection.sendPacket(new SPacketOpenWindow(this.currentWindowId, guiOwner.getGuiID(), guiOwner.getDisplayName()));
+-            this.openContainer = guiOwner.createContainer(this.inventory, this);
++            this.openContainer = (CBContainer) guiOwner.createContainer(this.inventory, this);
+             this.openContainer.windowId = this.currentWindowId;
+             this.openContainer.addListener(this);
+             net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.PlayerContainerEvent.Open(this, this.openContainer));
+@@ -988,6 +1025,12 @@
      {
-         this.field_71149_ch = -1.0E8F;
+         this.lastHealth = -1.0E8F;
      }
 +    //CB
 +    public void sendMessage(final ITextComponent[] ichatbasecomponent) {
 +        for (final ITextComponent component : ichatbasecomponent) {
-+            this.func_145747_a(component);
++            this.addChatMessage(component);
 +        }
 +    }
  
-     public void func_146105_b(ITextComponent p_146105_1_)
+     public void addChatComponentMessage(ITextComponent chatComponent)
      {
-@@ -1264,4 +1302,127 @@
-         this.func_70052_a(7, true);
-         this.func_70052_a(7, false);
+@@ -1264,4 +1307,127 @@
+         this.setFlag(7, true);
+         this.setFlag(7, false);
      }
 +    
 +    @Override
@@ -109,10 +121,10 @@
 +    public long getPlayerTime() {
 +    	if (this.relativeTime) {
 +    		// Adds timeOffset to the current server time.
-+    		return this.field_70170_p.func_72820_D() + this.timeOffset;
++    		return this.worldObj.getWorldTime() + this.timeOffset;
 +    	} else {
 +    		// Adds timeOffset to the beginning of this day.
-+    		return this.field_70170_p.func_72820_D() - (this.field_70170_p.func_72820_D() % 24000) + this.timeOffset;
++    		return this.worldObj.getWorldTime() - (this.worldObj.getWorldTime() % 24000) + this.timeOffset;
 +    	}
 +    }
 +    
@@ -132,9 +144,9 @@
 +    	}
 +    		
 +    	if (type == WeatherType.DOWNFALL) {
-+    		this.field_71135_a.func_147359_a(new SPacketChangeGameState(2, 0));
++    		this.connection.sendPacket(new SPacketChangeGameState(2, 0));
 +    	} else {
-+    		this.field_71135_a.func_147359_a(new SPacketChangeGameState(1, 0));
++    		this.connection.sendPacket(new SPacketChangeGameState(1, 0));
 +    	}
 +    }
 +    
@@ -145,20 +157,20 @@
 +    	if (this.weather == null) {
 +    		// Vanilla
 +    		if (oldRain != newRain) {
-+    			this.field_71135_a.func_147359_a(new SPacketChangeGameState(7, newRain));
++    			this.connection.sendPacket(new SPacketChangeGameState(7, newRain));
 +    		}
 +    	} else {
 +    		// Plugin
 +    		if (pluginRainPositionPrevious != pluginRainPosition) {
-+    			this.field_71135_a.func_147359_a(new SPacketChangeGameState(7, pluginRainPosition));
++    			this.connection.sendPacket(new SPacketChangeGameState(7, pluginRainPosition));
 +    		}
 +    	}
 +    	
 +    	if (oldThunder != newThunder) {
 +    		if (weather == WeatherType.DOWNFALL || weather == null) {
-+    			this.field_71135_a.func_147359_a(new SPacketChangeGameState(8, newThunder));
++    			this.connection.sendPacket(new SPacketChangeGameState(8, newThunder));
 +    		} else {
-+    			this.field_71135_a.func_147359_a(new SPacketChangeGameState(8, 0));
++    			this.connection.sendPacket(new SPacketChangeGameState(8, 0));
 +    		}
 +    	}
 +    }
@@ -173,48 +185,48 @@
 +    		pluginRainPosition -= 0.01;
 +    	}
 +    	
-+    	pluginRainPosition = MathHelper.func_76131_a(pluginRainPosition, 0.0F, 1.0F);
++    	pluginRainPosition = MathHelper.clamp_float(pluginRainPosition, 0.0F, 1.0F);
 +    }
 +    
 +    public void resetPlayerWeather() {
 +    	this.weather = null;
-+    	this.setPlayerWeather(this.field_70170_p.func_72912_H().func_76059_o() ? WeatherType.DOWNFALL : WeatherType.CLEAR, false);
++    	this.setPlayerWeather(this.worldObj.getWorldInfo().isRaining() ? WeatherType.DOWNFALL : WeatherType.CLEAR, false);
 +    }
 +    
 +    @Override
 +    public String toString() {
-+    	return super.toString() + "(" + this.func_70005_c_() + " at " + this.field_70165_t + "," + this.field_70163_u + "," + this.field_70161_v + ")";
++    	return super.toString() + "(" + this.getName() + " at " + this.posX + "," + this.posY + "," + this.posZ + ")";
 +    }
 +    
 +    public void reset() {
 +    	float exp = 0;
-+    	boolean keepInventory = this.field_70170_p.func_82736_K().func_82766_b("keepInventory");
++    	boolean keepInventory = this.worldObj.getGameRules().getBoolean("keepInventory");
 +    
 +    	if (this.keepLevel || keepInventory) {
-+    		exp = this.field_71106_cc;
-+    		this.newTotalExp = this.field_71067_cb;
-+    		this.newLevel = this.field_71068_ca;
++    		exp = this.experience;
++    		this.newTotalExp = this.experienceTotal;
++    		this.newLevel = this.experienceLevel;
 +    	}
 +    
-+    	this.func_70606_j(this.func_110138_aP());
-+    	this.field_70720_be = 0;
-+    	this.field_70143_R = 0;
++    	this.setHealth(this.getMaxHealth());
++    	this.arrowHitTimer = 0;
++    	this.fallDistance = 0;
 +    	//this.foodStats = new FoodStats(this); TODO!!!
-+    	this.field_71068_ca = this.newLevel;
-+    	this.field_71067_cb = this.newTotalExp;
-+    	this.field_71106_cc = 0;
-+    	this.field_70725_aQ = 0;
-+    	this.func_70674_bp();
++    	this.experienceLevel = this.newLevel;
++    	this.experienceTotal = this.newTotalExp;
++    	this.experience = 0;
++    	this.deathTime = 0;
++    	this.clearActivePotions();
 +    	//this.updateEffects = true; TODO!!!
-+    	this.field_71070_bA = this.field_71069_bz;
-+    	this.field_70717_bb = null;
++    	this.openContainer = this.inventoryContainer;
++    	this.attackingPlayer = null;
 +    	//this.lastDamager = null; TODO!!!
 +    	//this.MAIN_HAND = new CombatTracker(this); TODO!!!
-+    	this.field_71144_ck = -1;
++    	this.lastExperience = -1;
 +    	if (this.keepLevel || keepInventory) {
-+    		this.field_71106_cc = exp;
++    		this.experience = exp;
 +    	} else {
-+    		this.func_71023_q(this.newExp);
++    		this.addExperience(this.newExp);
 +    	}
 +    	this.keepLevel = false;
 +    }

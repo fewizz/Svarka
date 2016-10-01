@@ -1,15 +1,36 @@
 --- ../src-base/minecraft/net/minecraft/world/World.java
 +++ ../src-work/minecraft/net/minecraft/world/World.java
-@@ -4,6 +4,8 @@
+@@ -4,13 +4,29 @@
  import com.google.common.base.Objects;
  import com.google.common.base.Predicate;
  import com.google.common.collect.Lists;
++import com.google.common.collect.Maps;
 +
 +import java.util.ArrayList;
  import java.util.Calendar;
  import java.util.Collection;
  import java.util.Iterator;
-@@ -20,6 +22,13 @@
+ import java.util.List;
++import java.util.Map;
+ import java.util.Random;
+ import java.util.UUID;
+ import javax.annotation.Nullable;
++
++import org.bukkit.Bukkit;
++import org.bukkit.block.BlockState;
++import org.bukkit.craftbukkit.CraftServer;
++import org.bukkit.craftbukkit.CraftWorld;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.craftbukkit.util.CraftMagicNumbers;
++import org.bukkit.event.block.BlockCanBuildEvent;
++import org.bukkit.event.block.BlockPhysicsEvent;
++import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
++import org.bukkit.generator.ChunkGenerator;
++
+ import net.minecraft.block.Block;
+ import net.minecraft.block.BlockLiquid;
+ import net.minecraft.block.material.Material;
+@@ -20,6 +36,13 @@
  import net.minecraft.crash.ICrashReportDetail;
  import net.minecraft.entity.Entity;
  import net.minecraft.entity.EntityLiving;
@@ -23,7 +44,7 @@
  import net.minecraft.entity.player.EntityPlayer;
  import net.minecraft.entity.player.EntityPlayerMP;
  import net.minecraft.init.Biomes;
-@@ -27,6 +36,7 @@
+@@ -27,6 +50,7 @@
  import net.minecraft.item.ItemStack;
  import net.minecraft.nbt.NBTTagCompound;
  import net.minecraft.network.Packet;
@@ -31,7 +52,7 @@
  import net.minecraft.pathfinding.PathWorldListener;
  import net.minecraft.profiler.Profiler;
  import net.minecraft.scoreboard.Scoreboard;
-@@ -48,6 +58,7 @@
+@@ -48,6 +72,7 @@
  import net.minecraft.village.VillageCollection;
  import net.minecraft.world.biome.Biome;
  import net.minecraft.world.biome.BiomeProvider;
@@ -39,85 +60,50 @@
  import net.minecraft.world.border.WorldBorder;
  import net.minecraft.world.chunk.Chunk;
  import net.minecraft.world.chunk.IChunkProvider;
-@@ -59,6 +70,34 @@
- import net.minecraftforge.fml.relauncher.Side;
- import net.minecraftforge.fml.relauncher.SideOnly;
- 
-+import com.google.common.collect.Maps;
-+import java.util.Map;
-+import org.bukkit.Bukkit;
-+import org.bukkit.block.BlockState;
-+import org.bukkit.craftbukkit.CraftServer;
-+import org.bukkit.craftbukkit.CraftWorld;
-+import org.bukkit.craftbukkit.event.CraftEventFactory;
-+import org.bukkit.craftbukkit.util.CraftMagicNumbers;
-+import org.bukkit.event.block.BlockCanBuildEvent;
-+import org.bukkit.event.block.BlockPhysicsEvent;
-+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-+import org.bukkit.generator.ChunkGenerator;
-+
-+//CraftBukkit start
-+import com.google.common.collect.Maps;
-+import java.util.Map;
-+import org.bukkit.Bukkit;
-+import org.bukkit.block.BlockState;
-+import org.bukkit.craftbukkit.CraftServer;
-+import org.bukkit.craftbukkit.CraftWorld;
-+import org.bukkit.craftbukkit.event.CraftEventFactory;
-+import org.bukkit.craftbukkit.util.CraftMagicNumbers;
-+import org.bukkit.event.block.BlockCanBuildEvent;
-+import org.bukkit.event.block.BlockPhysicsEvent;
-+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-+import org.bukkit.generator.ChunkGenerator;
-+// CraftBukkit end
-+
- public abstract class World implements IBlockAccess
- {
-     /**
-@@ -89,22 +128,22 @@
-     public float field_73017_q;
-     private int field_73016_r;
-     public final Random field_73012_v = new Random();
--    public final WorldProvider field_73011_w;
-+    public WorldProvider field_73011_w;
-     protected PathWorldListener field_184152_t = new PathWorldListener();
-     protected List<IWorldEventListener> field_73021_x;
-     protected IChunkProvider field_73020_y;
-     protected final ISaveHandler field_73019_z;
--    protected WorldInfo field_72986_A;
-+    public WorldInfo field_72986_A;
-     protected boolean field_72987_B;
--    protected MapStorage field_72988_C;
-+    public MapStorage field_72988_C;
-     public VillageCollection field_72982_D;
-     protected LootTableManager field_184151_B;
-     public final Profiler field_72984_F;
-     private final Calendar field_83016_L;
--    protected Scoreboard field_96442_D;
-+    public Scoreboard field_96442_D;
-     public final boolean field_72995_K;
--    protected boolean field_72985_G;
--    protected boolean field_72992_H;
-+    public boolean field_72985_G;
-+    public boolean field_72992_H;
-     private boolean field_147481_N;
-     private final WorldBorder field_175728_M;
-     int[] field_72994_J;
-@@ -112,22 +151,102 @@
-     public boolean restoringBlockSnapshots = false;
-     public boolean captureBlockSnapshots = false;
+@@ -89,22 +114,22 @@
+     public float thunderingStrength;
+     private int lastLightningBolt;
+     public final Random rand = new Random();
+-    public final WorldProvider provider;
++    public WorldProvider provider;
+     protected PathWorldListener pathListener = new PathWorldListener();
+     protected List<IWorldEventListener> eventListeners;
+     protected IChunkProvider chunkProvider;
+     protected final ISaveHandler saveHandler;
+-    protected WorldInfo worldInfo;
++    public WorldInfo worldInfo;
+     protected boolean findingSpawnPoint;
+-    protected MapStorage mapStorage;
++    public MapStorage mapStorage;
+     public VillageCollection villageCollectionObj;
+     protected LootTableManager lootTable;
+     public final Profiler theProfiler;
+     private final Calendar theCalendar;
+-    protected Scoreboard worldScoreboard;
++    public Scoreboard worldScoreboard;
+     public final boolean isRemote;
+-    protected boolean spawnHostileMobs;
+-    protected boolean spawnPeacefulMobs;
++    public boolean spawnHostileMobs;
++    public boolean spawnPeacefulMobs;
+     private boolean processingLoadedTiles;
+     private final WorldBorder worldBorder;
+     int[] lightUpdateBlockList;
+@@ -114,10 +139,57 @@
      public java.util.ArrayList<net.minecraftforge.common.util.BlockSnapshot> capturedBlockSnapshots = new java.util.ArrayList<net.minecraftforge.common.util.BlockSnapshot>();
+     private net.minecraftforge.common.capabilities.CapabilityDispatcher capabilities;
+     private net.minecraftforge.common.util.WorldCapabilityData capabilityData;
 +    
 +    // CraftBukkit start Added the following
 +    private final CraftWorld world;
 +    public boolean pvpMode;
 +    public boolean keepSpawnInMemory = true;
 +    public ChunkGenerator generator;
-+    
++        
 +    public boolean captureBlockStates = false;
 +    public boolean captureTreeGeneration = false;
-+    
-+    public ArrayList<BlockState> capturedBlockStates= new ArrayList<BlockState>(){
++        
++    public ArrayList<BlockState> capturedBlockStates = new ArrayList<BlockState>(){
 +    	@Override
 +    	public boolean add(BlockState blockState ) {
 +    		Iterator<BlockState> blockStateIterator = this.iterator();
@@ -127,7 +113,7 @@
 +    				return false;
 +    			}
 +    		}
-+    	
++        	
 +    		return super.add( blockState );
 +    	}
 +    };
@@ -135,96 +121,53 @@
 +    public long ticksPerMonsterSpawns;
 +    public boolean populating;
 +    private int tickPosition;
-+    
++        
 +    public CraftWorld getWorld() {
 +    	return this.world;
 +    }
-+    
++        
 +    public CraftServer getServer() {
 +    	return (CraftServer) Bukkit.getServer();
 +    }
-+    
++        
 +    public Chunk getChunkIfLoaded(int x, int z) {
-+    	return ((net.minecraft.world.gen.ChunkProviderServer) this.field_73020_y).func_186026_b(x, z);
++    	return ((net.minecraft.world.gen.ChunkProviderServer) this.chunkProvider).getLoadedChunk(x, z);
 +    }
  
--    protected World(ISaveHandler p_i45749_1_, WorldInfo p_i45749_2_, WorldProvider p_i45749_3_, Profiler p_i45749_4_, boolean p_i45749_5_)
+-    protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client)
 -    {
--        this.field_73021_x = Lists.newArrayList(new IWorldEventListener[] {this.field_184152_t});
+-        this.eventListeners = Lists.newArrayList(new IWorldEventListener[] {this.pathListener});
++    //protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client)
++    //{
++    //   this.eventListeners = Lists.newArrayList(new IWorldEventListener[] {this.pathListener});
 +    protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client, ChunkGenerator gen, org.bukkit.World.Environment env) {
 +    	this.generator = gen;
 +    	this.world = new CraftWorld((WorldServer) this, gen, env);
 +    	this.ticksPerAnimalSpawns = this.getServer().getTicksPerAnimalSpawns(); // CraftBukkit
 +    	this.ticksPerMonsterSpawns = this.getServer().getTicksPerMonsterSpawns(); // CraftBukkit
 +    	// CB end
-+    	this.field_73021_x = Lists.newArrayList(new IWorldEventListener[] {this.field_184152_t});
-         this.field_83016_L = Calendar.getInstance();
-         this.field_96442_D = new Scoreboard();
-         this.field_72985_G = true;
-         this.field_72992_H = true;
-         this.field_72994_J = new int[32768];
--        this.field_73019_z = p_i45749_1_;
--        this.field_72984_F = p_i45749_4_;
--        this.field_72986_A = p_i45749_2_;
--        this.field_73011_w = p_i45749_3_;
--        this.field_72995_K = p_i45749_5_;
--        this.field_175728_M = p_i45749_3_.func_177501_r();
-+        this.field_73019_z = saveHandlerIn;
-+        this.field_72984_F = profilerIn;
-+        this.field_72986_A = info;
-+        this.field_73011_w = providerIn;
-+        this.field_72995_K = client;
-+        this.field_175728_M = providerIn.func_177501_r();
++    	this.eventListeners = Lists.newArrayList(new IWorldEventListener[] {this.pathListener});
+         this.theCalendar = Calendar.getInstance();
+         this.worldScoreboard = new Scoreboard();
+         this.spawnHostileMobs = true;
+@@ -130,6 +202,7 @@
+         this.isRemote = client;
+         this.worldBorder = providerIn.createWorldBorder();
          perWorldStorage = new MapStorage((ISaveHandler)null);
-+        this.func_175723_af().world = (WorldServer)this;
-+        this.func_175723_af().func_177737_a(new IBorderListener() {
-+            @Override
-+            public void func_177694_a(final WorldBorder worldborder, final double d0) {
-+                World.this.getServer().getHandle().sendAll(new SPacketWorldBorder(worldborder, SPacketWorldBorder.Action.SET_SIZE), worldborder.world);
-+            }
-+            
-+            @Override
-+            public void func_177692_a(final WorldBorder worldborder, final double d0, final double d1, final long i) {
-+                World.this.getServer().getHandle().sendAll(new SPacketWorldBorder(worldborder, SPacketWorldBorder.Action.LERP_SIZE), worldborder.world);
-+            }
-+            
-+            @Override
-+            public void func_177693_a(final WorldBorder worldborder, final double d0, final double d1) {
-+                World.this.getServer().getHandle().sendAll(new SPacketWorldBorder(worldborder, SPacketWorldBorder.Action.SET_CENTER), worldborder.world);
-+            }
-+            
-+            @Override
-+            public void func_177691_a(final WorldBorder worldborder, final int i) {
-+                World.this.getServer().getHandle().sendAll(new SPacketWorldBorder(worldborder, SPacketWorldBorder.Action.SET_WARNING_TIME), worldborder.world);
-+            }
-+            
-+            @Override
-+            public void func_177690_b(final WorldBorder worldborder, final int i) {
-+                World.this.getServer().getHandle().sendAll(new SPacketWorldBorder(worldborder, SPacketWorldBorder.Action.SET_WARNING_BLOCKS), worldborder.world);
-+            }
-+            
-+            @Override
-+            public void func_177696_b(final WorldBorder worldborder, final double d0) {
-+            }
-+            
-+            @Override
-+            public void func_177695_c(final WorldBorder worldborder, final double d0) {
-+            }
-+        });
 +        this.getServer().addWorld(this.world);
      }
  
-     public World func_175643_b()
-@@ -289,7 +408,7 @@
+     public World init()
+@@ -291,7 +364,7 @@
          }
      }
  
--    protected abstract boolean func_175680_a(int p_175680_1_, int p_175680_2_, boolean p_175680_3_);
-+    public abstract boolean func_175680_a(int p_175680_1_, int p_175680_2_, boolean p_175680_3_);
+-    protected abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
++    public abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
  
-     public Chunk func_175726_f(BlockPos p_175726_1_)
+     public Chunk getChunkFromBlockCoords(BlockPos pos)
      {
-@@ -311,7 +430,28 @@
+@@ -313,7 +386,28 @@
          {
              return false;
          }
@@ -235,59 +178,59 @@
 +        	Iterator<BlockState> it = capturedBlockStates.iterator();
 +        	while (it.hasNext()) {
 +        		BlockState previous = it.next();
-+        		if (previous.getX() == p_180501_1_.func_177958_n() && previous.getY() == p_180501_1_.func_177956_o() && previous.getZ() == p_180501_1_.func_177952_p()) {
++        		if (previous.getX() == pos.getX() && previous.getY() == pos.getY() && previous.getZ() == pos.getZ()) {
 +        			blockstate = previous;
 +        			it.remove();
 +        			break;
 +        		}
 +        	}
 +        	if (blockstate == null) {
-+        		blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(this, p_180501_1_.func_177958_n(), p_180501_1_.func_177956_o(), p_180501_1_.func_177952_p(), p_180501_3_);
++        		blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(this, pos.getX(), pos.getY(), pos.getZ(), flags);
 +        	}
-+        	blockstate.setTypeId(CraftMagicNumbers.getId(p_180501_2_.func_177230_c()));
-+        	blockstate.setRawData((byte) p_180501_2_.func_177230_c().func_176201_c(p_180501_2_));
++        	blockstate.setTypeId(CraftMagicNumbers.getId(newState.getBlock()));
++        	blockstate.setRawData((byte) newState.getBlock().getMetaFromState(newState));
 +        	this.capturedBlockStates.add(blockstate);
 +        	return true;
 +        }
 +        // CraftBukkit end
 +        //else
          {
-             Chunk chunk = this.func_175726_f(p_180501_1_);
-             Block block = p_180501_2_.func_177230_c();
-@@ -322,6 +462,13 @@
-                 blockSnapshot = net.minecraftforge.common.util.BlockSnapshot.getBlockSnapshot(this, p_180501_1_, p_180501_3_);
+             Chunk chunk = this.getChunkFromBlockCoords(pos);
+             Block block = newState.getBlock();
+@@ -324,6 +418,13 @@
+                 blockSnapshot = net.minecraftforge.common.util.BlockSnapshot.getBlockSnapshot(this, pos, flags);
                  this.capturedBlockSnapshots.add(blockSnapshot);
              }
 +            // CraftBukkit start - capture blockstates
 +            BlockState blockstate = null;
 +            if (this.captureBlockStates) {
-+            	blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(this, p_180501_1_.func_177958_n(), p_180501_1_.func_177956_o(), p_180501_1_.func_177952_p(), p_180501_3_);
++            	blockstate = org.bukkit.craftbukkit.block.CraftBlockState.getBlockState(this, pos.getX(), pos.getY(), pos.getZ(), flags);
 +            	this.capturedBlockStates.add(blockstate);
 +            }
 +            // CraftBukkit end
-             IBlockState oldState = func_180495_p(p_180501_1_);
-             int oldLight = oldState.getLightValue(this, p_180501_1_);
-             int oldOpacity = oldState.getLightOpacity(this, p_180501_1_);
-@@ -418,6 +565,11 @@
+             IBlockState oldState = getBlockState(pos);
+             int oldLight = oldState.getLightValue(this, pos);
+             int oldOpacity = oldState.getLightOpacity(this, pos);
+@@ -420,6 +521,11 @@
      {
-         if (this.field_72986_A.func_76067_t() != WorldType.field_180272_g)
+         if (this.worldInfo.getTerrainType() != WorldType.DEBUG_WORLD)
          {
 +        	// CraftBukkit start
 +        	if (populating) {
 +        		return;
 +        	}
 +        	// CraftBukkit end
-             this.func_175685_c(p_175722_1_, p_175722_2_);
+             this.notifyNeighborsOfStateChange(pos, blockType);
          }
      }
-@@ -514,6 +666,17 @@
+@@ -516,6 +622,17 @@
  
              try
              {
 +            	// CraftBukkit start
 +            	CraftWorld world = ((WorldServer) this).getWorld();
 +            	if (world != null) {
-+            		BlockPhysicsEvent event = new BlockPhysicsEvent(world.getBlockAt(p_180496_1_.func_177958_n(), p_180496_1_.func_177956_o(), p_180496_1_.func_177952_p()), CraftMagicNumbers.getId(p_180496_2_));
++            		BlockPhysicsEvent event = new BlockPhysicsEvent(world.getBlockAt(pos.getX(), pos.getY(), pos.getZ()), CraftMagicNumbers.getId(blockIn));
 +            		this.getServer().getPluginManager().callEvent(event);
 +            		
 +            		if (event.isCancelled()) {
@@ -295,12 +238,12 @@
 +            		}
 +            	}
 +            	// CraftBukkit end
-                 iblockstate.func_189546_a(this, p_180496_1_, p_180496_2_);
+                 iblockstate.neighborChanged(this, pos, blockIn);
              }
              catch (Throwable throwable)
-@@ -835,7 +998,18 @@
+@@ -837,7 +954,18 @@
          {
-             return Blocks.field_150350_a.func_176223_P();
+             return Blocks.AIR.getDefaultState();
          }
 -        else
 +        // CraftBukkit start - tree generation
@@ -308,48 +251,33 @@
 +        	Iterator<BlockState> it = capturedBlockStates.iterator();
 +        	while (it.hasNext()) {
 +        		BlockState previous = it.next();
-+        		if (previous.getX() == p_180495_1_.func_177958_n() && previous.getY() == p_180495_1_.func_177956_o() && previous.getZ() == p_180495_1_.func_177952_p()) {
-+        			return CraftMagicNumbers.getBlock(previous.getTypeId()).func_176203_a(previous.getRawData());
++        		if (previous.getX() == pos.getX() && previous.getY() == pos.getY() && previous.getZ() == pos.getZ()) {
++        			return CraftMagicNumbers.getBlock(previous.getTypeId()).getStateFromMeta(previous.getRawData());
 +        		}
 +        	}
 +        }
 +        // CraftBukkit end
 +        //else
          {
-             Chunk chunk = this.func_175726_f(p_180495_1_);
-             return chunk.func_177435_g(p_180495_1_);
-@@ -1096,17 +1270,19 @@
-         this.field_73007_j.add(p_72942_1_);
+             Chunk chunk = this.getChunkFromBlockCoords(pos);
+             return chunk.getBlockState(pos);
+@@ -1098,8 +1226,10 @@
+         this.weatherEffects.add(entityIn);
          return true;
      }
 -
--    public boolean func_72838_d(Entity p_72838_1_)
-+    public boolean func_72838_d(Entity p_72838_1_) {
-+    	return addEntity(p_72838_1_, SpawnReason.DEFAULT);
+-    public boolean spawnEntityInWorld(Entity entityIn)
++    public boolean spawnEntityInWorld(Entity entityIn) {
++    	return addEntity(entityIn, SpawnReason.DEFAULT);
 +    }
 +    public boolean addEntity(Entity entityIn, SpawnReason reason)
      {
          // do not drop any items while restoring blocksnapshots. Prevents dupes
--        if (!this.field_72995_K && (p_72838_1_ == null || (p_72838_1_ instanceof net.minecraft.entity.item.EntityItem && this.restoringBlockSnapshots))) return false;
-+        if (!this.field_72995_K && (entityIn == null || (entityIn instanceof net.minecraft.entity.item.EntityItem && this.restoringBlockSnapshots))) return false;
- 
--        int i = MathHelper.func_76128_c(p_72838_1_.field_70165_t / 16.0D);
--        int j = MathHelper.func_76128_c(p_72838_1_.field_70161_v / 16.0D);
--        boolean flag = p_72838_1_.field_98038_p;
-+        int i = MathHelper.func_76128_c(entityIn.field_70165_t / 16.0D);
-+        int j = MathHelper.func_76128_c(entityIn.field_70161_v / 16.0D);
-+        boolean flag = entityIn.field_98038_p;
- 
--        if (p_72838_1_ instanceof EntityPlayer)
-+        if (entityIn instanceof EntityPlayer)
-         {
-             flag = true;
-         }
-@@ -1117,18 +1293,44 @@
+         if (!this.isRemote && (entityIn == null || (entityIn instanceof net.minecraft.entity.item.EntityItem && this.restoringBlockSnapshots))) return false;
+@@ -1119,6 +1249,32 @@
          }
          else
          {
--            if (p_72838_1_ instanceof EntityPlayer)
 +        	// CraftBukkit start
 +        	org.bukkit.event.Cancellable event = null;
 +        	if (entityIn instanceof EntityLiving && !(entityIn instanceof EntityPlayerMP)) {
@@ -357,8 +285,8 @@
 +        	            boolean isMonster = entityIn instanceof EntityMob || entityIn instanceof EntityGhast || entityIn instanceof EntitySlime;
 +        	
 +        	            if (reason != SpawnReason.CUSTOM) {
-+        	                if (isAnimal && !field_72992_H || isMonster && !field_72985_G) {
-+        	                    entityIn.field_70128_L = true;
++        	                if (isAnimal && !spawnPeacefulMobs || isMonster && !spawnHostileMobs) {
++        	                    entityIn.isDead = true;
 +        	                    return false;
 +        	                }
 +        	            }
@@ -371,70 +299,53 @@
 +        	            event = CraftEventFactory.callProjectileLaunchEvent(entityIn);
 +        	        }
 +        	
-+        	        if (event != null && (event.isCancelled() || entityIn.field_70128_L)) {
-+        	            entityIn.field_70128_L = true;
++        	        if (event != null && (event.isCancelled() || entityIn.isDead)) {
++        	            entityIn.isDead = true;
 +        	            return false;
 +        	        }
 +        	        // CraftBukkit end
-+            if (entityIn instanceof EntityPlayer)
+             if (entityIn instanceof EntityPlayer)
              {
--                EntityPlayer entityplayer = (EntityPlayer)p_72838_1_;
-+                EntityPlayer entityplayer = (EntityPlayer)entityIn;
-                 this.field_73010_i.add(entityplayer);
-                 this.func_72854_c();
-             }
- 
--            if (net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.EntityJoinWorldEvent(p_72838_1_, this)) && !flag) return false;
-+            if (net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.EntityJoinWorldEvent(entityIn, this)) && !flag) return false;
- 
--            this.func_72964_e(i, j).func_76612_a(p_72838_1_);
--            this.field_72996_f.add(p_72838_1_);
--            this.func_72923_a(p_72838_1_);
-+            this.func_72964_e(i, j).func_76612_a(entityIn);
-+            this.field_72996_f.add(entityIn);
-+            this.func_72923_a(entityIn);
-             return true;
-         }
-     }
-@@ -1139,6 +1341,7 @@
+                 EntityPlayer entityplayer = (EntityPlayer)entityIn;
+@@ -1141,6 +1297,7 @@
          {
-             ((IWorldEventListener)this.field_73021_x.get(i)).func_72703_a(p_72923_1_);
+             ((IWorldEventListener)this.eventListeners.get(i)).onEntityAdded(entityIn);
          }
-+        p_72923_1_.valid = true; // CraftBukkit
++        entityIn.valid = true; // CraftBukkit
      }
  
-     public void func_72847_b(Entity p_72847_1_)
-@@ -1147,6 +1350,7 @@
+     public void onEntityRemoved(Entity entityIn)
+@@ -1149,6 +1306,7 @@
          {
-             ((IWorldEventListener)this.field_73021_x.get(i)).func_72709_b(p_72847_1_);
+             ((IWorldEventListener)this.eventListeners.get(i)).onEntityRemoved(entityIn);
          }
-+        p_72847_1_.valid = false; // CraftBukkit
++        entityIn.valid = false; // CraftBukkit
      }
  
-     public void func_72900_e(Entity p_72900_1_)
-@@ -1189,8 +1393,16 @@
+     public void removeEntity(Entity entityIn)
+@@ -1191,8 +1349,16 @@
          {
-             this.func_72964_e(i, j).func_76622_b(p_72973_1_);
+             this.getChunkFromChunkCoords(i, j).removeEntity(entityIn);
          }
 -
--        this.field_72996_f.remove(p_72973_1_);
+-        this.loadedEntityList.remove(entityIn);
 +        // CraftBukkit start - Decrement loop variable field if we've already ticked this entity
-+        int index = this.field_72996_f.indexOf(p_72973_1_);
++        int index = this.loadedEntityList.indexOf(entityIn);
 +        if (index != -1) {
 +        	if (index <= this.tickPosition) {
 +        		this.tickPosition--;
 +        	}
-+        	this.field_72996_f.remove(index);
++        	this.loadedEntityList.remove(index);
 +        }
 +        // CraftBukkit end
 +        //this.loadedEntityList.remove(entityIn);
-         this.func_72847_b(p_72973_1_);
+         this.onEntityRemoved(entityIn);
      }
  
-@@ -1665,7 +1877,11 @@
-         for (int i = 0; i < this.field_73007_j.size(); ++i)
+@@ -1667,7 +1833,11 @@
+         for (int i = 0; i < this.weatherEffects.size(); ++i)
          {
-             Entity entity = (Entity)this.field_73007_j.get(i);
+             Entity entity = (Entity)this.weatherEffects.get(i);
 -
 +            // CraftBukkit start - Fixed an NPE
 +            if (entity == null) {
@@ -443,14 +354,14 @@
 +            // CraftBukkit end
              try
              {
-                 ++entity.field_70173_aa;
-@@ -1676,14 +1892,14 @@
-                 CrashReport crashreport = CrashReport.func_85055_a(throwable2, "Ticking entity");
-                 CrashReportCategory crashreportcategory = crashreport.func_85058_a("Entity being ticked");
+                 ++entity.ticksExisted;
+@@ -1678,14 +1848,14 @@
+                 CrashReport crashreport = CrashReport.makeCrashReport(throwable2, "Ticking entity");
+                 CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being ticked");
  
 -                if (entity == null)
 -                {
--                    crashreportcategory.func_71507_a("Entity", "~~NULL~~");
+-                    crashreportcategory.addCrashSection("Entity", "~~NULL~~");
 -                }
 -                else
 -                {
@@ -460,193 +371,185 @@
 +                //}
 +                //else
 +                //{
-                     entity.func_85029_a(crashreportcategory);
+                     entity.addEntityCrashInfo(crashreportcategory);
 -                }
 +                //}
  
                  if (net.minecraftforge.common.ForgeModContainer.removeErroringEntities)
                  {
-@@ -1724,9 +1940,13 @@
-         this.func_184147_l();
-         this.field_72984_F.func_76318_c("regular");
+@@ -1726,9 +1896,13 @@
+         this.tickPlayers();
+         this.theProfiler.endStartSection("regular");
  
--        for (int i1 = 0; i1 < this.field_72996_f.size(); ++i1)
+-        for (int i1 = 0; i1 < this.loadedEntityList.size(); ++i1)
 -        {
--            Entity entity2 = (Entity)this.field_72996_f.get(i1);
+-            Entity entity2 = (Entity)this.loadedEntityList.get(i1);
 +        //for (int i1 = 0; i1 < this.loadedEntityList.size(); ++i1)
 +        //{
 +        // CraftBukkit start - Use field for loop variable
-+        for (this.tickPosition = 0; this.tickPosition < this.field_72996_f.size(); ++this.tickPosition) {
-+        	Entity entity2 = (Entity) this.field_72996_f.get(this.tickPosition);
++        for (this.tickPosition = 0; this.tickPosition < this.loadedEntityList.size(); ++this.tickPosition) {
++        	Entity entity2 = (Entity) this.loadedEntityList.get(this.tickPosition);
 +        	// CraftBukkit end
 +            //Entity entity2 = (Entity)this.loadedEntityList.get(i1);
-             Entity entity3 = entity2.func_184187_bx();
+             Entity entity3 = entity2.getRidingEntity();
  
              if (entity3 != null)
-@@ -1775,7 +1995,7 @@
-                     this.func_72964_e(l1, i2).func_76622_b(entity2);
+@@ -1777,7 +1951,7 @@
+                     this.getChunkFromChunkCoords(l1, i2).removeEntity(entity2);
                  }
  
--                this.field_72996_f.remove(i1--);
-+                this.field_72996_f.remove(this.tickPosition--); // CraftBukkit - Use field for loop variable
-                 this.func_72847_b(entity2);
+-                this.loadedEntityList.remove(i1--);
++                this.loadedEntityList.remove(this.tickPosition--); // CraftBukkit - Use field for loop variable
+                 this.onEntityRemoved(entity2);
              }
  
-@@ -1784,6 +2004,17 @@
+@@ -1786,6 +1960,17 @@
  
-         this.field_72984_F.func_76318_c("blockEntities");
-         this.field_147481_N = true;
+         this.theProfiler.endStartSection("blockEntities");
+         this.processingLoadedTiles = true;
 +        // CraftBukkit start - From below, clean up tile entities before ticking them
-+        if (!this.field_147483_b.isEmpty()) {
-+        	for (Object tile : field_147483_b) // Forge
++        if (!this.tileEntitiesToBeRemoved.isEmpty()) {
++        	for (Object tile : tileEntitiesToBeRemoved) // Forge
 +            {
 +               ((TileEntity)tile).onChunkUnload();
 +            }
-+        	this.field_175730_i.removeAll(this.field_147483_b);
-+        	this.field_147482_g.removeAll(this.field_147483_b);
-+        	this.field_147483_b.clear();
++        	this.tickableTileEntities.removeAll(this.tileEntitiesToBeRemoved);
++        	this.loadedTileEntityList.removeAll(this.tileEntitiesToBeRemoved);
++        	this.tileEntitiesToBeRemoved.clear();
 +        }
 +        // CraftBukkit end
-         Iterator<TileEntity> iterator = this.field_175730_i.iterator();
+         Iterator<TileEntity> iterator = this.tickableTileEntities.iterator();
  
          while (iterator.hasNext())
-@@ -1834,17 +2065,17 @@
+@@ -1836,7 +2021,7 @@
              }
          }
  
--        if (!this.field_147483_b.isEmpty())
+-        if (!this.tileEntitiesToBeRemoved.isEmpty())
 +        /*if (!this.tileEntitiesToBeRemoved.isEmpty())
          {
--            for (Object tile : field_147483_b)
-+            for (Object tile : tileEntitiesToBeRemoved)
+             for (Object tile : tileEntitiesToBeRemoved)
              {
-                ((TileEntity)tile).onChunkUnload();
-             }
- 
--            this.field_175730_i.removeAll(this.field_147483_b);
--            this.field_147482_g.removeAll(this.field_147483_b);
--            this.field_147483_b.clear();
+@@ -1846,7 +2031,7 @@
+             this.tickableTileEntities.removeAll(this.tileEntitiesToBeRemoved);
+             this.loadedTileEntityList.removeAll(this.tileEntitiesToBeRemoved);
+             this.tileEntitiesToBeRemoved.clear();
 -        }
-+            this.tickableTileEntities.removeAll(this.tileEntitiesToBeRemoved);
-+            this.loadedTileEntityList.removeAll(this.tileEntitiesToBeRemoved);
-+            this.tileEntitiesToBeRemoved.clear();
 +        }*/
  
-         this.field_147481_N = false;  //FML Move below remove to prevent CMEs
+         this.processingLoadedTiles = false;  //FML Move below remove to prevent CMEs
  
-@@ -1858,10 +2089,11 @@
+@@ -1860,10 +2045,11 @@
  
-                 if (!tileentity1.func_145837_r())
+                 if (!tileentity1.isInvalid())
                  {
--                    if (!this.field_147482_g.contains(tileentity1))
 +                	/* CraftBukkit start - Order matters, moved down
-+                    if (!this.loadedTileEntityList.contains(tileentity1))
+                     if (!this.loadedTileEntityList.contains(tileentity1))
                      {
--                        this.func_175700_a(tileentity1);
+                         this.addTileEntity(tileentity1);
 -                    }
-+                        this.addTileEntity(tileentity1);
 +                    }// CraftBukkit end */
  
-                     if (this.func_175667_e(tileentity1.func_174877_v()))
+                     if (this.isBlockLoaded(tileentity1.getPos()))
                      {
-@@ -1869,6 +2101,12 @@
-                         IBlockState iblockstate = chunk.func_177435_g(tileentity1.func_174877_v());
-                         chunk.func_177426_a(tileentity1.func_174877_v(), tileentity1);
-                         this.func_184138_a(tileentity1.func_174877_v(), iblockstate, iblockstate, 3);
+@@ -1871,6 +2057,12 @@
+                         IBlockState iblockstate = chunk.getBlockState(tileentity1.getPos());
+                         chunk.addTileEntity(tileentity1.getPos(), tileentity1);
+                         this.notifyBlockUpdate(tileentity1.getPos(), iblockstate, iblockstate, 3);
 +                        // CraftBukkit start
 +                        // From above, don't screw this up - SPIGOT-1746
-+                        if (!this.field_147482_g.contains(tileentity1)) {
-+                        	this.func_175700_a(tileentity1);
++                        if (!this.loadedTileEntityList.contains(tileentity1)) {
++                        	this.addTileEntity(tileentity1);
 +                        }
 +                        // CraftBukkit end
                      }
                  }
              }
-@@ -1936,9 +2174,11 @@
+@@ -1938,9 +2130,11 @@
      {
-         int i = MathHelper.func_76128_c(p_72866_1_.field_70165_t);
-         int j = MathHelper.func_76128_c(p_72866_1_.field_70161_v);
+         int i = MathHelper.floor_double(entityIn.posX);
+         int j = MathHelper.floor_double(entityIn.posZ);
 -        boolean isForced = getPersistentChunks().containsKey(new net.minecraft.util.math.ChunkPos(i >> 4, j >> 4));
 -        int k = isForced ? 0 : 32;
--        boolean canUpdate = !p_72866_2_ || this.func_175663_a(i - k, 0, j - k, i + k, 0, j + k, true);
+-        boolean canUpdate = !forceUpdate || this.isAreaLoaded(i - k, 0, j - k, i + k, 0, j + k, true);
 +        //boolean isForced = getPersistentChunks().containsKey(new net.minecraft.util.math.ChunkPos(i >> 4, j >> 4));
 +        //int k = isForced ? 0 : 32;
 +        // CraftBukkit start - Use neighbor cache instead of looking up
 +        Chunk startingChunk = this.getChunkIfLoaded(i >> 4, j >> 4);
-+        boolean canUpdate = !p_72866_2_ || startingChunk.areNeighborsLoaded(2)/*this.isAreaLoaded(i - k, 0, j - k, i + k, 0, j + k, true)*/;
-         if (!canUpdate) canUpdate = net.minecraftforge.event.ForgeEventFactory.canEntityUpdate(p_72866_1_);
++        boolean canUpdate = !forceUpdate || startingChunk.areNeighborsLoaded(2)/*this.isAreaLoaded(i - k, 0, j - k, i + k, 0, j + k, true)*/;
+         if (!canUpdate) canUpdate = net.minecraftforge.event.ForgeEventFactory.canEntityUpdate(entityIn);
  
          if (canUpdate)
-@@ -2378,7 +2618,7 @@
+@@ -2380,7 +2574,7 @@
      {
-         return this.field_73020_y.func_73148_d();
+         return this.chunkProvider.makeString();
      }
 -
 +    public Map<BlockPos, TileEntity> capturedTileEntities = Maps.newHashMap();
      @Nullable
-     public TileEntity func_175625_s(BlockPos p_175625_1_)
+     public TileEntity getTileEntity(BlockPos pos)
      {
-@@ -2388,6 +2628,11 @@
+@@ -2390,6 +2584,11 @@
          }
          else
          {
 +        	// CraftBukkit start
-+        	if (capturedTileEntities.containsKey(p_175625_1_)) {
-+        		return capturedTileEntities.get(p_175625_1_);
++        	if (capturedTileEntities.containsKey(pos)) {
++        		return capturedTileEntities.get(pos);
 +        	}
 +        	// CraftBukkit end
              TileEntity tileentity = null;
  
-             if (this.field_147481_N)
-@@ -2432,6 +2677,14 @@
+             if (this.processingLoadedTiles)
+@@ -2434,6 +2633,14 @@
          {
-             if (p_175690_2_ != null && !p_175690_2_.func_145837_r())
+             if (tileEntityIn != null && !tileEntityIn.isInvalid())
              {
 +            	// CraftBukkit start
 +            	if (captureBlockStates) {
-+            		p_175690_2_.func_145834_a(this);
-+            		p_175690_2_.func_174878_a(p_175690_1_);
-+            		capturedTileEntities.put(p_175690_1_, p_175690_2_);
++            		tileEntityIn.setWorldObj(this);
++            		tileEntityIn.setPos(pos);
++            		capturedTileEntities.put(pos, tileEntityIn);
 +            		return;
 +            	}
 +            	// CraftBukkit end
-                 if (this.field_147481_N)
+                 if (this.processingLoadedTiles)
                  {
-                     p_175690_2_.func_174878_a(p_175690_1_);
-@@ -2654,6 +2907,13 @@
+                     tileEntityIn.setPos(pos);
+@@ -2656,6 +2863,13 @@
                  }
  
-                 this.field_73004_o = MathHelper.func_76131_a(this.field_73004_o, 0.0F, 1.0F);
+                 this.rainingStrength = MathHelper.clamp_float(this.rainingStrength, 0.0F, 1.0F);
 +                // CraftBukkit start
-+                for (int idx = 0; idx < this.field_73010_i.size(); ++idx) {
-+                	if (((EntityPlayerMP) this.field_73010_i.get(idx)).field_70170_p == this) {
-+                		((EntityPlayerMP) this.field_73010_i.get(idx)).tickWeather();
++                for (int idx = 0; idx < this.playerEntities.size(); ++idx) {
++                	if (((EntityPlayerMP) this.playerEntities.get(idx)).worldObj == this) {
++                		((EntityPlayerMP) this.playerEntities.get(idx)).tickWeather();
 +                	}
 +                }
 +                // CraftBukkit end
              }
          }
      }
-@@ -2837,8 +3097,11 @@
+@@ -2839,8 +3053,11 @@
  
-     public boolean func_180500_c(EnumSkyBlock p_180500_1_, BlockPos p_180500_2_)
+     public boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos)
      {
--        if (!this.func_175648_a(p_180500_2_, 17, false))
+-        if (!this.isAreaLoaded(pos, 17, false))
 -        {
 +        //if (!this.isAreaLoaded(pos, 17, false))
 +    	// CraftBukkit start - Use neighbor cache instead of looking up
-+    	Chunk chunk = this.getChunkIfLoaded(p_180500_2_.func_177958_n() >> 4, p_180500_2_.func_177952_p() >> 4);
++    	Chunk chunk = this.getChunkIfLoaded(pos.getX() >> 4, pos.getZ() >> 4);
 +    	if (chunk == null || !chunk.areNeighborsLoaded(1) /*!this.areChunksLoaded(blockposition, 17, false)*/) {
 +    		// CraftBukkit end
              return false;
          }
          else
-@@ -3125,11 +3388,20 @@
+@@ -3127,11 +3344,20 @@
          int i = 0;
  
-         for (Entity entity : this.field_72996_f)
+         for (Entity entity : this.loadedEntityList)
 -        {
--            if ((!(entity instanceof EntityLiving) || !((EntityLiving)entity).func_104002_bU()) && p_72907_1_.isAssignableFrom(entity.getClass()))
+-            if ((!(entity instanceof EntityLiving) || !((EntityLiving)entity).isNoDespawnRequired()) && entityType.isAssignableFrom(entity.getClass()))
 -            {
 -                ++i;
 +        {   // CB start
@@ -656,19 +559,19 @@
 +            //}
 +        	if (entity instanceof EntityLiving) {
 +                final EntityLiving entityinsentient = (EntityLiving)entity;
-+                if (entityinsentient.func_70692_ba() && entityinsentient.func_104002_bU()) {
++                if (entityinsentient.canDespawn() && entityinsentient.isNoDespawnRequired()) {
 +                    continue;
 +                }
              }
-+            if (p_72907_1_.isAssignableFrom(entity.getClass())) {
++            if (entityType.isAssignableFrom(entity.getClass())) {
 +                ++i;
 +            } // CB end
          }
  
          return i;
-@@ -3139,6 +3411,11 @@
+@@ -3141,6 +3367,11 @@
      {
-         for (Entity entity : p_175650_1_)
+         for (Entity entity : entityCollection)
          {
 +        	// CB start
 +        	if(entity == null) {
@@ -677,20 +580,20 @@
 +        	// CB end
              if (!net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.EntityJoinWorldEvent(entity, this)))
              {
-                 field_72996_f.add(entity);
-@@ -3153,10 +3430,17 @@
+                 loadedEntityList.add(entity);
+@@ -3155,10 +3386,17 @@
      }
  
-     public boolean func_175716_a(Block p_175716_1_, BlockPos p_175716_2_, boolean p_175716_3_, EnumFacing p_175716_4_, @Nullable Entity p_175716_5_, @Nullable ItemStack p_175716_6_)
+     public boolean canBlockBePlaced(Block blockIn, BlockPos pos, boolean p_175716_3_, EnumFacing side, @Nullable Entity entityIn, @Nullable ItemStack itemStackIn)
 -    {
--        IBlockState iblockstate = this.func_180495_p(p_175716_2_);
--        AxisAlignedBB axisalignedbb = p_175716_3_ ? null : p_175716_1_.func_176223_P().func_185890_d(this, p_175716_2_);
--        return axisalignedbb != Block.field_185506_k && !this.func_72917_a(axisalignedbb.func_186670_a(p_175716_2_), p_175716_5_) ? false : (iblockstate.func_185904_a() == Material.field_151594_q && p_175716_1_ == Blocks.field_150467_bQ ? true : iblockstate.func_177230_c().func_176200_f(this, p_175716_2_) && p_175716_1_.func_176193_a(this, p_175716_2_, p_175716_4_, p_175716_6_));
+-        IBlockState iblockstate = this.getBlockState(pos);
+-        AxisAlignedBB axisalignedbb = p_175716_3_ ? null : blockIn.getDefaultState().getCollisionBoundingBox(this, pos);
+-        return axisalignedbb != Block.NULL_AABB && !this.checkNoEntityCollision(axisalignedbb.offset(pos), entityIn) ? false : (iblockstate.getMaterial() == Material.CIRCUITS && blockIn == Blocks.ANVIL ? true : iblockstate.getBlock().isReplaceable(this, pos) && blockIn.canReplace(this, pos, side, itemStackIn));
 +    {   // CB start
-+    	final IBlockState iblockdata = this.func_180495_p(p_175716_2_);
-+        final AxisAlignedBB axisalignedbb = p_175716_3_ ? null : p_175716_1_.func_176223_P().func_185890_d(this, p_175716_2_);
-+        final boolean defaultReturn = (axisalignedbb == Block.field_185506_k || this.func_72917_a(axisalignedbb.func_186670_a(p_175716_2_), p_175716_5_)) && ((iblockdata.func_185904_a() == Material.field_151594_q && p_175716_1_ == Blocks.field_150467_bQ) || (iblockdata.func_185904_a().func_76222_j() && p_175716_1_.func_176193_a(this, p_175716_2_, p_175716_4_, p_175716_6_)));
-+        final BlockCanBuildEvent event = new BlockCanBuildEvent(this.getWorld().getBlockAt(p_175716_2_.func_177958_n(), p_175716_2_.func_177956_o(), p_175716_2_.func_177952_p()), CraftMagicNumbers.getId(p_175716_1_), defaultReturn);
++    	final IBlockState iblockdata = this.getBlockState(pos);
++        final AxisAlignedBB axisalignedbb = p_175716_3_ ? null : blockIn.getDefaultState().getCollisionBoundingBox(this, pos);
++        final boolean defaultReturn = (axisalignedbb == Block.NULL_AABB || this.checkNoEntityCollision(axisalignedbb.offset(pos), entityIn)) && ((iblockdata.getMaterial() == Material.CIRCUITS && blockIn == Blocks.ANVIL) || (iblockdata.getMaterial().isReplaceable() && blockIn.canReplace(this, pos, side, itemStackIn)));
++        final BlockCanBuildEvent event = new BlockCanBuildEvent(this.getWorld().getBlockAt(pos.getX(), pos.getY(), pos.getZ()), CraftMagicNumbers.getId(blockIn), defaultReturn);
 +        this.getServer().getPluginManager().callEvent(event);
 +        return event.isBuildable();
 +        //IBlockState iblockstate = this.getBlockState(pos);
@@ -699,21 +602,21 @@
 +        // CB end
      }
  
-     public int func_181545_F()
-@@ -3290,6 +3574,11 @@
-         for (int i = 0; i < this.field_73010_i.size(); ++i)
+     public int getSeaLevel()
+@@ -3292,6 +3530,11 @@
+         for (int i = 0; i < this.playerEntities.size(); ++i)
          {
-             EntityPlayer entityplayer1 = (EntityPlayer)this.field_73010_i.get(i);
+             EntityPlayer entityplayer1 = (EntityPlayer)this.playerEntities.get(i);
 +            // CraftBukkit start - Fixed an NPE
-+            if (entityplayer1 == null || entityplayer1.field_70128_L) {
++            if (entityplayer1 == null || entityplayer1.isDead) {
 +            	continue;
 +            }
 +            // CraftBukkit end
  
-             if ((EntitySelectors.field_188444_d.apply(entityplayer1) || !p_184137_9_) && (EntitySelectors.field_180132_d.apply(entityplayer1) || p_184137_9_))
+             if ((EntitySelectors.CAN_AI_TARGET.apply(entityplayer1) || !spectator) && (EntitySelectors.NOT_SPECTATING.apply(entityplayer1) || spectator))
              {
-@@ -3535,6 +3824,16 @@
-     public void func_72854_c()
+@@ -3537,6 +3780,16 @@
+     public void updateAllPlayersSleepingFlag()
      {
      }
 +    
@@ -721,11 +624,11 @@
 +    // Calls the method that checks to see if players are sleeping
 +    // Called by CraftPlayer.setPermanentSleeping()
 +    public void checkSleepStatus() {
-+    	if (!this.field_72995_K) {
-+    		this.func_72854_c();
++    	if (!this.isRemote) {
++    		this.updateAllPlayersSleepingFlag();
 +    	}
 +    }	
 +    // CraftBukkit end
  
-     public float func_72819_i(float p_72819_1_)
+     public float getThunderStrength(float delta)
      {

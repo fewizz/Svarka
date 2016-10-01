@@ -3,9 +3,9 @@
 @@ -22,7 +22,7 @@
  public class TileEntitySkull extends TileEntity implements ITickable
  {
-     private int field_145908_a;
--    private int field_145910_i;
-+    public int field_145910_i;
-     private GameProfile field_152110_j;
-     private int field_184296_h;
-     private boolean field_184297_i;
+     private int skullType;
+-    private int skullRotation;
++    public int skullRotation;
+     private GameProfile playerProfile;
+     private int dragonAnimatedTicks;
+     private boolean dragonAnimated;

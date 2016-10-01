@@ -18,32 +18,32 @@
 +
 +public class ContainerPlayer extends CBContainer
  {
-     private static final EntityEquipmentSlot[] field_185003_h = new EntityEquipmentSlot[] {EntityEquipmentSlot.HEAD, EntityEquipmentSlot.CHEST, EntityEquipmentSlot.LEGS, EntityEquipmentSlot.FEET};
-     public InventoryCrafting field_75181_e = new InventoryCrafting(this, 2, 2);
--    public IInventory field_75179_f = new InventoryCraftResult();
-+    public ICBInventory field_75179_f = new InventoryCraftResult();
-     public boolean field_75180_g;
-     private final EntityPlayer field_82862_h;
+     private static final EntityEquipmentSlot[] VALID_EQUIPMENT_SLOTS = new EntityEquipmentSlot[] {EntityEquipmentSlot.HEAD, EntityEquipmentSlot.CHEST, EntityEquipmentSlot.LEGS, EntityEquipmentSlot.FEET};
+     public InventoryCrafting craftMatrix = new InventoryCrafting(this, 2, 2);
+-    public IInventory craftResult = new InventoryCraftResult();
++    public ICBInventory craftResult = new InventoryCraftResult();
+     public boolean isLocalWorld;
+     private final EntityPlayer thePlayer;
 +    // CraftBukkit start
 +    private CraftInventoryView bukkitEntity = null;
 +    private InventoryPlayer player;
 +    // CraftBukkit end
  
-     public ContainerPlayer(final InventoryPlayer p_i1819_1_, boolean p_i1819_2_, EntityPlayer p_i1819_3_)
+     public ContainerPlayer(final InventoryPlayer playerInventory, boolean localWorld, EntityPlayer player)
      {
-         this.field_75180_g = p_i1819_2_;
+         this.isLocalWorld = localWorld;
 +        // CraftBukkit start
-+        this.field_75179_f = new InventoryCraftResult(); // CraftBukkit - moved to before InventoryCrafting construction
-+        this.field_75181_e = new InventoryCrafting(this, 2, 2, p_i1819_1_.field_70458_d); // CraftBukkit - pass player
-+        this.field_75181_e.resultInventory = this.field_75179_f; // CraftBukkit - let InventoryCrafting know about its result slot
-+        this.player = p_i1819_1_; // CraftBukkit - save player
++        this.craftResult = new InventoryCraftResult(); // CraftBukkit - moved to before InventoryCrafting construction
++        this.craftMatrix = new InventoryCrafting(this, 2, 2, playerInventory.player); // CraftBukkit - pass player
++        this.craftMatrix.resultInventory = this.craftResult; // CraftBukkit - let InventoryCrafting know about its result slot
++        this.player = playerInventory; // CraftBukkit - save player
 +        // CraftBukkit end 
-         this.field_82862_h = p_i1819_3_;
-         this.func_75146_a(new SlotCrafting(p_i1819_1_.field_70458_d, this.field_75181_e, this.field_75179_f, 0, 154, 28));
+         this.thePlayer = player;
+         this.addSlotToContainer(new SlotCrafting(playerInventory.player, this.craftMatrix, this.craftResult, 0, 154, 28));
  
 @@ -211,4 +231,17 @@
      {
-         return p_94530_2_.field_75224_c != this.field_75179_f && super.func_94530_a(p_94530_1_, p_94530_2_);
+         return slotIn.inventory != this.craftResult && super.canMergeSlot(stack, slotIn);
      }
 +    
 +    // CraftBukkit start
@@ -53,8 +53,8 @@
 +    		return bukkitEntity;
 +    	}
 +    
-+    	CraftInventoryCrafting inventory = new CraftInventoryCrafting(this.field_75181_e, this.field_75179_f);
-+    	bukkitEntity = new CraftInventoryView(this.player.field_70458_d.getBukkitEntity(), inventory, this);
++    	CraftInventoryCrafting inventory = new CraftInventoryCrafting(this.craftMatrix, this.craftResult);
++    	bukkitEntity = new CraftInventoryView(this.player.player.getBukkitEntity(), inventory, this);
 +    	return bukkitEntity;
 +    }
 +    // CraftBukkit end

@@ -21,50 +21,50 @@
 +
  public class EntityAreaEffectCloud extends Entity
  {
-     private static final DataParameter<Float> field_184498_a = EntityDataManager.<Float>func_187226_a(EntityAreaEffectCloud.class, DataSerializers.field_187193_c);
+     private static final DataParameter<Float> RADIUS = EntityDataManager.<Float>createKey(EntityAreaEffectCloud.class, DataSerializers.FLOAT);
 @@ -33,15 +40,15 @@
-     private static final DataParameter<Integer> field_189736_e = EntityDataManager.<Integer>func_187226_a(EntityAreaEffectCloud.class, DataSerializers.field_187192_b);
-     private static final DataParameter<Integer> field_189737_f = EntityDataManager.<Integer>func_187226_a(EntityAreaEffectCloud.class, DataSerializers.field_187192_b);
-     private PotionType field_184502_e;
--    private final List<PotionEffect> field_184503_f;
-+    public final List<PotionEffect> field_184503_f;
-     private final Map<Entity, Integer> field_184504_g;
-     private int field_184505_h;
--    private int field_184506_as;
--    private int field_184507_at;
-+    public int field_184506_as;
-+    public int field_184507_at;
-     private boolean field_184508_au;
--    private int field_184509_av;
--    private float field_184510_aw;
--    private float field_184511_ax;
-+    public int field_184509_av;
-+    public float field_184510_aw;
-+    public float field_184511_ax;
-     private EntityLivingBase field_184512_ay;
-     private UUID field_184513_az;
+     private static final DataParameter<Integer> field_189736_e = EntityDataManager.<Integer>createKey(EntityAreaEffectCloud.class, DataSerializers.VARINT);
+     private static final DataParameter<Integer> field_189737_f = EntityDataManager.<Integer>createKey(EntityAreaEffectCloud.class, DataSerializers.VARINT);
+     private PotionType potion;
+-    private final List<PotionEffect> effects;
++    public final List<PotionEffect> effects;
+     private final Map<Entity, Integer> reapplicationDelayMap;
+     private int duration;
+-    private int waitTime;
+-    private int reapplicationDelay;
++    public int waitTime;
++    public int reapplicationDelay;
+     private boolean colorSet;
+-    private int durationOnUse;
+-    private float radiusOnUse;
+-    private float radiusPerTick;
++    public int durationOnUse;
++    public float radiusOnUse;
++    public float radiusPerTick;
+     private EntityLivingBase owner;
+     private UUID ownerUniqueId;
  
 @@ -64,6 +71,21 @@
-         this(p_i46810_1_);
-         this.func_70107_b(p_i46810_2_, p_i46810_4_, p_i46810_6_);
+         this(worldIn);
+         this.setPosition(x, y, z);
      }
 +    // CraftBukkit start accessor methods
 +    public void refreshEffects() {
-+    	if (!this.field_184508_au) {
-+    		this.func_184212_Q().func_187227_b(EntityAreaEffectCloud.field_184499_b, Integer.valueOf(PotionUtils.func_185181_a(PotionUtils.func_185186_a(this.field_184502_e, this.field_184503_f)))); // PAIL: rename
++    	if (!this.colorSet) {
++    		this.getDataManager().set(EntityAreaEffectCloud.COLOR, Integer.valueOf(PotionUtils.getPotionColorFromEffectList(PotionUtils.mergeEffects(this.potion, this.effects)))); // PAIL: rename
 +    	}
 +    }
 +    
 +    public String getType() {
-+    	return PotionType.field_185176_a.func_177774_c(this.field_184502_e).toString();
++    	return PotionType.REGISTRY.getNameForObject(this.potion).toString();
 +    }
 +    
 +    public void setType(String string) {
-+    	this.func_184484_a(PotionType.field_185176_a.func_82594_a(new ResourceLocation(string)));
++    	this.setPotion(PotionType.REGISTRY.getObject(new ResourceLocation(string)));
 +    }
 +    // CraftBukkit end
  
-     protected void func_70088_a()
+     protected void entityInit()
      {
 @@ -321,6 +343,7 @@
  
@@ -73,9 +73,9 @@
 +                    	List<LivingEntity> entities = new ArrayList<LivingEntity>(); // CraftBukkit
                          for (EntityLivingBase entitylivingbase : list)
                          {
-                             if (!this.field_184504_g.containsKey(entitylivingbase) && entitylivingbase.func_184603_cC())
+                             if (!this.reapplicationDelayMap.containsKey(entitylivingbase) && entitylivingbase.canBeHitWithPotion())
 @@ -329,8 +352,18 @@
-                                 double d1 = entitylivingbase.field_70161_v - this.field_70161_v;
+                                 double d1 = entitylivingbase.posZ - this.posZ;
                                  double d2 = d0 * d0 + d1 * d1;
  
 -                                if (d2 <= (double)(f * f))
@@ -92,6 +92,6 @@
 +                        		if (entity instanceof CraftLivingEntity) {
 +                        			EntityLivingBase entitylivingbase = ((CraftLivingEntity) entity).getHandle();
 +                        			// CraftBukkit end
-                                     this.field_184504_g.put(entitylivingbase, Integer.valueOf(this.field_70173_aa + this.field_184507_at));
+                                     this.reapplicationDelayMap.put(entitylivingbase, Integer.valueOf(this.ticksExisted + this.reapplicationDelay));
  
                                      for (PotionEffect potioneffect : potions)

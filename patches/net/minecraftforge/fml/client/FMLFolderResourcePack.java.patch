@@ -4,11 +4,11 @@
      }
  
      @Override
--    protected boolean func_110593_b(String p_110593_1_)
-+    protected boolean func_110593_b(String name)
+-    protected boolean hasResourceName(String p_110593_1_)
++    protected boolean hasResourceName(String name)
      {
--        return super.func_110593_b(p_110593_1_);
-+        return super.func_110593_b(name);
+-        return super.hasResourceName(p_110593_1_);
++        return super.hasResourceName(name);
      }
      @Override
-     public String func_130077_b()
+     public String getPackName()

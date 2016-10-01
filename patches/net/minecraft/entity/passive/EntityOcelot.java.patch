@@ -4,8 +4,8 @@
          }
      }
  
--    protected boolean func_70692_ba()
-+    public boolean func_70692_ba()
+-    protected boolean canDespawn()
++    public boolean canDespawn()
      {
-         return !this.func_70909_n() && this.field_70173_aa > 2400;
+         return !this.isTamed() && this.ticksExisted > 2400;
      }

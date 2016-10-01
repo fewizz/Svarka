@@ -9,46 +9,46 @@
  public class EntityHorse extends EntityAnimal implements IInventoryChangedListener, IJumpingMount
  {
 @@ -70,7 +71,7 @@
-             return p_apply_1_ instanceof EntityHorse && ((EntityHorse)p_apply_1_).func_110205_ce();
+             return p_apply_1_ instanceof EntityHorse && ((EntityHorse)p_apply_1_).isBreeding();
          }
      };
--    private static final IAttribute field_110271_bv = (new RangedAttribute((IAttribute)null, "horse.jumpStrength", 0.7D, 0.0D, 2.0D)).func_111117_a("Jump Strength").func_111112_a(true);
-+    public static final IAttribute field_110271_bv = (new RangedAttribute((IAttribute)null, "horse.jumpStrength", 0.7D, 0.0D, 2.0D)).func_111117_a("Jump Strength").func_111112_a(true);
-     private static final UUID field_184786_bD = UUID.fromString("556E1665-8B10-40C8-8F9D-CF9B1667F295");
-     private static final DataParameter<Byte> field_184787_bE = EntityDataManager.<Byte>func_187226_a(EntityHorse.class, DataSerializers.field_187191_a);
-     private static final DataParameter<Integer> field_184788_bF = EntityDataManager.<Integer>func_187226_a(EntityHorse.class, DataSerializers.field_187192_b);
+-    private static final IAttribute JUMP_STRENGTH = (new RangedAttribute((IAttribute)null, "horse.jumpStrength", 0.7D, 0.0D, 2.0D)).setDescription("Jump Strength").setShouldWatch(true);
++    public static final IAttribute JUMP_STRENGTH = (new RangedAttribute((IAttribute)null, "horse.jumpStrength", 0.7D, 0.0D, 2.0D)).setDescription("Jump Strength").setShouldWatch(true);
+     private static final UUID ARMOR_MODIFIER_UUID = UUID.fromString("556E1665-8B10-40C8-8F9D-CF9B1667F295");
+     private static final DataParameter<Byte> STATUS = EntityDataManager.<Byte>createKey(EntityHorse.class, DataSerializers.BYTE);
+     private static final DataParameter<Integer> HORSE_TYPE = EntityDataManager.<Integer>createKey(EntityHorse.class, DataSerializers.VARINT);
 @@ -88,7 +89,7 @@
-     public int field_110278_bp;
-     public int field_110279_bq;
-     protected boolean field_110275_br;
--    private AnimalChest field_110296_bG;
-+    public AnimalChest field_110296_bG;
-     private boolean field_110293_bH;
-     protected int field_110274_bs;
-     protected float field_110277_bt;
+     public int tailCounter;
+     public int sprintCounter;
+     protected boolean horseJumping;
+-    private AnimalChest horseChest;
++    public AnimalChest horseChest;
+     private boolean hasReproduced;
+     protected int temper;
+     protected float jumpPower;
 @@ -104,6 +105,7 @@
-     private int field_110285_bP;
-     private String field_110286_bQ;
-     private final String[] field_110280_bR = new String[3];
+     private int gallopTime;
+     private String texturePrefix;
+     private final String[] horseTexturesArray = new String[3];
 +    public int maxDomestication = 100; // CraftBukkit - store max domestication value
      @SideOnly(Side.CLIENT)
-     private boolean field_175508_bO;
+     private boolean hasTexture;
  
 @@ -417,7 +419,7 @@
-         return this.func_110261_ca() && horsetype.func_188600_f() ? 17 : 2;
+         return this.isChested() && horsetype.canBeChested() ? 17 : 2;
      }
  
--    private void func_110226_cD()
-+    public void func_110226_cD()
+-    private void initHorseChest()
++    public void initHorseChest()
      {
-         AnimalChest animalchest = this.field_110296_bG;
-         this.field_110296_bG = new AnimalChest("HorseChest", this.func_110225_cC());
+         AnimalChest animalchest = this.horseChest;
+         this.horseChest = new AnimalChest("HorseChest", this.getChestSize());
 @@ -612,7 +614,7 @@
  
-     public int func_110218_cm()
+     public int getMaxTemper()
      {
 -        return 100;
 +        return this.maxDomestication; // CB
      }
  
-     protected float func_70599_aP()
+     protected float getSoundVolume()

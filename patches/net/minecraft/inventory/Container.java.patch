@@ -19,13 +19,13 @@
 +
  public abstract class Container
  {
-     public List<ItemStack> field_75153_a = Lists.<ItemStack>newArrayList();
+     public List<ItemStack> inventoryItemStacks = Lists.<ItemStack>newArrayList();
 @@ -31,7 +43,7 @@
      {
-         p_75146_1_.field_75222_d = this.field_75151_b.size();
-         this.field_75151_b.add(p_75146_1_);
--        this.field_75153_a.add((ItemStack)null);
-+        this.field_75153_a.add(null);
-         return p_75146_1_;
+         slotIn.slotNumber = this.inventorySlots.size();
+         this.inventorySlots.add(slotIn);
+-        this.inventoryItemStacks.add((ItemStack)null);
++        this.inventoryItemStacks.add(null);
+         return slotIn;
      }
  

@@ -4,8 +4,8 @@
          }
      }
  
--    private void func_180678_e(World p_180678_1_, BlockPos p_180678_2_, IBlockState p_180678_3_)
-+    public void func_180678_e(World p_180678_1_, BlockPos p_180678_2_, IBlockState p_180678_3_)
+-    private void dropRecord(World worldIn, BlockPos pos, IBlockState state)
++    public void dropRecord(World worldIn, BlockPos pos, IBlockState state)
      {
-         if (!p_180678_1_.field_72995_K)
+         if (!worldIn.isRemote)
          {

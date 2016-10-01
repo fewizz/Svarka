@@ -4,8 +4,8 @@
          return 120;
      }
  
--    protected boolean func_70692_ba()
-+    public boolean func_70692_ba()
+-    protected boolean canDespawn()
++    public boolean canDespawn()
      {
          return true;
      }

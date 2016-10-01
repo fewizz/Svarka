@@ -10,18 +10,18 @@
 +
  public class MerchantRecipe
  {
--    private ItemStack field_77403_a;
--    private ItemStack field_77401_b;
--    private ItemStack field_77402_c;
--    private int field_77400_d;
--    private int field_82786_e;
--    private boolean field_180323_f;
-+    public ItemStack field_77403_a;
-+    public ItemStack field_77401_b;
-+    public ItemStack field_77402_c;
-+    public int field_77400_d;
-+    public int field_82786_e;
-+    public boolean field_180323_f;
+-    private ItemStack itemToBuy;
+-    private ItemStack secondItemToBuy;
+-    private ItemStack itemToSell;
+-    private int toolUses;
+-    private int maxTradeUses;
+-    private boolean rewardsExp;
++    public ItemStack itemToBuy;
++    public ItemStack secondItemToBuy;
++    public ItemStack itemToSell;
++    public int toolUses;
++    public int maxTradeUses;
++    public boolean rewardsExp;
 +    // CraftBukkit start
 +    private CraftMerchantRecipe bukkitHandle;
 +    
@@ -35,5 +35,5 @@
 +    }
 +    // CraftBukkit end
  
-     public MerchantRecipe(NBTTagCompound p_i1940_1_)
+     public MerchantRecipe(NBTTagCompound tagCompound)
      {

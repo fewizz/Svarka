@@ -23,7 +23,7 @@
 +	private int maxStack = MAX_STACK;
 +	
 +	public ItemStack[] getContents() {
-+		return this.field_70467_a;
++		return this.stackResult;
 +	}
 +	
 +	public org.bukkit.inventory.InventoryHolder getOwner() {
@@ -46,6 +46,6 @@
 +		return null;
 +	}
 +	// CraftBukkit end
-     private final ItemStack[] field_70467_a = new ItemStack[1];
+     private final ItemStack[] stackResult = new ItemStack[1];
  
-     public int func_70302_i_()
+     public int getSizeInventory()

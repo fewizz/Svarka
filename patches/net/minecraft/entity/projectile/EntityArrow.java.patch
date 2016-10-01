@@ -28,78 +28,78 @@
 +
  public abstract class EntityArrow extends Entity implements IProjectile
  {
-     private static final Predicate<Entity> field_184553_f = Predicates.and(new Predicate[] {EntitySelectors.field_180132_d, EntitySelectors.field_94557_a, new Predicate<Entity>()
+     private static final Predicate<Entity> ARROW_TARGETS = Predicates.and(new Predicate[] {EntitySelectors.NOT_SPECTATING, EntitySelectors.IS_ALIVE, new Predicate<Entity>()
 @@ -59,7 +70,7 @@
-     private int field_70252_j;
-     private int field_70257_an;
-     private double field_70255_ao;
--    private int field_70256_ap;
-+    public int field_70256_ap;
+     private int ticksInGround;
+     private int ticksInAir;
+     private double damage;
+-    private int knockbackStrength;
++    public int knockbackStrength;
  
-     public EntityArrow(World p_i1753_1_)
+     public EntityArrow(World worldIn)
      {
 @@ -82,7 +93,7 @@
      {
-         this(p_i46777_1_, p_i46777_2_.field_70165_t, p_i46777_2_.field_70163_u + (double)p_i46777_2_.func_70047_e() - 0.10000000149011612D, p_i46777_2_.field_70161_v);
-         this.field_70250_c = p_i46777_2_;
+         this(worldIn, shooter.posX, shooter.posY + (double)shooter.getEyeHeight() - 0.10000000149011612D, shooter.posZ);
+         this.shootingEntity = shooter;
 -
-+        this.projectileSource = (LivingEntity) p_i46777_2_.getBukkitEntity(); // CraftBukkit
-         if (p_i46777_2_ instanceof EntityPlayer)
++        this.projectileSource = (LivingEntity) shooter.getBukkitEntity(); // CraftBukkit
+         if (shooter instanceof EntityPlayer)
          {
-             this.field_70251_a = EntityArrow.PickupStatus.ALLOWED;
+             this.pickupStatus = EntityArrow.PickupStatus.ALLOWED;
 @@ -338,7 +349,7 @@
-     protected void func_184549_a(RayTraceResult p_184549_1_)
+     protected void onHit(RayTraceResult raytraceResultIn)
      {
-         Entity entity = p_184549_1_.field_72308_g;
+         Entity entity = raytraceResultIn.entityHit;
 -
 +        org.bukkit.craftbukkit.event.CraftEventFactory.callProjectileHitEvent(this); // CraftBukkit - Call event
          if (entity != null)
          {
-             float f = MathHelper.func_76133_a(this.field_70159_w * this.field_70159_w + this.field_70181_x * this.field_70181_x + this.field_70179_y * this.field_70179_y);
+             float f = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
 @@ -362,7 +373,14 @@
  
-             if (this.func_70027_ad() && !(entity instanceof EntityEnderman))
+             if (this.isBurning() && !(entity instanceof EntityEnderman))
              {
--                entity.func_70015_d(5);
+-                entity.setFire(5);
 +                //entity.setFire(5);
 +            	// CraftBukkit start
 +            	EntityCombustByEntityEvent combustEvent = new EntityCombustByEntityEvent(this.getBukkitEntity(), entity.getBukkitEntity(), 5);
 +            	org.bukkit.Bukkit.getPluginManager().callEvent(combustEvent);
 +            	if (!combustEvent.isCancelled()) {
-+            		entity.func_70015_d(combustEvent.getDuration());
++            		entity.setFire(combustEvent.getDuration());
 +            	}
 +            	// CraftBukkit end
              }
  
-             if (entity.func_70097_a(damagesource, (float)i))
+             if (entity.attackEntityFrom(damagesource, (float)i))
 @@ -554,6 +572,20 @@
      {
-         if (!this.field_70170_p.field_72995_K && this.field_70254_i && this.field_70249_b <= 0)
+         if (!this.worldObj.isRemote && this.inGround && this.arrowShake <= 0)
          {
 +        	// CraftBukkit start
-+        	ItemStack itemstack = new ItemStack(Items.field_151032_g);
-+        	if (this.field_70251_a == PickupStatus.ALLOWED && p_70100_1_.field_71071_by.canHold(itemstack) > 0) {
-+        		EntityItem item = new EntityItem(this.field_70170_p, this.field_70165_t, this.field_70163_u, this.field_70161_v, itemstack);
++        	ItemStack itemstack = new ItemStack(Items.ARROW);
++        	if (this.pickupStatus == PickupStatus.ALLOWED && entityIn.inventory.canHold(itemstack) > 0) {
++        		EntityItem item = new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, itemstack);
 +        		
-+        		PlayerPickupArrowEvent event = new PlayerPickupArrowEvent((org.bukkit.entity.Player) p_70100_1_.getBukkitEntity(), new org.bukkit.craftbukkit.entity.CraftItem(this.field_70170_p.getServer(), this, item), (org.bukkit.entity.Arrow) this.getBukkitEntity());
++        		PlayerPickupArrowEvent event = new PlayerPickupArrowEvent((org.bukkit.entity.Player) entityIn.getBukkitEntity(), new org.bukkit.craftbukkit.entity.CraftItem(this.worldObj.getServer(), this, item), (org.bukkit.entity.Arrow) this.getBukkitEntity());
 +        		// event.setCancelled(!entityhuman.canPickUpLoot); TODO
-+        		this.field_70170_p.getServer().getPluginManager().callEvent(event);
++        		this.worldObj.getServer().getPluginManager().callEvent(event);
 +        		
 +        		if (event.isCancelled()) {
 +        			return;
 +        		}
 +        	}
 +        	// CraftBukkit end
-             boolean flag = this.field_70251_a == EntityArrow.PickupStatus.ALLOWED || this.field_70251_a == EntityArrow.PickupStatus.CREATIVE_ONLY && p_70100_1_.field_71075_bZ.field_75098_d;
+             boolean flag = this.pickupStatus == EntityArrow.PickupStatus.ALLOWED || this.pickupStatus == EntityArrow.PickupStatus.CREATIVE_ONLY && entityIn.capabilities.isCreativeMode;
  
-             if (this.field_70251_a == EntityArrow.PickupStatus.ALLOWED && !p_70100_1_.field_71071_by.func_70441_a(this.func_184550_j()))
+             if (this.pickupStatus == EntityArrow.PickupStatus.ALLOWED && !entityIn.inventory.addItemStackToInventory(this.getArrowStack()))
 @@ -627,6 +659,11 @@
-         byte b0 = ((Byte)this.field_70180_af.func_187225_a(field_184554_g)).byteValue();
+         byte b0 = ((Byte)this.dataManager.get(CRITICAL)).byteValue();
          return (b0 & 1) != 0;
      }
 +    // CraftBukkit start
 +    public boolean isInGround() {
-+    	return field_70254_i;
++    	return inGround;
 +    }
 +    // CraftBukkit end
  

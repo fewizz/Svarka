@@ -8,12 +8,12 @@
  
  public class EntityLightningBolt extends EntityWeatherEffect
  {
-     private int field_70262_b;
-     public long field_70264_a;
-     private int field_70263_c;
--    private final boolean field_184529_d;
-+    public final boolean field_184529_d;
+     private int lightningState;
+     public long boltVertex;
+     private int boltLivingTime;
+-    private final boolean effectOnly;
++    public final boolean effectOnly;
 +    //public boolean isEffect; // CraftBukkit
  
-     public EntityLightningBolt(World p_i46780_1_, double p_i46780_2_, double p_i46780_4_, double p_i46780_6_, boolean p_i46780_8_)
+     public EntityLightningBolt(World worldIn, double x, double y, double z, boolean effectOnlyIn)
      {

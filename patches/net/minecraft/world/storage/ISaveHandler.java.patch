@@ -10,9 +10,9 @@
  import net.minecraft.world.MinecraftException;
  import net.minecraft.world.WorldProvider;
 @@ -28,4 +30,6 @@
-     File func_75758_b(String p_75758_1_);
+     File getMapFileFromName(String mapName);
  
-     TemplateManager func_186340_h();
+     TemplateManager getStructureTemplateManager();
 +    
 +    UUID getUUID();
  }

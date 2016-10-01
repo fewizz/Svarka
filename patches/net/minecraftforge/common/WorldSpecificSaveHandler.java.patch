@@ -9,7 +9,7 @@
  import net.minecraft.world.gen.structure.template.TemplateManager;
  import org.apache.logging.log4j.Level;
 @@ -106,4 +107,9 @@
-         return parent.func_186340_h();
+         return parent.getStructureTemplateManager();
      }
  
 +	@Override

@@ -7,17 +7,17 @@
 -public class RecipeTippedArrow implements IRecipe
 +public class RecipeTippedArrow extends ShapedRecipes implements IRecipe
  {
--    private static final ItemStack[] field_185255_a = new ItemStack[9];
+-    private static final ItemStack[] EMPTY_ITEMS = new ItemStack[9];
 +    public RecipeTippedArrow() {
 +    	super(3, 3, new ItemStack[]{
-+    			new ItemStack(Items.field_151032_g, 0), new ItemStack(Items.field_151032_g, 0), new ItemStack(Items.field_151032_g, 0),
-+    			new ItemStack(Items.field_151032_g, 0), new ItemStack(Items.field_185156_bI, 0), new ItemStack(Items.field_151032_g, 0),
-+    			new ItemStack(Items.field_151032_g, 0), new ItemStack(Items.field_151032_g, 0), new ItemStack(Items.field_151032_g, 0)
-+    	}, new ItemStack(Items.field_185167_i, 8));
++    			new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0),
++    			new ItemStack(Items.ARROW, 0), new ItemStack(Items.LINGERING_POTION, 0), new ItemStack(Items.ARROW, 0),
++    			new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0), new ItemStack(Items.ARROW, 0)
++    	}, new ItemStack(Items.TIPPED_ARROW, 8));
 +	}
  
-+	private static final ItemStack[] field_185255_a = new ItemStack[9];
++	private static final ItemStack[] EMPTY_ITEMS = new ItemStack[9];
 +
-     public boolean func_77569_a(InventoryCrafting p_77569_1_, World p_77569_2_)
+     public boolean matches(InventoryCrafting inv, World worldIn)
      {
-         if (p_77569_1_.func_174922_i() == 3 && p_77569_1_.func_174923_h() == 3)
+         if (inv.getWidth() == 3 && inv.getHeight() == 3)

@@ -15,12 +15,12 @@
 -public class RecipeBookCloning implements IRecipe
 +public class RecipeBookCloning extends ShapelessRecipes implements IRecipe
  {
--    public boolean func_77569_a(InventoryCrafting p_77569_1_, World p_77569_2_)
+-    public boolean matches(InventoryCrafting inv, World worldIn)
 +    public RecipeBookCloning() {
-+		super(new ItemStack(Items.field_151164_bB, 0, -1), java.util.Arrays.asList(new ItemStack(Items.field_151099_bA, 0, 0)));
++		super(new ItemStack(Items.WRITTEN_BOOK, 0, -1), java.util.Arrays.asList(new ItemStack(Items.WRITABLE_BOOK, 0, 0)));
 +	}
 +
-+	public boolean func_77569_a(InventoryCrafting p_77569_1_, World p_77569_2_)
++	public boolean matches(InventoryCrafting inv, World worldIn)
      {
          int i = 0;
          ItemStack itemstack = null;

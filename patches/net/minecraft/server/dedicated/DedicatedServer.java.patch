@@ -30,23 +30,23 @@
  {
 @@ -51,18 +67,18 @@
      private static final Pattern field_189647_l = Pattern.compile("^[a-fA-F0-9]{40}$");
-     public final List<PendingCommand> field_71341_l = Collections.<PendingCommand>synchronizedList(Lists.<PendingCommand>newArrayList());
-     private RConThreadQuery field_71342_m;
--    private final RConConsoleSource field_184115_n = new RConConsoleSource(this);
-+    public final RConConsoleSource field_184115_n = new RConConsoleSource(this);
-     private RConThreadMain field_71339_n;
--    private PropertyManager field_71340_o;
-+    public PropertyManager field_71340_o;
-     private ServerEula field_154332_n;
-     private boolean field_71338_p;
-     private GameType field_71337_q;
-     private boolean field_71335_s;
+     public final List<PendingCommand> pendingCommandList = Collections.<PendingCommand>synchronizedList(Lists.<PendingCommand>newArrayList());
+     private RConThreadQuery theRConThreadQuery;
+-    private final RConConsoleSource rconConsoleSource = new RConConsoleSource(this);
++    public final RConConsoleSource rconConsoleSource = new RConConsoleSource(this);
+     private RConThreadMain theRConThreadMain;
+-    private PropertyManager settings;
++    public PropertyManager settings;
+     private ServerEula eula;
+     private boolean canSpawnStructures;
+     private GameType gameType;
+     private boolean guiIsEnabled;
      public static boolean allowPlayerLogins = false;
  
--    public DedicatedServer(File p_i47086_1_, DataFixer p_i47086_2_, YggdrasilAuthenticationService p_i47086_3_, MinecraftSessionService p_i47086_4_, GameProfileRepository p_i47086_5_, PlayerProfileCache p_i47086_6_)
+-    public DedicatedServer(File anvilFileIn, DataFixer dataFixerIn, YggdrasilAuthenticationService authServiceIn, MinecraftSessionService sessionServiceIn, GameProfileRepository profileRepoIn, PlayerProfileCache profileCacheIn)
 +    public DedicatedServer(joptsimple.OptionSet options/*, File anvilFileIn*/, DataFixer dataFixerIn, YggdrasilAuthenticationService authServiceIn, MinecraftSessionService sessionServiceIn, GameProfileRepository profileRepoIn, PlayerProfileCache profileCacheIn)
      {
--        super(p_i47086_1_, Proxy.NO_PROXY, p_i47086_2_, p_i47086_3_, p_i47086_4_, p_i47086_5_, p_i47086_6_);
+-        super(anvilFileIn, Proxy.NO_PROXY, dataFixerIn, authServiceIn, sessionServiceIn, profileRepoIn, profileCacheIn);
 +        super(options, Proxy.NO_PROXY, dataFixerIn, authServiceIn, sessionServiceIn, profileRepoIn, profileCacheIn);
          Thread thread = new Thread("Server Infinisleeper")
          {
@@ -66,61 +66,61 @@
 @@ -121,7 +142,8 @@
          net.minecraftforge.fml.common.FMLCommonHandler.instance().onServerStart(this);
  
-         field_155771_h.info("Loading properties");
--        this.field_71340_o = new PropertyManager(new File("server.properties"));
+         LOGGER.info("Loading properties");
+-        this.settings = new PropertyManager(new File("server.properties"));
 +        //this.settings = new PropertyManager(new File("server.properties"));
-+        this.field_71340_o = new PropertyManager(this.options); // CraftBukkit - CLI argument support
-         this.field_154332_n = new ServerEula(new File("eula.txt"));
++        this.settings = new PropertyManager(this.options); // CraftBukkit - CLI argument support
+         this.eula = new ServerEula(new File("eula.txt"));
  
-         if (!this.field_154332_n.func_154346_a())
+         if (!this.eula.hasAcceptedEULA())
 @@ -191,7 +213,7 @@
-                 field_155771_h.warn("Perhaps a server is already running on that port?");
+                 LOGGER.warn("Perhaps a server is already running on that port?");
                  return false;
              }
 -
-+            this.func_184105_a(new DedicatedPlayerList(this));
-             if (!this.func_71266_T())
++            this.setPlayerList(new DedicatedPlayerList(this));
+             if (!this.isServerInOnlineMode())
              {
-                 field_155771_h.warn("**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");
+                 LOGGER.warn("**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");
 @@ -212,7 +234,8 @@
              else
              {
                  net.minecraftforge.fml.common.FMLCommonHandler.instance().onServerStarted();
--                this.func_184105_a(new DedicatedPlayerList(this));
+-                this.setPlayerList(new DedicatedPlayerList(this));
 +                //this.setPlayerList(new DedicatedPlayerList(this)); // CB - ^
-+                this.field_71310_m = new AnvilSaveConverter(this.server.getWorldContainer(), this.func_184110_aI());
++                this.anvilConverterForAnvilFile = new AnvilSaveConverter(this.server.getWorldContainer(), this.getDataFixer());
                  long j = System.nanoTime();
  
-                 if (this.func_71270_I() == null)
+                 if (this.getFolderName() == null)
 @@ -280,7 +303,17 @@
-                     field_155771_h.info("Starting remote control listener");
-                     this.field_71339_n = new RConThreadMain(this);
-                     this.field_71339_n.func_72602_a();
-+                    this.remoteConsole = new CraftRemoteConsoleCommandSender(this.field_184115_n); // CB
+                     LOGGER.info("Starting remote control listener");
+                     this.theRConThreadMain = new RConThreadMain(this);
+                     this.theRConThreadMain.startThread();
++                    this.remoteConsole = new CraftRemoteConsoleCommandSender(this.rconConsoleSource); // CB
                  }
 +                // CraftBukkit start
 +                if (this.server.getBukkitSpawnRadius() > -1) {
-+                	DedicatedServer.field_155771_h.info("'settings.spawn-radius' in bukkit.yml has been moved to 'spawn-protection' in server.properties. I will move your config for you.");
-+                	this.field_71340_o.field_73672_b.remove("spawn-protection");
-+                	this.field_71340_o.func_73669_a("spawn-protection", this.server.getBukkitSpawnRadius());
++                	DedicatedServer.LOGGER.info("'settings.spawn-radius' in bukkit.yml has been moved to 'spawn-protection' in server.properties. I will move your config for you.");
++                	this.settings.serverProperties.remove("spawn-protection");
++                	this.settings.getIntProperty("spawn-protection", this.server.getBukkitSpawnRadius());
 +                	this.server.removeBukkitSpawnRadius();
-+                	this.field_71340_o.func_73668_b();
++                	this.settings.saveProperties();
 +                }
 +                // CraftBukkit end
  
-                 if (this.func_175593_aQ() > 0L)
+                 if (this.getMaxTickTime() > 0L)
                  {
 @@ -420,7 +453,14 @@
-         while (!this.field_71341_l.isEmpty())
+         while (!this.pendingCommandList.isEmpty())
          {
-             PendingCommand pendingcommand = (PendingCommand)this.field_71341_l.remove(0);
--            this.func_71187_D().func_71556_a(pendingcommand.field_73701_b, pendingcommand.field_73702_a);
+             PendingCommand pendingcommand = (PendingCommand)this.pendingCommandList.remove(0);
+-            this.getCommandManager().executeCommand(pendingcommand.sender, pendingcommand.command);
 +            //this.getCommandManager().executeCommand(pendingcommand.sender, pendingcommand.command);
 +            // CraftBukkit start - ServerCommand for preprocessing
-+            ServerCommandEvent event = new ServerCommandEvent(console, pendingcommand.field_73702_a);
++            ServerCommandEvent event = new ServerCommandEvent(console, pendingcommand.command);
 +            server.getPluginManager().callEvent(event);
 +            if (event.isCancelled()) continue;
-+            pendingcommand = new PendingCommand(event.getCommand(), pendingcommand.field_73701_b);
++            pendingcommand = new PendingCommand(event.getCommand(), pendingcommand.sender);
 +            server.dispatchServerCommand(console, pendingcommand);
 +            // CraftBukkit end
          }
@@ -128,7 +128,7 @@
  
 @@ -679,13 +719,65 @@
  
-     public String func_71258_A()
+     public String getPlugins()
      {
 -        return "";
 +        //return "";
@@ -153,39 +153,39 @@
 +    	// CraftBukkit end
      }
  
--    public String func_71252_i(String p_71252_1_)
-+    public String func_71252_i(final String p_71252_1_)
+-    public String handleRConCommand(String command)
++    public String handleRConCommand(final String command)
      {
--        this.field_184115_n.func_70007_b();
--        this.field_71321_q.func_71556_a(this.field_184115_n, p_71252_1_);
--        return this.field_184115_n.func_70008_c();
+-        this.rconConsoleSource.resetLog();
+-        this.commandManager.executeCommand(this.rconConsoleSource, command);
+-        return this.rconConsoleSource.getLogContents();
 +        //this.rconConsoleSource.resetLog();
 +        //this.commandManager.executeCommand(this.rconConsoleSource, command);
 +        //return this.rconConsoleSource.getLogContents();
 +    	Waitable<String> waitable = new Waitable<String>() {
 +    		@Override
 +    		protected String evaluate() {
-+    			field_184115_n.func_70007_b();
++    			rconConsoleSource.resetLog();
 +    			// Event changes start
-+    			RemoteServerCommandEvent event = new RemoteServerCommandEvent(remoteConsole, p_71252_1_);
++    			RemoteServerCommandEvent event = new RemoteServerCommandEvent(remoteConsole, command);
 +    			server.getPluginManager().callEvent(event);
 +    			if (event.isCancelled()) {
 +    				return "";
 +    			}
 +    			// Event change end
-+    			PendingCommand serverCommand = new PendingCommand(event.getCommand(), field_184115_n);
++    			PendingCommand serverCommand = new PendingCommand(event.getCommand(), rconConsoleSource);
 +    			server.dispatchServerCommand(remoteConsole, serverCommand);
-+    			return field_184115_n.func_70008_c();
++    			return rconConsoleSource.getLogContents();
 +    		}
 +    	};
 +    	processQueue.add(waitable);
 +    	try {
 +    		return waitable.get();
 +    	} catch (java.util.concurrent.ExecutionException e) {
-+    		throw new RuntimeException("Exception processing rcon command " + p_71252_1_, e.getCause());
++    		throw new RuntimeException("Exception processing rcon command " + command, e.getCause());
 +    	} catch (InterruptedException e) {
 +    		Thread.currentThread().interrupt(); // Maintain interrupted state
-+    		throw new RuntimeException("Interrupted processing rcon command " + p_71252_1_, e);
++    		throw new RuntimeException("Interrupted processing rcon command " + command, e);
 +    	}
 +    	// CraftBukkit end
      }
@@ -193,7 +193,7 @@
 +    // CraftBukkit start
 +    @Override
 +    public PropertyManager getPropertyManager() {
-+    	return this.field_71340_o;
++    	return this.settings;
 +    }
 +    // CraftBukkit end
  }

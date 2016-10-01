@@ -7,7 +7,7 @@
 -            ILockableContainer ilockablecontainer = (TileEntityChest)tileentity;
 +            ILockableContainer ilockablecontainer = (ILockableContainer)tileentity;
  
-             if (!p_189418_3_ && this.func_176457_m(p_189418_1_, p_189418_2_))
+             if (!p_189418_3_ && this.isBlocked(p_189418_1_, p_189418_2_))
              {
 @@ -457,11 +457,11 @@
                          {

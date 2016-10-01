@@ -3,14 +3,14 @@
 @@ -6,10 +6,10 @@
  public abstract class BossInfo
  {
-     private final UUID field_186756_h;
--    protected ITextComponent field_186749_a;
-+    public ITextComponent field_186749_a;
-     protected float field_186750_b;
--    protected BossInfo.Color field_186751_c;
--    protected BossInfo.Overlay field_186752_d;
-+    public BossInfo.Color field_186751_c;
-+    public BossInfo.Overlay field_186752_d;
-     protected boolean field_186753_e;
-     protected boolean field_186754_f;
-     protected boolean field_186755_g;
+     private final UUID uniqueId;
+-    protected ITextComponent name;
++    public ITextComponent name;
+     protected float percent;
+-    protected BossInfo.Color color;
+-    protected BossInfo.Overlay overlay;
++    public BossInfo.Color color;
++    public BossInfo.Overlay overlay;
+     protected boolean darkenSky;
+     protected boolean playEndBossMusic;
+     protected boolean createFog;

@@ -25,21 +25,21 @@
  public abstract class EntityPlayer extends EntityLivingBase
  {
 @@ -123,9 +139,9 @@
-     public double field_71094_bP;
-     public double field_71095_bQ;
-     public double field_71085_bR;
--    protected boolean field_71083_bS;
-+    public boolean field_71083_bS;
-     public BlockPos field_71081_bT;
--    private int field_71076_b;
-+    public int field_71076_b;
-     public float field_71079_bU;
+     public double chasingPosX;
+     public double chasingPosY;
+     public double chasingPosZ;
+-    protected boolean sleeping;
++    public boolean sleeping;
+     public BlockPos playerLocation;
+-    private int sleepTimer;
++    public int sleepTimer;
+     public float renderOffsetX;
      @SideOnly(Side.CLIENT)
-     public float field_71082_cx;
+     public float renderOffsetY;
 @@ -147,7 +163,17 @@
-     private ItemStack field_184831_bT;
-     private final CooldownTracker field_184832_bU = this.func_184815_l();
-     public EntityFishHook field_71104_cf;
+     private ItemStack itemStackMainHand;
+     private final CooldownTracker cooldownTracker = this.createCooldownTracker();
+     public EntityFishHook fishEntity;
 -
 +    // CraftBukkit start
 +    public boolean fauxSleeping;
@@ -52,6 +52,6 @@
 +    }
 +    // CraftBukkit end
 +    
-     protected CooldownTracker func_184815_l()
+     protected CooldownTracker createCooldownTracker()
      {
          return new CooldownTracker();

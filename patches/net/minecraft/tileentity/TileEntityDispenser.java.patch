@@ -18,15 +18,15 @@
 +
 +public class TileEntityDispenser extends CBTileEntityLockableLoot implements IInventory
  {
-     private static final Random field_174913_f = new Random();
-     private ItemStack[] field_146022_i = new ItemStack[9];
-     protected String field_146020_a;
+     private static final Random RNG = new Random();
+     private ItemStack[] stacks = new ItemStack[9];
+     protected String customName;
 +    // CraftBukkit start - add fields and methods
 +    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
 +    private int maxStack = MAX_STACK;
 +    
 +    public ItemStack[] getContents() {
-+    	return this.field_146022_i;
++    	return this.stacks;
 +    }
 +    
 +    public void onOpen(CraftHumanEntity who) {
@@ -46,5 +46,5 @@
 +    }
 +    // CraftBukkit end
  
-     public int func_70302_i_()
+     public int getSizeInventory()
      {
