@@ -62,6 +62,11 @@ import org.bukkit.material.Wool;
 
 import com.google.common.collect.Maps;
 
+import net.minecraft.block.Block;
+import net.minecraft.item.Item;
+import net.minecraftforge.common.util.EnumHelper;
+import ru.svarka.Svarka;
+
 import org.bukkit.material.Banner;
 
 /**
@@ -609,7 +614,8 @@ public enum Material {
      * @return true if this material is a block
      */
     public boolean isBlock() {
-        return id < 256;
+        /*return id < 256;*/
+    	return Block.getBlockById(id) == null ? false : true; // Svarka
     }
 
     /**
@@ -717,14 +723,32 @@ public enum Material {
 
     static {
         for (Material material : values()) {
-            if (byId.length > material.id) {
+            /*if (byId.length > material.id) {
                 byId[material.id] = material;
             } else {
                 byId = Arrays.copyOfRange(byId, 0, material.id + 2);
                 byId[material.id] = material;
             }
-            BY_NAME.put(material.name(), material);
+            BY_NAME.put(material.name(), material);*/
+        	addMaterial(material); // Svarka
         }
+    }
+    public static void addMaterial(Material material) {
+    	if (byId.length > material.id) {
+        } else {
+            byId = Arrays.copyOfRange(byId, 0, material.id + 2);
+        }
+    	if(byId[material.id] != null) {return;}; // Svarka - already here
+    	
+    	byId[material.id] = material;
+        BY_NAME.put(material.name(), material);
+    }
+    public static void addEnum(String name, int id) {
+    	Material mat = EnumHelper.addEnum(Material.class, name, new Class<?>[] {int.class}, id);
+    	addMaterial(mat);
+    	if(Svarka.DEBUG) {
+    		Svarka.LOG.info("Added new Material enum: " + name + " " + id);
+    	}
     }
 
     /**

@@ -1,6 +1,27 @@
 --- ../src-base/minecraft/net/minecraftforge/fml/common/registry/FMLControlledNamespacedRegistry.java
 +++ ../src-work/minecraft/net/minecraftforge/fml/common/registry/FMLControlledNamespacedRegistry.java
-@@ -800,12 +800,12 @@
+@@ -39,7 +39,10 @@
+ import net.minecraftforge.event.RegistryEvent;
+ import org.apache.commons.lang3.Validate;
+ import org.apache.logging.log4j.Level;
++import org.bukkit.Material;
+ 
++import net.minecraft.block.Block;
++import net.minecraft.item.Item;
+ import net.minecraft.util.ResourceLocation;
+ import net.minecraft.util.registry.RegistryNamespacedDefaultedByKey;
+ import net.minecraftforge.fml.common.FMLLog;
+@@ -482,6 +485,9 @@
+ 
+ 
+         addObjectRaw(idToUse, name, thing);
++        if((thing instanceof Block || thing instanceof Item) && !name.getResourceDomain().equals("minecraft")) {
++        	Material.addEnum(name.toString(), idToUse);
++        }
+         if (isDelegated)
+         {
+             getExistingDelegate(thing).setName(name);
+@@ -800,12 +806,12 @@
      }
  
      @Override

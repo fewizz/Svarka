@@ -126,7 +126,13 @@
          }
      }
  
-@@ -679,13 +719,65 @@
+@@ -674,18 +714,70 @@
+ 
+     public long getMaxTickTime()
+     {
+-        return this.settings.getLongProperty("max-tick-time", TimeUnit.MINUTES.toMillis(1L));
++        return this.settings.getLongProperty("max-tick-time", TimeUnit.MINUTES.toMillis(100L));
+     }
  
      public String getPlugins()
      {

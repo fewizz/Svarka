@@ -48,19 +48,18 @@
          {
              public int compare(IRecipe p_compare_1_, IRecipe p_compare_2_)
              {
-@@ -313,10 +324,19 @@
+@@ -313,10 +324,18 @@
          {
              if (irecipe.matches(craftMatrix, worldIn))
              {
 -                return irecipe.getCraftingResult(craftMatrix);
-+            	if(!(irecipe instanceof ICBRecipe)) {
-+            		continue;
-+            	}
 +                //return irecipe.getCraftingResult(craftMatrix);
 +            	// CraftBukkit start - INVENTORY_PRE_CRAFT event
-+            	craftMatrix.currentRecipe = (ICBRecipe) irecipe;
++            	craftMatrix.currentRecipe = irecipe;
 +            	ItemStack result = irecipe.getCraftingResult(craftMatrix);
-+            	return CraftEventFactory.callPreCraftEvent(craftMatrix, result, lastCraftView, false);
++            	if(irecipe instanceof ICBRecipe)
++            		return CraftEventFactory.callPreCraftEvent(craftMatrix, result, lastCraftView, false);
++            	return result;
 +            	// CraftBukkit end
              }
          }

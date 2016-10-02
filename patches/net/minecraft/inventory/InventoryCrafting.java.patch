@@ -37,7 +37,7 @@
 +    
 +    // CraftBukkit start - add fields
 +    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
-+    public ICBRecipe currentRecipe;
++    public IRecipe currentRecipe;
 +    public ICBInventory resultInventory;
 +    private EntityPlayer owner;
 +    private int maxStack = MAX_STACK;
@@ -74,7 +74,7 @@
 +    @Override
 +    public void setMaxStackSize(int size) {
 +    	maxStack = size;
-+    	resultInventory.setMaxStackSize(size);
++    	((ICBInventory)resultInventory).setMaxStackSize(size);
 +    }
 +    
 +    @Override

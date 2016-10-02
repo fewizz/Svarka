@@ -82,15 +82,6 @@
  
      public void displayGui(IInteractionObject guiOwner)
      {
-@@ -753,7 +790,7 @@
-         {
-             this.getNextWindowId();
-             this.connection.sendPacket(new SPacketOpenWindow(this.currentWindowId, guiOwner.getGuiID(), guiOwner.getDisplayName()));
--            this.openContainer = guiOwner.createContainer(this.inventory, this);
-+            this.openContainer = (CBContainer) guiOwner.createContainer(this.inventory, this);
-             this.openContainer.windowId = this.currentWindowId;
-             this.openContainer.addListener(this);
-             net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.PlayerContainerEvent.Open(this, this.openContainer));
 @@ -988,6 +1025,12 @@
      {
          this.lastHealth = -1.0E8F;

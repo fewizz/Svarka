@@ -1,0 +1,20 @@
+--- ../src-base/minecraft/net/minecraft/world/chunk/BlockStateContainer.java
++++ ../src-work/minecraft/net/minecraft/world/chunk/BlockStateContainer.java
+@@ -20,7 +20,7 @@
+ 
+     public BlockStateContainer()
+     {
+-        this.setBits(4);
++        this.setBits(6);
+     }
+ 
+     private static int getIndex(int x, int y, int z)
+@@ -49,7 +49,7 @@
+                 this.bits = MathHelper.calculateLogBaseTwoDeBruijn(Block.BLOCK_STATE_IDS.size());
+             }
+ 
+-            this.palette.idFor(AIR_BLOCK_STATE);
++            //this.palette.idFor(AIR_BLOCK_STATE);
+             this.storage = new BitArray(this.bits, 4096);
+         }
+     }

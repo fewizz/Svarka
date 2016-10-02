@@ -141,7 +141,10 @@ public class CraftInventoryCrafting extends CraftInventory implements CraftingIn
     
     @Override
     public Recipe getRecipe() {
-        final ICBRecipe recipe = ((InventoryCrafting)this.getInventory()).currentRecipe;
-        return (recipe == null) ? null : recipe.toBukkitRecipe();
+        final IRecipe recipe = ((InventoryCrafting)this.getInventory()).currentRecipe;
+        if(recipe instanceof ICBRecipe) {
+        	return (recipe == null) ? null : ((ICBRecipe)recipe).toBukkitRecipe();
+        }
+        return null;
     }
 }

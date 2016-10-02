@@ -143,6 +143,7 @@ import org.bukkit.event.Event;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import ru.svarka.inventory.CBContainer;
+import ru.svarka.inventory.ICBInventory;
 
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.Bukkit;
@@ -783,7 +784,7 @@ public class CraftEventFactory
     }
     
     public static net.minecraft.item.ItemStack callPreCraftEvent(final InventoryCrafting matrix, final net.minecraft.item.ItemStack result, final InventoryView lastCraftView, final boolean isRepair) {
-        final CraftInventoryCrafting inventory = new CraftInventoryCrafting(matrix, matrix.resultInventory);
+        final CraftInventoryCrafting inventory = new CraftInventoryCrafting(matrix, (ICBInventory)matrix.resultInventory);
         inventory.setResult(CraftItemStack.asCraftMirror(result));
         final PrepareItemCraftEvent event = new PrepareItemCraftEvent(inventory, lastCraftView, isRepair);
         Bukkit.getPluginManager().callEvent(event);
@@ -896,6 +897,9 @@ public class CraftEventFactory
     }
     
     public static void handleInventoryCloseEvent(final EntityPlayer human) {
+    	if(!(human.openContainer instanceof CBContainer)) {
+    		return;
+    	}
         final InventoryCloseEvent event = new InventoryCloseEvent(((CBContainer) human.openContainer).getBukkitView());
         human.worldObj.getServer().getPluginManager().callEvent(event);
         ((CBContainer) human.openContainer).transferTo((CBContainer) human.inventoryContainer, human.getBukkitEntity());
