@@ -11,7 +11,7 @@
  import net.minecraft.util.ResourceLocation;
  import net.minecraft.util.registry.RegistryNamespacedDefaultedByKey;
  import net.minecraftforge.fml.common.FMLLog;
-@@ -482,6 +485,9 @@
+@@ -480,6 +483,9 @@
  
  
          addObjectRaw(idToUse, name, thing);
@@ -21,7 +21,7 @@
          if (isDelegated)
          {
              getExistingDelegate(thing).setName(name);
-@@ -800,12 +806,12 @@
+@@ -798,12 +804,12 @@
      }
  
      @Override

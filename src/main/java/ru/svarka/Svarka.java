@@ -6,4 +6,10 @@ import org.apache.logging.log4j.Logger;
 public class Svarka {
 	public static final Logger LOG = LogManager.getLogger();
 	public static final boolean DEBUG = true;
+	
+	public static void debug(String str) {
+		if(DEBUG) {
+			LOG.info(str);
+		}
+	}
 }

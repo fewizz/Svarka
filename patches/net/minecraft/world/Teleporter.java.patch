@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/world/Teleporter.java
 +++ ../src-work/minecraft/net/minecraft/world/Teleporter.java
-@@ -4,6 +4,11 @@
+@@ -4,29 +4,92 @@
  import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
  import it.unimi.dsi.fastutil.objects.ObjectIterator;
  import java.util.Random;
@@ -11,8 +11,17 @@
 +
  import net.minecraft.block.BlockPortal;
  import net.minecraft.block.state.IBlockState;
- import net.minecraft.block.state.pattern.BlockPattern;
-@@ -19,14 +24,73 @@
+-import net.minecraft.block.state.pattern.BlockPattern;
+ import net.minecraft.entity.Entity;
+-import net.minecraft.entity.player.EntityPlayerMP;
+ import net.minecraft.init.Blocks;
+ import net.minecraft.util.EnumFacing;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.math.ChunkPos;
+ import net.minecraft.util.math.MathHelper;
++import ru.svarka.Svarka;
+ 
+ public class Teleporter
  {
      private final WorldServer worldServerInstance;
      private final Random random;
@@ -87,11 +96,23 @@
      public void placeInPortal(Entity entityIn, float rotationYaw)
      {
          if (this.worldServerInstance.provider.getDimensionType().getId() != 1)
-@@ -69,6 +133,19 @@
+@@ -42,8 +105,8 @@
+             int i = MathHelper.floor_double(entityIn.posX);
+             int j = MathHelper.floor_double(entityIn.posY) - 1;
+             int k = MathHelper.floor_double(entityIn.posZ);
+-            int l = 1;
+-            int i1 = 0;
++            //int l = 1;
++            //int i1 = 0;
+ 
+             for (int j1 = -2; j1 <= 2; ++j1)
+             {
+@@ -69,6 +132,21 @@
  
      public boolean placeInExistingPortal(Entity entityIn, float rotationYaw)
      {
 +    	BlockPos found = findPortal(entityIn.posX, entityIn.posY, entityIn.posZ, 128);
++    	Svarka.debug("Found portal: " + found);
 +    	if(found == null) {
 +    		return false;
 +    	}
@@ -102,12 +123,13 @@
 +        if (entityIn.motionX != velocity.getX() || entityIn.motionY != velocity.getY() || entityIn.motionZ != velocity.getZ()) {
 +            entityIn.getBukkitEntity().setVelocity(velocity);
 +        }
++        Svarka.debug("Place in portal: " + exit);
 +        return true;
 +    	/*
          int i = 128;
          double d0 = -1.0D;
          int j = MathHelper.floor_double(entityIn.posX);
-@@ -193,16 +270,119 @@
+@@ -193,16 +271,119 @@
          else
          {
              return false;
@@ -117,18 +139,18 @@
 + // Entity repositioning logic split out from original b method and combined with repositioning logic for The End from original a method
 +    public void adjustExit(Entity entity, Location position, Vector velocity) {
 +        Location from = position.clone();
-+        Vector before = velocity.clone();
-+        BlockPos object = new BlockPos(position.getBlockX(), position.getBlockY(), position.getBlockZ());
-+        float yaw = position.getYaw();
++        Vector beforeVel = velocity.clone();
++        //BlockPos object = new BlockPos(position.getBlockX(), position.getBlockY(), position.getBlockZ());
++        //float yaw = position.getYaw();
 +
-+        if (this.worldServerInstance.getWorld().getEnvironment() == org.bukkit.World.Environment.THE_END || entity.getBukkitEntity().getWorld().getEnvironment() == org.bukkit.World.Environment.THE_END || entity.getLastPortalVec() == null) {
++        //if (this.worldServerInstance.getWorld().getEnvironment() == org.bukkit.World.Environment.THE_END || entity.getBukkitEntity().getWorld().getEnvironment() == org.bukkit.World.Environment.THE_END || entity.getLastPortalVec() == null) {
 +            // entity.setPositionRotation((double) i, (double) j, (double) k, entity.yaw, 0.0F);
 +            // entity.motX = entity.motY = entity.motZ = 0.0D;
 +            position.setPitch(0.0F);
 +            velocity.setX(0);
 +            velocity.setY(0);
 +            velocity.setZ(0);
-+        } else {
++        /*} else {
 +            // CraftBukkit end
 +
 +            double d2 = (double) ((BlockPos) object).getX() + 0.5D;
@@ -191,8 +213,8 @@
 +            position.setY(d5);
 +            position.setZ(d3);
 +            position.setYaw(f);
-         }
-+        EntityPortalExitEvent event = new EntityPortalExitEvent(entity.getBukkitEntity(), from, position, before, velocity);
++        }*/
++        EntityPortalExitEvent event = new EntityPortalExitEvent(entity.getBukkitEntity(), from, position, beforeVel, velocity);
 +        this.worldServerInstance.getServer().getPluginManager().callEvent(event);
 +        Location to = event.getTo();
 +        if (event.isCancelled() || to == null || !entity.isEntityAlive()) {
@@ -201,7 +223,7 @@
 +            position.setZ(from.getZ());
 +            position.setYaw(from.getYaw());
 +            position.setPitch(from.getPitch());
-+            velocity.copy(before);
++            velocity.copy(beforeVel);
 +        } else {
 +            position.setX(to.getX());
 +            position.setY(to.getY());
@@ -209,7 +231,7 @@
 +            position.setYaw(to.getYaw());
 +            position.setPitch(to.getPitch());
 +            velocity.copy(event.getAfter()); // event.getAfter() will never be null, as setAfter() will cause an NPE if null is passed in
-+        }
+         }
 +        // CraftBukkit end
      }
  
@@ -220,7 +242,8 @@
 +    
 +    public boolean makePortal(double x, double y, double z, int b0)
      {
-         int i = 16;
+-        int i = 16;
++        //int i = 16;
          double d0 = -1.0D;
 -        int j = MathHelper.floor_double(entityIn.posX);
 -        int k = MathHelper.floor_double(entityIn.posY);
@@ -231,7 +254,7 @@
          int i1 = j;
          int j1 = k;
          int k1 = l;
-@@ -212,11 +392,11 @@
+@@ -212,11 +393,11 @@
  
          for (int j2 = j - 16; j2 <= j + 16; ++j2)
          {
@@ -245,7 +268,7 @@
                  label146:
  
                  for (int j3 = this.worldServerInstance.getActualHeight() - 1; j3 >= 0; --j3)
-@@ -258,7 +438,7 @@
+@@ -258,7 +439,7 @@
                                  }
                              }
  
@@ -254,7 +277,7 @@
                              double d7 = d1 * d1 + d5 * d5 + d2 * d2;
  
                              if (d0 < 0.0D || d7 < d0)
-@@ -279,11 +459,11 @@
+@@ -279,11 +460,11 @@
          {
              for (int l5 = j - 16; l5 <= j + 16; ++l5)
              {
@@ -268,7 +291,7 @@
                      label567:
  
                      for (int i7 = this.worldServerInstance.getActualHeight() - 1; i7 >= 0; --i7)
-@@ -316,7 +496,7 @@
+@@ -316,7 +497,7 @@
                                      }
                                  }
  

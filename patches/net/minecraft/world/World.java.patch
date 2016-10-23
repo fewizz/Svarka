@@ -476,7 +476,7 @@
 +        //int k = isForced ? 0 : 32;
 +        // CraftBukkit start - Use neighbor cache instead of looking up
 +        Chunk startingChunk = this.getChunkIfLoaded(i >> 4, j >> 4);
-+        boolean canUpdate = !forceUpdate || startingChunk.areNeighborsLoaded(2)/*this.isAreaLoaded(i - k, 0, j - k, i + k, 0, j + k, true)*/;
++        boolean canUpdate = startingChunk != null && (!forceUpdate || startingChunk.areNeighborsLoaded(2))/*this.isAreaLoaded(i - k, 0, j - k, i + k, 0, j + k, true)*/;
          if (!canUpdate) canUpdate = net.minecraftforge.event.ForgeEventFactory.canEntityUpdate(entityIn);
  
          if (canUpdate)

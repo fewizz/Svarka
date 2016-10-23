@@ -55,3 +55,14 @@
      protected CooldownTracker createCooldownTracker()
      {
          return new CooldownTracker();
+@@ -437,6 +463,10 @@
+     {
+         return this.getHealth() <= 0.0F || this.isPlayerSleeping();
+     }
++    
++    public boolean isMovementBlockedCB() {
++    	return isMovementBlocked();
++    }
+ 
+     public void closeScreen()
+     {
